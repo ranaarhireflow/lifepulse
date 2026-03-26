@@ -35,8 +35,19 @@ import {
   archiveTracker,
   unarchiveTracker,
   deleteTracker,
+  updateTracker,
   type Tracker,
 } from "@/services/trackers"
+import { ConfigDrawer } from "@/components/common/ConfigDrawer"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const TYPE_LABELS: Record<string, string> = {
   NUMERIC: "Number",
@@ -53,6 +64,36 @@ export function TrackersPage() {
   const [loading, setLoading] = useState(true)
   const [showArchived, setShowArchived] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<Tracker | null>(null)
+  const [editPulse, setEditPulse] = useState<Tracker | null>(null)
+  const [editName, setEditName] = useState("")
+  const [editUnit, setEditUnit] = useState("")
+  const [editTarget, setEditTarget] = useState("")
+  const [editDefault, setEditDefault] = useState("")
+  const [saving, setSaving] = useState(false)
+
+  const openEdit = (t: Tracker) => {
+    setEditPulse(t)
+    setEditName(t.name)
+    setEditUnit(t.unit || "")
+    setEditTarget(t.target_value ? String(t.target_value) : "")
+    setEditDefault(t.default_behavior)
+  }
+
+  const saveEdit = async () => {
+    if (!editPulse) return
+    setSaving(true)
+    try {
+      await updateTracker(editPulse.id, {
+        name: editName,
+        unit: editUnit || null,
+        target_value: editTarget ? parseFloat(editTarget) : null,
+        default_behavior: editDefault as "CARRY_FORWARD" | "ZERO" | "NULL",
+      })
+      setEditPulse(null)
+      loadTrackers()
+    } catch { /* */ }
+    finally { setSaving(false) }
+  }
 
   const loadTrackers = async () => {
     setLoading(true)
@@ -147,8 +188,8 @@ export function TrackersPage() {
                       </div>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => navigate(`/trackers/${tracker.id}`)}>
-                        <Pencil className="mr-2 h-4 w-4" />View & Edit
+                      <DropdownMenuItem onClick={() => openEdit(tracker)}>
+                        <Pencil className="mr-2 h-4 w-4" />Edit Pulse
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleArchive(tracker)}>
                         <Archive className="mr-2 h-4 w-4" />Archive
@@ -183,6 +224,57 @@ export function TrackersPage() {
           ))}
         </div>
       )}
+
+      {/* Edit drawer */}
+      <ConfigDrawer open={!!editPulse} onClose={() => setEditPulse(null)} title="Edit Pulse" description="Update pulse settings">
+        {editPulse && (
+          <div className="space-y-4">
+            <div>
+              <Label className="text-[12px]">Name</Label>
+              <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="mt-1" />
+            </div>
+            <div>
+              <Label className="text-[12px]">Unit</Label>
+              <Input value={editUnit} onChange={(e) => setEditUnit(e.target.value)} placeholder="e.g. kg, pages, glasses" className="mt-1" />
+            </div>
+            {editPulse.type !== "BOOLEAN" && editPulse.type !== "TEXT" && (
+              <div>
+                <Label className="text-[12px]">Daily Target</Label>
+                <Input type="number" value={editTarget} onChange={(e) => setEditTarget(e.target.value)} placeholder="Optional" className="mt-1" />
+              </div>
+            )}
+            <div>
+              <Label className="text-[12px]">When Not Logged</Label>
+              <Select value={editDefault} onValueChange={(v) => v && setEditDefault(v)}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NULL">Leave empty</SelectItem>
+                  <SelectItem value="ZERO">Default to 0</SelectItem>
+                  <SelectItem value="CARRY_FORWARD">Use yesterday's value</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="border-t border-border pt-4 mt-2">
+              <div className="flex items-center justify-between text-[12px] text-muted-foreground mb-2">
+                <span>Type</span>
+                <span className="font-bold">{TYPE_LABELS[editPulse.type] || editPulse.type}</span>
+              </div>
+              <div className="flex items-center justify-between text-[12px] text-muted-foreground">
+                <span>Icon</span>
+                <span className="text-[18px]">{editPulse.icon || "📊"}</span>
+              </div>
+            </div>
+
+            <Button onClick={saveEdit} disabled={!editName.trim() || saving} className="w-full">
+              {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              Save Changes
+            </Button>
+          </div>
+        )}
+      </ConfigDrawer>
 
       {/* Delete confirm */}
       <Dialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
