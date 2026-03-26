@@ -11,7 +11,7 @@ export function BooleanToggle({ value, onChange }: BooleanToggleProps) {
     <button
       onClick={() => onChange(!isChecked)}
       className={`relative h-[34px] w-[56px] rounded-full transition-colors duration-200 ${
-        isChecked ? "bg-primary" : "bg-border"
+        isChecked ? "bg-primary" : "bg-muted-foreground/30"
       }`}
     >
       <div
