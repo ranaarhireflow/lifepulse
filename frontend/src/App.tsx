@@ -11,6 +11,7 @@ import { TrackerCreatePage } from "@/pages/trackers/TrackerCreatePage"
 import { TrackerDetailPage } from "@/pages/trackers/TrackerDetailPage"
 import { MonkScorePage } from "@/pages/score/MonkScorePage"
 import { AchievementsPage } from "@/pages/achievements/AchievementsPage"
+import { QuizFlow } from "@/pages/onboarding/QuizFlow"
 import { SettingsPage } from "@/pages/settings/SettingsPage"
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
           <TooltipProvider>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/quiz" element={<ProtectedRoute><QuizFlow /></ProtectedRoute>} />
               <Route
                 element={
                   <ProtectedRoute>
