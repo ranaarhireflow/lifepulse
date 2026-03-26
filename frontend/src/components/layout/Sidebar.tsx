@@ -20,7 +20,7 @@ export function Sidebar({ className }: { className?: string }) {
   const initials = user?.display_name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?"
 
   return (
-    <aside className={cn("w-[72px] flex-col items-center bg-sidebar py-6 border-r border-sidebar-border", className)}>
+    <aside className={cn("w-[72px] flex-col items-center bg-black py-6 border-r border-[#1C1C1E]", className)}>
       {/* Logo */}
       <NavLink to="/" className="mb-8">
         <PulseLogo size={38} />
@@ -39,7 +39,7 @@ export function Sidebar({ className }: { className?: string }) {
                 "flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-200",
                 isActive
                   ? "bg-primary/15 text-primary shadow-sm shadow-primary/10"
-                  : "text-sidebar-foreground/30 hover:text-sidebar-foreground/60 hover:bg-sidebar-accent"
+                  : "text-sidebar-foreground/30 hover:text-sidebar-foreground/60 hover:bg-black-accent"
               )
             }
           >
@@ -59,13 +59,13 @@ export function Sidebar({ className }: { className?: string }) {
         <NavLink to="/settings" title="Settings"
           className={({ isActive }) =>
             cn("flex h-11 w-11 items-center justify-center rounded-xl transition-all",
-              isActive ? "bg-primary/15 text-primary" : "text-sidebar-foreground/30 hover:text-sidebar-foreground/60 hover:bg-sidebar-accent")
+              isActive ? "bg-primary/15 text-primary" : "text-sidebar-foreground/30 hover:text-sidebar-foreground/60 hover:bg-black-accent")
           }>
           <Settings className="h-[20px] w-[20px]" />
         </NavLink>
 
         <button onClick={toggleTheme} title={theme === "dark" ? "Switch to light" : "Switch to dark"}
-          className="flex h-11 w-11 items-center justify-center rounded-xl text-sidebar-foreground/30 hover:text-sidebar-foreground/60 hover:bg-sidebar-accent transition-all">
+          className="flex h-11 w-11 items-center justify-center rounded-xl text-sidebar-foreground/30 hover:text-sidebar-foreground/60 hover:bg-black-accent transition-all">
           {theme === "dark" ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
         </button>
 

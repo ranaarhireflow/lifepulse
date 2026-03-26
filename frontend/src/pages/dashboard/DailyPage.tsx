@@ -1,24 +1,25 @@
 import { useState, useEffect, useCallback, useMemo } from "react"
 import { format, subDays, addDays, isToday, isYesterday, startOfWeek } from "date-fns"
-import { ChevronLeft, ChevronRight, Plus, Loader2, Sparkles, Trophy, Flame, Target, TrendingUp } from "lucide-react"
+import { ChevronLeft, ChevronRight, Plus, Loader2, Sparkles, Trophy, Flame } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { NavLink } from "react-router-dom"
 import { useAuth } from "@/store/auth-context"
 import { TrackerCard } from "@/components/trackers/TrackerCard"
+import { LevelBar } from "@/components/gamification/LevelBar"
 import { fetchDailyEntries, upsertEntry, type DailyTrackerEntry, type Entry } from "@/services/trackers"
 
-const MONK_QUOTES = [
+const QUOTES = [
   "The only way to do great work is to love what you do.",
   "Discipline is choosing between what you want now and what you want most.",
   "Small daily improvements over time lead to stunning results.",
   "The mind is everything. What you think, you become.",
   "Be the master of your habits, not the slave.",
-  "Every morning you have two choices: continue to sleep with your dreams, or wake up and chase them.",
   "The path to monk mode begins with a single tracked day.",
   "Consistency is more important than perfection.",
   "Your habits shape your identity. Choose wisely.",
   "The strongest warriors are patient ones.",
+  "What you do every day matters more than what you do once in a while.",
 ]
 
 export function DailyPage() {
@@ -27,7 +28,6 @@ export function DailyPage() {
   const [dailyData, setDailyData] = useState<DailyTrackerEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<"todo" | "done" | "skipped">("todo")
   const [showCelebration, setShowCelebration] = useState(false)
 
   const today = new Date()
@@ -35,12 +35,14 @@ export function DailyPage() {
   const dateStr = format(selectedDate, "yyyy-MM-dd")
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 })
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
-  const dailyQuote = useMemo(() => MONK_QUOTES[new Date().getDate() % MONK_QUOTES.length], [])
+  const dailyQuote = useMemo(() => QUOTES[new Date().getDate() % QUOTES.length], [])
 
   const loadData = useCallback(async () => {
     setLoading(true)
     setError(null)
-    try { setDailyData(await fetchDailyEntries(dateStr)) } catch { setError("Failed to load pulses"); setDailyData([]) } finally { setLoading(false) }
+    try { setDailyData(await fetchDailyEntries(dateStr)) }
+    catch { setError("Failed to load"); setDailyData([]) }
+    finally { setLoading(false) }
   }, [dateStr])
 
   useEffect(() => { loadData() }, [loadData])
@@ -64,63 +66,54 @@ export function DailyPage() {
   const completedTrackers = dailyData.filter((d) => d.entry !== null).length
   const completionPct = totalTrackers > 0 ? Math.round((completedTrackers / totalTrackers) * 100) : 0
 
-  const todoItems = dailyData.filter((d) => d.entry === null)
-  const doneItems = dailyData.filter((d) => d.entry !== null)
-
   const getGreeting = () => {
     const hour = new Date().getHours()
     const name = user?.display_name?.split(" ")[0] || ""
-    const prefix = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening"
-    return `${prefix}${name ? `, ${name}` : ""}`
+    return `${hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening"}${name ? `, ${name}` : ""}`
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Celebration */}
       <AnimatePresence>
         {showCelebration && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-            <motion.div initial={{ scale: 0.8, y: 20 }} animate={{ scale: 1, y: 0 }} className="flex flex-col items-center gap-3 rounded-2xl bg-card p-8 shadow-2xl border border-primary/20">
-              <Trophy className="h-14 w-14 text-amber-400" />
-              <h2 className="text-xl font-extrabold text-foreground">All Pulses Logged!</h2>
-              <p className="text-muted-foreground text-sm">Monk mode activated. XP gained.</p>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+            <motion.div initial={{ scale: 0.5, y: 30 }} animate={{ scale: 1, y: 0 }}
+              className="flex flex-col items-center gap-4 p-10">
+              <motion.div animate={{ rotate: [0, -15, 15, 0], scale: [1, 1.3, 1] }} transition={{ duration: 0.8 }}>
+                <Trophy className="h-20 w-20 text-amber-400" />
+              </motion.div>
+              <h2 className="text-[28px] font-extrabold text-white">All Pulses Logged!</h2>
+              <p className="text-muted-foreground">Monk mode activated. +50 XP</p>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Daily Quote */}
-      <div className="rounded-xl bg-gradient-to-r from-primary/10 to-transparent border border-primary/10 px-4 py-3">
-        <p className="text-[12px] text-primary dark:text-primary/70 italic">"{dailyQuote}"</p>
-      </div>
+      {/* Motivational quote */}
+      <p className="text-[13px] text-primary/60 italic text-center">"{dailyQuote}"</p>
+
+      {/* Level bar — always visible */}
+      <LevelBar />
 
       {/* Hero */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-end justify-between">
         <div>
-          <p className="text-[13px] text-muted-foreground">{getGreeting()}</p>
-          <h1 className="text-[28px] font-extrabold tracking-tight text-foreground leading-tight">
+          <p className="text-[14px] text-muted-foreground">{getGreeting()}</p>
+          <h1 className="text-[36px] font-extrabold text-foreground tracking-tight leading-none mt-1">
             {isToday(selectedDate) ? "Today" : isYesterday(selectedDate) ? "Yesterday" : format(selectedDate, "EEEE")}
           </h1>
-          <p className="text-[12px] text-muted-foreground">{format(selectedDate, "MMMM d, yyyy")}</p>
+          <p className="text-[13px] text-muted-foreground mt-1">{format(selectedDate, "MMMM d, yyyy")}</p>
         </div>
-        {/* Streak + Progress */}
         {!loading && totalTrackers > 0 && (
           <div className="flex items-center gap-2">
-            {/* Streak */}
-            <div className="flex items-center gap-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-2">
+            <div className="flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1.5">
               <Flame className="h-4 w-4 text-amber-400" />
-              <span className="text-[16px] font-extrabold text-amber-400">12</span>
+              <span className="text-[15px] font-extrabold text-amber-400">12</span>
             </div>
-            {/* Progress */}
-            <div className="flex items-center gap-2 rounded-xl bg-primary/10 dark:bg-primary/10 border border-primary/30 px-3 py-2">
-              <div className="relative h-[28px] w-[28px]">
-                <svg viewBox="0 0 28 28" className="h-full w-full -rotate-90">
-                  <circle cx="14" cy="14" r="11" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
-                  <circle cx="14" cy="14" r="11" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round"
-                    strokeDasharray="69.1" strokeDashoffset={69.1 - (69.1 * completionPct) / 100} />
-                </svg>
-              </div>
-              <span className="text-[14px] font-extrabold text-white">{completionPct}%</span>
+            <div className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5">
+              <span className="text-[15px] font-extrabold text-primary">{completionPct}%</span>
             </div>
           </div>
         )}
@@ -129,41 +122,42 @@ export function DailyPage() {
       {/* Week strip */}
       <div className="flex items-center gap-2">
         <button onClick={() => setSelectedDate(d => subDays(d, 7))} disabled={subDays(selectedDate, 7) < maxPastDate}
-          className="shrink-0 rounded-lg p-1 text-muted-foreground hover:text-white disabled:opacity-20 transition-all"><ChevronLeft className="h-4 w-4" /></button>
+          className="shrink-0 rounded-full p-1.5 text-muted-foreground hover:text-foreground disabled:opacity-20"><ChevronLeft className="h-4 w-4" /></button>
         <div className="flex flex-1 gap-1.5">
           {weekDays.map((day) => {
             const isSelected = format(day, "yyyy-MM-dd") === dateStr
             const isPast = day <= today
             return (
               <button key={day.toISOString()} onClick={() => isPast && setSelectedDate(day)} disabled={!isPast || day < maxPastDate}
-                className={`flex-1 rounded-xl border py-2 text-center transition-all ${isSelected ? "border-primary bg-primary/20 text-white" : isPast ? "border-border bg-card hover:border-primary/30 cursor-pointer" : "border-transparent opacity-20"}`}>
-                <div className="text-[9px] font-bold uppercase tracking-wide opacity-50">{format(day, "EEE")}</div>
-                <div className="text-[15px] font-extrabold mt-0.5">{format(day, "d")}</div>
+                className={`flex-1 rounded-2xl py-2.5 text-center transition-all ${
+                  isSelected ? "bg-primary text-white shadow-lg glow-green" : isPast ? "bg-card hover:bg-secondary cursor-pointer" : "opacity-20"
+                }`}>
+                <div className="text-[9px] font-bold uppercase tracking-wider opacity-60">{format(day, "EEE")}</div>
+                <div className="text-[16px] font-extrabold mt-0.5">{format(day, "d")}</div>
               </button>
             )
           })}
         </div>
-        <button onClick={() => setSelectedDate(d => addDays(d, 7))} disabled={!isToday(selectedDate) ? false : true}
-          className="shrink-0 rounded-lg p-1 text-muted-foreground hover:text-white disabled:opacity-20 transition-all"><ChevronRight className="h-4 w-4" /></button>
+        <button onClick={() => setSelectedDate(d => addDays(d, 7))} disabled={isToday(selectedDate)}
+          className="shrink-0 rounded-full p-1.5 text-muted-foreground hover:text-foreground disabled:opacity-20"><ChevronRight className="h-4 w-4" /></button>
       </div>
 
-
       {/* Loading */}
-      {loading && <div className="flex items-center justify-center py-16"><Loader2 className="h-7 w-7 animate-spin text-primary" /></div>}
+      {loading && <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}
 
       {/* Error */}
       {error && (
-        <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-5 text-center">
-          <p className="text-sm text-destructive font-medium">{error}</p>
+        <div className="rounded-2xl bg-card p-6 text-center">
+          <p className="text-destructive font-semibold">{error}</p>
           <Button variant="ghost" size="sm" className="mt-2" onClick={loadData}>Try Again</Button>
         </div>
       )}
 
       {/* Pulse cards */}
       {!loading && !error && dailyData.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {dailyData.map((item, i) => (
-            <motion.div key={item.tracker.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
+            <motion.div key={item.tracker.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06, duration: 0.4 }}>
               <TrackerCard data={item} onUpdate={(updates) => handleUpdate(item.tracker.id, updates)} />
             </motion.div>
           ))}
@@ -172,13 +166,14 @@ export function DailyPage() {
 
       {/* Empty state */}
       {!loading && !error && dailyData.length === 0 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card p-14 text-center">
-          <Sparkles className="h-10 w-10 text-primary mb-4" />
-          <h3 className="text-lg font-extrabold text-foreground mb-1">Begin Your Journey</h3>
-          <p className="mb-5 text-muted-foreground text-sm max-w-xs">Take the monk quiz to discover your personalized plan, or create pulses manually.</p>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          className="flex flex-col items-center justify-center py-20 text-center">
+          <Sparkles className="h-12 w-12 text-primary mb-6" />
+          <h3 className="text-[24px] font-extrabold text-foreground mb-2">Begin Your Journey</h3>
+          <p className="text-muted-foreground mb-8 max-w-xs">Create your first pulse to start tracking. Take the monk quiz for personalized recommendations.</p>
           <div className="flex gap-3">
-            <NavLink to="/quiz"><Button className="gap-2 rounded-xl px-6"><Sparkles className="h-4 w-4" />Take the Quiz</Button></NavLink>
-            <NavLink to="/trackers/new"><Button variant="outline" className="gap-2 rounded-xl px-6"><Plus className="h-4 w-4" />Create Manually</Button></NavLink>
+            <NavLink to="/quiz"><Button className="glow-green gap-2 rounded-xl px-6 h-12 text-[15px] font-bold"><Sparkles className="h-4 w-4" />Take the Quiz</Button></NavLink>
+            <NavLink to="/trackers/new"><Button variant="outline" className="gap-2 rounded-xl px-6 h-12 text-[15px]"><Plus className="h-4 w-4" />Create Manually</Button></NavLink>
           </div>
         </motion.div>
       )}

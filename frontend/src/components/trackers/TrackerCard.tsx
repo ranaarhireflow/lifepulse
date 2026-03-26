@@ -9,91 +9,139 @@ interface TrackerCardProps {
   onUpdate: (data: Partial<Entry>) => void
 }
 
-// Each pulse gets a strong color identity
-const PULSE_COLORS: Record<string, { gradient: string; lightGradient: string; iconBg: string; lightIconBg: string; accentText: string }> = {
-  "💧": { gradient: "from-blue-800/60 via-blue-900/40 to-cyan-900/50", lightGradient: "from-blue-50 via-sky-100 to-cyan-50", iconBg: "bg-black/25", lightIconBg: "bg-blue-200", accentText: "text-blue-700" },
-  "🏋️": { gradient: "from-orange-800/60 via-amber-900/40 to-yellow-900/50", lightGradient: "from-orange-50 via-amber-100 to-yellow-50", iconBg: "bg-black/25", lightIconBg: "bg-orange-200", accentText: "text-orange-700" },
-  "🧠": { gradient: "from-violet-800/60 via-purple-900/40 to-indigo-900/50", lightGradient: "from-violet-50 via-purple-100 to-indigo-50", iconBg: "bg-black/25", lightIconBg: "bg-violet-200", accentText: "text-violet-700" },
-  "📖": { gradient: "from-emerald-800/60 via-green-900/40 to-teal-900/50", lightGradient: "from-emerald-50 via-green-100 to-teal-50", iconBg: "bg-black/25", lightIconBg: "bg-emerald-200", accentText: "text-emerald-700" },
-  "⚖️": { gradient: "from-indigo-800/60 via-blue-900/40 to-violet-900/50", lightGradient: "from-indigo-50 via-blue-100 to-violet-50", iconBg: "bg-black/25", lightIconBg: "bg-indigo-200", accentText: "text-indigo-700" },
-  "🌙": { gradient: "from-slate-800/60 via-indigo-900/40 to-blue-900/50", lightGradient: "from-slate-50 via-indigo-100 to-blue-50", iconBg: "bg-black/25", lightIconBg: "bg-slate-200", accentText: "text-slate-700" },
-  "🪥": { gradient: "from-teal-800/60 via-cyan-900/40 to-sky-900/50", lightGradient: "from-teal-50 via-cyan-100 to-sky-50", iconBg: "bg-black/25", lightIconBg: "bg-teal-200", accentText: "text-teal-700" },
-  "❤️": { gradient: "from-red-800/60 via-rose-900/40 to-pink-900/50", lightGradient: "from-red-50 via-rose-100 to-pink-50", iconBg: "bg-black/25", lightIconBg: "bg-rose-200", accentText: "text-rose-700" },
-  "🌅": { gradient: "from-amber-800/60 via-orange-900/40 to-red-900/50", lightGradient: "from-amber-50 via-orange-100 to-yellow-50", iconBg: "bg-black/25", lightIconBg: "bg-amber-200", accentText: "text-amber-700" },
-  "🔥": { gradient: "from-red-800/60 via-orange-900/40 to-amber-900/50", lightGradient: "from-red-50 via-orange-100 to-amber-50", iconBg: "bg-black/25", lightIconBg: "bg-red-200", accentText: "text-red-700" },
-  "🏃": { gradient: "from-teal-800/60 via-emerald-900/40 to-green-900/50", lightGradient: "from-teal-50 via-emerald-100 to-green-50", iconBg: "bg-black/25", lightIconBg: "bg-teal-200", accentText: "text-teal-700" },
-  "💓": { gradient: "from-pink-800/60 via-rose-900/40 to-red-900/50", lightGradient: "from-pink-50 via-rose-100 to-red-50", iconBg: "bg-black/25", lightIconBg: "bg-pink-200", accentText: "text-pink-700" },
+// CSS artwork scenes — multi-layer gradients that create PAINTINGS
+const SCENES: Record<string, { bg: string; narrative: string }> = {
+  "💧": {
+    bg: "radial-gradient(ellipse at 30% 80%, #0c4a6e 0%, #0e7490 35%, #155e75 60%, #164e63 100%), linear-gradient(180deg, rgba(14,116,144,0.3) 0%, rgba(8,51,68,0.8) 100%)",
+    narrative: "Stay hydrated, stay sharp",
+  },
+  "🏋️": {
+    bg: "radial-gradient(ellipse at 70% 20%, #ea580c 0%, #c2410c 30%, #9a3412 55%, #7c2d12 100%), linear-gradient(135deg, rgba(234,88,12,0.2) 0%, rgba(124,45,18,0.6) 100%)",
+    narrative: "Build strength, build character",
+  },
+  "🧠": {
+    bg: "radial-gradient(circle at 80% 10%, #7c3aed 0%, #4c1d95 35%, #2e1065 60%, #1e1b4b 100%), linear-gradient(225deg, rgba(124,58,237,0.15) 0%, rgba(15,10,46,0.7) 100%)",
+    narrative: "Focus is your superpower",
+  },
+  "📖": {
+    bg: "radial-gradient(ellipse at 20% 70%, #059669 0%, #047857 35%, #065f46 60%, #064e3b 100%), linear-gradient(135deg, rgba(5,150,105,0.2) 0%, rgba(6,78,59,0.7) 100%)",
+    narrative: "Feed your mind daily",
+  },
+  "⚖️": {
+    bg: "radial-gradient(ellipse at 50% 30%, #4338ca 0%, #3730a3 35%, #312e81 60%, #1e1b4b 100%), linear-gradient(180deg, rgba(67,56,202,0.2) 0%, rgba(30,27,75,0.7) 100%)",
+    narrative: "Track your body's journey",
+  },
+  "🌙": {
+    bg: "radial-gradient(circle at 70% 20%, #312e81 0%, #1e1b4b 40%, #0f0a2e 70%, #000 100%), linear-gradient(180deg, rgba(49,46,129,0.1) 0%, rgba(0,0,0,0.9) 100%)",
+    narrative: "Rest well, rise strong",
+  },
+  "🪥": {
+    bg: "radial-gradient(ellipse at 30% 40%, #0891b2 0%, #0e7490 35%, #155e75 60%, #164e63 100%), linear-gradient(135deg, rgba(8,145,178,0.2) 0%, rgba(22,78,99,0.7) 100%)",
+    narrative: "Start every day right",
+  },
+  "❤️": {
+    bg: "radial-gradient(ellipse at 50% 50%, #e11d48 0%, #be123c 35%, #9f1239 60%, #881337 100%), linear-gradient(180deg, rgba(225,29,72,0.2) 0%, rgba(136,19,55,0.7) 100%)",
+    narrative: "Know your numbers, own your health",
+  },
+  "🌅": {
+    bg: "radial-gradient(ellipse at 50% 80%, #f59e0b 0%, #d97706 25%, #b45309 50%, #92400e 100%), linear-gradient(0deg, rgba(245,158,11,0.3) 0%, rgba(146,64,14,0.8) 100%)",
+    narrative: "Rise before everyone, seize the day",
+  },
+  "🔥": {
+    bg: "radial-gradient(ellipse at 40% 60%, #dc2626 0%, #b91c1c 30%, #991b1b 55%, #7f1d1d 100%), linear-gradient(135deg, rgba(220,38,38,0.2) 0%, rgba(127,29,29,0.7) 100%)",
+    narrative: "Push beyond your limits",
+  },
+  "🏃": {
+    bg: "radial-gradient(ellipse at 60% 30%, #0d9488 0%, #0f766e 35%, #115e59 60%, #134e4a 100%), linear-gradient(180deg, rgba(13,148,136,0.2) 0%, rgba(19,78,74,0.7) 100%)",
+    narrative: "Every step counts",
+  },
+  "💓": {
+    bg: "radial-gradient(circle at 50% 40%, #ec4899 0%, #db2777 35%, #be185d 60%, #9d174d 100%), linear-gradient(180deg, rgba(236,72,153,0.2) 0%, rgba(157,23,77,0.7) 100%)",
+    narrative: "Listen to your heart",
+  },
 }
 
-const DEFAULT_COLORS = { gradient: "from-[#1A3520]/60 via-[#162B1E]/40 to-[#111A14]/50", lightGradient: "from-green-400 to-emerald-500", iconBg: "bg-black/25", lightIconBg: "bg-white/30", accentText: "text-green-600" }
+const DEFAULT_SCENE = {
+  bg: "radial-gradient(ellipse at 50% 50%, #16a34a 0%, #15803d 35%, #166534 60%, #14532d 100%)",
+  narrative: "Track it. Master it.",
+}
 
 export function TrackerCard({ data, onUpdate }: TrackerCardProps) {
   const { tracker, entry, default_value } = data
   const hasValue = entry !== null
-  const colors = PULSE_COLORS[tracker.icon || ""] || DEFAULT_COLORS
-  const metaText = tracker.unit || (tracker.type === "BOOLEAN" ? "yes / no" : tracker.type === "TIME" ? "time" : tracker.type === "DURATION" ? "hours" : "")
+  const scene = SCENES[tracker.icon || ""] || DEFAULT_SCENE
 
   return (
     <NavLink to={`/trackers/${tracker.id}`}>
       <motion.div
-        layout
-        whileTap={{ scale: 0.98 }}
-        className={`overflow-hidden rounded-2xl transition-all cursor-pointer shadow-sm hover:shadow-lg ${
-          hasValue ? "opacity-70 ring-1 ring-primary/30" : "hover:scale-[1.01]"
+        whileTap={{ scale: 0.97 }}
+        whileHover={{ scale: 1.01 }}
+        className={`relative overflow-hidden rounded-[20px] transition-all cursor-pointer ${
+          hasValue ? "opacity-60 ring-2 ring-primary/30" : "hover:shadow-2xl hover:shadow-primary/10"
         }`}
+        style={{ minHeight: "180px" }}
       >
-        {/* DARK MODE: full gradient card */}
-        <div className="hidden dark:block relative">
-          <div className={`absolute inset-0 bg-gradient-to-br ${colors.gradient}`} />
-          <div className="relative px-4 py-3.5">
-            <div className="flex items-start justify-between mb-2.5">
-              <div className="flex items-center gap-3">
-                <div className={`flex h-11 w-11 items-center justify-center rounded-xl text-[22px] ${colors.iconBg} backdrop-blur-sm`}>{tracker.icon || "📊"}</div>
-                <div>
-                  <h3 className="text-[15px] font-bold text-white tracking-tight">{tracker.name}</h3>
-                  <p className="text-[12px] text-white/50 mt-0.5">{tracker.target_value ? `${metaText} · target ${tracker.target_value}` : metaText}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1 rounded-lg px-2 py-1 bg-black/20 backdrop-blur-sm">
-                <Flame className="h-3.5 w-3.5 text-amber-400" /><span className="text-[12px] font-bold text-amber-400">3</span>
-              </div>
+        {/* CSS Artwork Background */}
+        <div
+          className="absolute inset-0"
+          style={{ background: scene.bg }}
+        />
+
+        {/* Noise texture overlay for depth */}
+        <div className="absolute inset-0 opacity-20" style={{
+          backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")"
+        }} />
+
+        {/* Bottom gradient overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+        {/* Content */}
+        <div className="relative h-full flex flex-col justify-between p-5">
+          {/* Top row */}
+          <div className="flex items-start justify-between">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-md text-[26px] shadow-lg">
+              {tracker.icon || "📊"}
             </div>
-            <div className="flex gap-1 mb-2.5">
-              {[1,2,3,4,5].map((s) => <Star key={s} className={`h-3 w-3 ${s <= 1 ? "text-amber-400 fill-amber-400" : "text-white/10"}`} />)}
-              <span className="text-[10px] text-white/30 ml-1">Repeat: Everyday</span>
-            </div>
-            <div className="flex items-center justify-between" onClick={(e) => e.preventDefault()}>
-              <div className="text-[11px] font-semibold text-white/40">{hasValue ? "✓ Logged" : "Tap to log"}</div>
-              <EntryInput type={tracker.type} unit={tracker.unit} unitSecondary={tracker.unit_secondary} entry={entry} defaultValue={default_value} color={tracker.color} onUpdate={onUpdate} />
+            <div className="flex items-center gap-1.5 rounded-full bg-black/30 backdrop-blur-md px-3 py-1">
+              <Flame className="h-3.5 w-3.5 text-amber-400" />
+              <span className="text-[13px] font-bold text-amber-400">3 days</span>
             </div>
           </div>
-        </div>
 
-        {/* LIGHT MODE: full pastel gradient card with dark text */}
-        <div className="dark:hidden">
-          <div className={`bg-gradient-to-br ${colors.lightGradient} px-4 py-3.5 rounded-2xl border border-black/[0.06]`}>
-            <div className="flex items-start justify-between mb-2.5">
-              <div className="flex items-center gap-3">
-                <div className={`flex h-11 w-11 items-center justify-center rounded-xl text-[22px] ${colors.lightIconBg} shadow-sm`}>{tracker.icon || "📊"}</div>
-                <div>
-                  <h3 className={`text-[15px] font-bold tracking-tight ${colors.accentText}`}>{tracker.name}</h3>
-                  <p className="text-[12px] text-gray-600 mt-0.5">{tracker.target_value ? `${metaText} · target ${tracker.target_value}` : metaText}</p>
-                </div>
+          {/* Middle — title + narrative */}
+          <div className="mt-auto">
+            <h3 className="text-[22px] font-extrabold text-white tracking-tight" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
+              {tracker.name}
+            </h3>
+            <p className="text-[13px] text-white/50 italic mt-0.5" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.5)" }}>
+              "{scene.narrative}"
+            </p>
+
+            {/* Stars + metadata */}
+            <div className="flex items-center gap-3 mt-2">
+              <div className="flex gap-0.5">
+                {[1,2,3,4,5].map((s) => (
+                  <Star key={s} className={`h-3 w-3 ${s <= 2 ? "text-amber-400 fill-amber-400" : "text-white/20"}`} />
+                ))}
               </div>
-              <div className="flex items-center gap-1 rounded-lg px-2 py-1 bg-amber-100 shadow-sm">
-                <Flame className="h-3.5 w-3.5 text-amber-600" /><span className="text-[12px] font-bold text-amber-600">3</span>
-              </div>
+              <span className="text-[10px] text-white/30 uppercase tracking-wider font-semibold">Repeat: Everyday</span>
             </div>
-            <div className="flex gap-1 mb-2.5">
-              {[1,2,3,4,5].map((s) => <Star key={s} className={`h-3 w-3 ${s <= 1 ? "text-amber-500 fill-amber-500" : "text-black/10"}`} />)}
-              <span className="text-[10px] text-gray-500 ml-1">Repeat: Everyday</span>
-            </div>
-            <div className="flex items-center justify-between" onClick={(e) => e.preventDefault()}>
-              <div className={`text-[11px] font-semibold ${hasValue ? colors.accentText : "text-gray-400"}`}>
-                {hasValue ? "✓ Logged" : "Tap to log"}
-              </div>
-              <EntryInput type={tracker.type} unit={tracker.unit} unitSecondary={tracker.unit_secondary} entry={entry} defaultValue={default_value} color={tracker.color} onUpdate={onUpdate} />
-            </div>
+          </div>
+
+          {/* Bottom — input + status */}
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10" onClick={(e) => e.preventDefault()}>
+            <span className={`text-[12px] font-semibold ${hasValue ? "text-emerald-400" : "text-white/30"}`}>
+              {hasValue ? "✓ Logged" : "Tap to log"}
+            </span>
+            <EntryInput
+              type={tracker.type}
+              unit={tracker.unit}
+              unitSecondary={tracker.unit_secondary}
+              entry={entry}
+              defaultValue={default_value}
+              color={tracker.color}
+              onUpdate={onUpdate}
+            />
           </div>
         </div>
       </motion.div>
