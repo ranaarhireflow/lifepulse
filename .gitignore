@@ -46,3 +46,7 @@ frontend/dist/
 
 # Firebase
 firebase-service-account.json
+
+# Capacitor native projects (regenerated with `npx cap sync`)
+frontend/ios/
+frontend/android/

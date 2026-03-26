@@ -1,17 +1,6 @@
-from app.models.user import User
-from app.models.tracker import Tracker, TrackerType, DefaultBehavior
-from app.models.entry import Entry
-from app.models.tracker_alert import TrackerAlert
-from app.models.tracker_template import TrackerTemplate
-from app.models.push_subscription import PushSubscription
-
-__all__ = [
-    "User",
-    "Tracker",
-    "TrackerType",
-    "DefaultBehavior",
-    "Entry",
-    "TrackerAlert",
-    "TrackerTemplate",
-    "PushSubscription",
-]
+from app.models.user import User  # noqa: F401
+from app.models.tracker import Tracker, TrackerType, DefaultBehavior  # noqa: F401
+from app.models.entry import Entry  # noqa: F401
+from app.models.tracker_alert import TrackerAlert  # noqa: F401
+from app.models.tracker_template import TrackerTemplate  # noqa: F401
+from app.models.push_subscription import PushSubscription  # noqa: F401

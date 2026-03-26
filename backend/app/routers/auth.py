@@ -8,6 +8,7 @@ from app.database import get_db
 from app.middleware.auth import get_current_user, DEV_FIREBASE_UID, DEV_MODE
 from app.models.user import User
 from app.schemas.auth import LoginRequest, UserResponse, UserUpdate
+from app.services.default_trackers import create_default_trackers
 
 router = APIRouter()
 
@@ -19,6 +20,7 @@ def dev_login(db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Dev mode not enabled")
 
     user = db.query(User).filter(User.firebase_uid == DEV_FIREBASE_UID).first()
+    is_new = user is None
     if not user:
         user = User(
             firebase_uid=DEV_FIREBASE_UID,
@@ -28,6 +30,10 @@ def dev_login(db: Session = Depends(get_db)):
         db.add(user)
         db.commit()
         db.refresh(user)
+
+    if is_new:
+        create_default_trackers(user.id, db)
+
     return user
 
 
@@ -50,6 +56,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     photo_url = decoded.get("picture", "")
 
     user = db.query(User).filter(User.firebase_uid == firebase_uid).first()
+    is_new = user is None
     if user:
         user.email = email
         user.display_name = display_name
@@ -65,6 +72,10 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 
     db.commit()
     db.refresh(user)
+
+    if is_new:
+        create_default_trackers(user.id, db)
+
     return user
 
 
