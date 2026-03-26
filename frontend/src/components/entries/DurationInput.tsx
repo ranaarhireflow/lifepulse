@@ -7,40 +7,39 @@ interface DurationInputProps {
 }
 
 export function DurationInput({ value, onChange }: DurationInputProps) {
-  const [localH, setLocalH] = useState(value !== null ? String(Math.floor(value / 60)) : "")
-  const [localM, setLocalM] = useState(value !== null ? String(value % 60) : "")
+  // Store as HH:MM string for consistent display with TimeInput
+  const toTimeStr = (mins: number | null) => {
+    if (mins === null) return ""
+    const h = Math.floor(mins / 60)
+    const m = mins % 60
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`
+  }
+
+  const [localValue, setLocalValue] = useState(toTimeStr(value))
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   useEffect(() => {
-    if (value !== null) {
-      setLocalH(String(Math.floor(value / 60)))
-      setLocalM(String(value % 60))
-    } else {
-      setLocalH("")
-      setLocalM("")
-    }
+    setLocalValue(toTimeStr(value))
   }, [value])
 
-  const handleChange = (h: string, m: string) => {
+  const handleChange = (val: string) => {
+    setLocalValue(val)
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
-      const hrs = parseInt(h) || 0
-      const mins = parseInt(m) || 0
-      onChange(h === "" && m === "" ? null : hrs * 60 + mins)
+      if (!val) { onChange(null); return }
+      const [h, m] = val.split(":").map(Number)
+      onChange((h || 0) * 60 + (m || 0))
     }, 600)
   }
 
-  const inputClass = "h-[34px] w-[36px] rounded-lg border border-border bg-secondary text-center text-[14px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
-
   return (
-    <div className="flex items-center gap-1">
-      <input type="number" inputMode="numeric" min={0} value={localH} placeholder="0"
-        onChange={(e) => { setLocalH(e.target.value); handleChange(e.target.value, localM) }}
-        className={inputClass} style={{ fontFamily: "inherit" }} />
-      <span className="text-muted-foreground font-bold text-xs">:</span>
-      <input type="number" inputMode="numeric" min={0} max={59} value={localM} placeholder="00"
-        onChange={(e) => { setLocalM(e.target.value); handleChange(localH, e.target.value) }}
-        className={inputClass} style={{ fontFamily: "inherit" }} />
-    </div>
+    <input
+      type="time"
+      value={localValue}
+      onChange={(e) => handleChange(e.target.value)}
+      placeholder="00:00"
+      className="h-[34px] w-[90px] rounded-lg border border-border bg-secondary text-center text-[13px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+      style={{ fontFamily: "inherit" }}
+    />
   )
 }
