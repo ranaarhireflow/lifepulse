@@ -8,10 +8,10 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#0F1F17]">
+      <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <PulseLogo size={56} className="animate-pulse" />
-          <Loader2 className="h-5 w-5 animate-spin text-[#22C55E]" />
+          <Loader2 className="h-5 w-5 animate-spin text-primary" />
         </div>
       </div>
     )

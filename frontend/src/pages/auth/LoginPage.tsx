@@ -20,7 +20,7 @@ export function LoginPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0F1F17]">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -45,7 +45,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#0F1F17]">
+    <div className="flex min-h-screen bg-background">
       {/* Left: Brand */}
       <div className="hidden lg:flex lg:flex-1 items-center justify-center p-12">
         <motion.div
@@ -62,10 +62,10 @@ export function LoginPage() {
             <PulseLogo size={72} />
           </motion.div>
 
-          <h1 className="mt-8 text-5xl font-extrabold tracking-tight text-white">
+          <h1 className="mt-8 text-5xl font-extrabold tracking-tight text-foreground">
             {BRAND.name}
           </h1>
-          <p className="mt-2 text-lg text-white/40">
+          <p className="mt-2 text-lg text-muted-foreground">
             {BRAND.description}
           </p>
 
@@ -85,8 +85,8 @@ export function LoginPage() {
                   <f.icon className="h-5 w-5" style={{ color: f.color }} />
                 </div>
                 <div>
-                  <p className="font-bold text-sm text-white">{f.label}</p>
-                  <p className="text-sm text-white/40">{f.desc}</p>
+                  <p className="font-bold text-sm text-foreground">{f.label}</p>
+                  <p className="text-sm text-muted-foreground">{f.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -112,23 +112,23 @@ export function LoginPage() {
             >
               <PulseLogo size={72} className="mx-auto" />
             </motion.div>
-            <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-white">
+            <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-foreground">
               {BRAND.name}
             </h1>
-            <p className="mt-1 text-white/40">{BRAND.description}</p>
+            <p className="mt-1 text-muted-foreground">{BRAND.description}</p>
           </div>
 
           {/* Login card */}
-          <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-8">
+          <div className="rounded-2xl border border-border bg-card backdrop-blur-sm p-8">
             <h2 className="text-xl font-bold text-center text-white mb-1">Welcome</h2>
-            <p className="text-sm text-white/40 text-center mb-8">
+            <p className="text-sm text-muted-foreground text-center mb-8">
               Sign in to start tracking your life
             </p>
 
             <Button
               onClick={handleSignIn}
               disabled={signingIn}
-              className="w-full gap-3 h-12 text-base rounded-xl bg-white text-[#0F1F17] hover:bg-white/90 font-bold"
+              className="w-full gap-3 h-12 text-base rounded-xl bg-primary text-primary-foreground hover:bg-white/90 font-bold"
             >
               {signingIn ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -151,15 +151,15 @@ export function LoginPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 + i * 0.08 }}
-                  className="rounded-xl bg-white/5 p-3 text-center"
+                  className="rounded-xl bg-card p-3 text-center"
                 >
                   <f.icon className="mx-auto mb-1 h-4 w-4" style={{ color: f.color }} />
-                  <p className="text-[11px] font-bold text-white/80">{f.label}</p>
+                  <p className="text-[11px] font-bold text-foreground/80">{f.label}</p>
                 </motion.div>
               ))}
             </div>
 
-            <p className="text-center text-[11px] text-white/25 mt-6 leading-relaxed">
+            <p className="text-center text-[11px] text-muted-foreground/60 mt-6 leading-relaxed">
               Free forever. No subscriptions. No ads.
               <br />
               Your data stays private and secure.

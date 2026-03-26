@@ -79,7 +79,7 @@ export function DailyPage() {
       {/* Celebration */}
       <AnimatePresence>
         {showCelebration && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
             <motion.div initial={{ scale: 0.8, y: 20 }} animate={{ scale: 1, y: 0 }} className="flex flex-col items-center gap-3 rounded-2xl bg-card p-8 shadow-2xl border border-primary/20">
               <Trophy className="h-14 w-14 text-amber-400" />
               <h2 className="text-xl font-extrabold text-foreground">All Pulses Logged!</h2>
