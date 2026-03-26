@@ -60,7 +60,7 @@ export function TrackerCard({ data, onUpdate }: TrackerCardProps) {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-1 rounded-lg px-2 py-1 bg-amber-500/10 dark:bg-black/20 dark:backdrop-blur-sm">
+            <div className="flex items-center gap-1 rounded-lg px-2 py-1 bg-amber-100 dark:bg-black/20 dark:backdrop-blur-sm">
               <Flame className="h-3.5 w-3.5 text-amber-500" />
               <span className="text-[12px] font-bold text-amber-500">3</span>
             </div>
@@ -68,7 +68,7 @@ export function TrackerCard({ data, onUpdate }: TrackerCardProps) {
 
           <div className="flex gap-1 mb-2.5">
             {[1, 2, 3, 4, 5].map((s) => (
-              <Star key={s} className={`h-3 w-3 ${s <= 1 ? "text-amber-500 fill-amber-500" : "text-muted-foreground/20"}`} />
+              <Star key={s} className={`h-3 w-3 ${s <= 1 ? "text-amber-500 fill-amber-500" : "text-foreground/15 dark:text-foreground/10"}`} />
             ))}
             <span className="text-[10px] text-muted-foreground ml-1">Repeat: Everyday</span>
           </div>

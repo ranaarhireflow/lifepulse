@@ -91,7 +91,7 @@ export function DailyPage() {
 
       {/* Daily Quote */}
       <div className="rounded-xl bg-gradient-to-r from-primary/10 to-transparent border border-primary/10 px-4 py-3">
-        <p className="text-[12px] text-primary/70 italic">"{dailyQuote}"</p>
+        <p className="text-[12px] text-primary dark:text-primary/70 italic">"{dailyQuote}"</p>
       </div>
 
       {/* Hero */}
@@ -112,7 +112,7 @@ export function DailyPage() {
               <span className="text-[16px] font-extrabold text-amber-400">12</span>
             </div>
             {/* Progress */}
-            <div className="flex items-center gap-2 rounded-xl bg-primary/10 border border-primary/20 px-3 py-2">
+            <div className="flex items-center gap-2 rounded-xl bg-primary/10 dark:bg-primary/10 border border-primary/30 px-3 py-2">
               <div className="relative h-[28px] w-[28px]">
                 <svg viewBox="0 0 28 28" className="h-full w-full -rotate-90">
                   <circle cx="14" cy="14" r="11" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
