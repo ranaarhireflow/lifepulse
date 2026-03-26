@@ -33,7 +33,7 @@ export function Sidebar({ className }: { className?: string }) {
     >
       {/* Logo + Collapse */}
       <div className={cn("flex items-center mb-8", collapsed ? "justify-center pt-1" : "gap-3 px-2.5 pt-2 justify-between")}>
-        <div className="flex items-center gap-3">
+        <NavLink to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
           <PulseLogo size={collapsed ? 36 : 40} />
           {!collapsed && (
             <div>
@@ -41,7 +41,7 @@ export function Sidebar({ className }: { className?: string }) {
               <p className="text-[8.5px] font-bold uppercase tracking-[2px] text-white/35">{BRAND.tagline}</p>
             </div>
           )}
-        </div>
+        </NavLink>
         {!collapsed && (
           <button
             onClick={() => setCollapsed(true)}

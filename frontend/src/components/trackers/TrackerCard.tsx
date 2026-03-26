@@ -16,51 +16,46 @@ export function TrackerCard({ data, onUpdate }: TrackerCardProps) {
       ? Math.min(100, Math.round((entry.value_numeric / tracker.target_value) * 100))
       : null
 
+  const metaText = tracker.target_value && tracker.unit
+    ? `Target: ${tracker.target_value} ${tracker.unit}`
+    : tracker.unit || (tracker.type === "BOOLEAN" ? "Yes / No" : tracker.type === "TIME" ? "Time" : "")
+
   return (
-    <div className="flex items-center rounded-[14px] border border-border bg-card p-3 transition-all hover:border-primary/20 hover:shadow-sm">
+    <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-2.5 transition-all hover:border-primary/20">
       {/* Icon */}
-      <div className="flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-[11px] bg-accent text-[18px]">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-accent text-[17px]">
         {tracker.icon || "📊"}
       </div>
 
-      {/* Name + meta — fixed width */}
-      <div className="ml-3 w-[140px] shrink-0">
-        <p className="text-[13px] font-bold truncate">{tracker.name}</p>
-        <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
-          {tracker.target_value && tracker.unit
-            ? `Target: ${tracker.target_value} ${tracker.unit}`
-            : tracker.unit || (tracker.type === "BOOLEAN" ? "Yes / No" : tracker.type === "TIME" ? "Time" : "")}
-        </p>
+      {/* Name + meta */}
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] font-bold truncate leading-tight">{tracker.name}</p>
+        {metaText && <p className="text-[10px] text-muted-foreground truncate">{metaText}</p>}
         {targetPct !== null && (
-          <div className="flex items-center gap-1.5 mt-1">
-            <div className="h-[3px] w-[60px] overflow-hidden rounded-full bg-border">
-              <div className="h-full rounded-full" style={{ width: `${targetPct}%`, backgroundColor: "#16A34A" }} />
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <div className="h-[3px] w-14 overflow-hidden rounded-full bg-border">
+              <div className="h-full rounded-full bg-primary" style={{ width: `${targetPct}%` }} />
             </div>
             <span className="text-[9px] font-bold text-primary">{targetPct}%</span>
           </div>
         )}
       </div>
 
-      {/* Spacer */}
-      <div className="flex-1" />
-
       {/* Input */}
-      <div className="shrink-0">
-        <EntryInput
-          type={tracker.type}
-          unit={tracker.unit}
-          unitSecondary={tracker.unit_secondary}
-          entry={entry}
-          defaultValue={default_value}
-          color={tracker.color}
-          onUpdate={onUpdate}
-        />
-      </div>
+      <EntryInput
+        type={tracker.type}
+        unit={tracker.unit}
+        unitSecondary={tracker.unit_secondary}
+        entry={entry}
+        defaultValue={default_value}
+        color={tracker.color}
+        onUpdate={onUpdate}
+      />
 
-      {/* Detail chevron */}
+      {/* Chevron */}
       <NavLink
         to={`/trackers/${tracker.id}`}
-        className="ml-2 shrink-0 flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground/30 hover:text-foreground hover:bg-accent transition-all"
+        className="shrink-0 text-muted-foreground/25 hover:text-foreground transition-colors"
         onClick={(e) => e.stopPropagation()}
       >
         <ChevronRight className="h-4 w-4" />

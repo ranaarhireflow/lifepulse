@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { LogOut, Moon, Sun, Bell } from "lucide-react"
+import { NavLink } from "react-router-dom"
 import { useTheme } from "@/hooks/useTheme"
 import { PulseLogo } from "@/components/common/PulseLogo"
 import { BRAND } from "@/lib/brand"
@@ -25,11 +26,11 @@ export function Header() {
 
   return (
     <header className="flex h-14 items-center justify-between border-b border-border bg-background px-4 lg:px-6">
-      {/* Mobile: logo */}
-      <div className="flex items-center gap-2 lg:hidden">
+      {/* Mobile: logo — clickable */}
+      <NavLink to="/" className="flex items-center gap-2 lg:hidden">
         <PulseLogo size={32} />
         <span className="font-extrabold text-sm">{BRAND.name}</span>
-      </div>
+      </NavLink>
 
       {/* Desktop: empty left space */}
       <div className="hidden lg:block" />

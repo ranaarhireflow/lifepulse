@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { format, subDays, startOfYear, subYears } from "date-fns"
 import {
@@ -9,8 +9,11 @@ import {
   Calendar,
   Hash,
   Loader2,
+  Bell,
+  Settings2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ConfigDrawer } from "@/components/common/ConfigDrawer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -67,6 +70,7 @@ export function TrackerDetailPage() {
   const [heatmap, setHeatmap] = useState<HeatmapData | null>(null)
   const [range, setRange] = useState("30d")
   const [loading, setLoading] = useState(true)
+  const [configOpen, setConfigOpen] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -158,7 +162,50 @@ export function TrackerDetailPage() {
             </div>
           </div>
         </div>
+        <Button variant="outline" size="sm" onClick={() => setConfigOpen(true)} className="gap-1.5 text-xs">
+          <Settings2 className="h-3.5 w-3.5" /> Configure
+        </Button>
       </div>
+
+      {/* Config drawer */}
+      <ConfigDrawer open={configOpen} onClose={() => setConfigOpen(false)} title={`${tracker.name} Settings`} description="Configure alerts, defaults, and targets">
+        <div className="space-y-6">
+          {/* Alerts section */}
+          <div>
+            <h3 className="text-sm font-bold flex items-center gap-2 mb-3">
+              <Bell className="h-4 w-4 text-primary" /> Alerts & Reminders
+            </h3>
+            {tracker.alerts && tracker.alerts.length > 0 ? (
+              <div className="space-y-2">
+                {tracker.alerts.map((alert) => (
+                  <div key={alert.id} className="flex items-center justify-between rounded-lg border border-border bg-secondary p-3">
+                    <div>
+                      <p className="text-sm font-semibold">{alert.alert_time}</p>
+                      {alert.label && <p className="text-xs text-muted-foreground">{alert.label}</p>}
+                    </div>
+                    <div className={`text-xs font-bold px-2 py-0.5 rounded-full ${alert.enabled ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                      {alert.enabled ? "On" : "Off"}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No alerts configured. Alerts help you remember to log this pulse daily.</p>
+            )}
+          </div>
+
+          {/* Pulse info */}
+          <div>
+            <h3 className="text-sm font-bold mb-3">Pulse Details</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between"><span className="text-muted-foreground">Type</span><span className="font-semibold">{tracker.type}</span></div>
+              {tracker.unit && <div className="flex justify-between"><span className="text-muted-foreground">Unit</span><span className="font-semibold">{tracker.unit}</span></div>}
+              {tracker.target_value && <div className="flex justify-between"><span className="text-muted-foreground">Target</span><span className="font-semibold">{tracker.target_value} {tracker.unit}</span></div>}
+              <div className="flex justify-between"><span className="text-muted-foreground">Default</span><span className="font-semibold">{tracker.default_behavior}</span></div>
+            </div>
+          </div>
+        </div>
+      </ConfigDrawer>
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
