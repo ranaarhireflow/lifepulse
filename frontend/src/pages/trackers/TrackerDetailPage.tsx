@@ -15,6 +15,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { ConfigDrawer } from "@/components/common/ConfigDrawer"
 import { Switch } from "@/components/ui/switch"
+import { Input } from "@/components/ui/input"
+import api from "@/services/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -72,6 +74,10 @@ export function TrackerDetailPage() {
   const [range, setRange] = useState("30d")
   const [loading, setLoading] = useState(true)
   const [configOpen, setConfigOpen] = useState(false)
+  const [showAddAlert, setShowAddAlert] = useState(false)
+  const [newAlertTime, setNewAlertTime] = useState("08:00")
+  const [newAlertLabel, setNewAlertLabel] = useState("")
+  const [newAlertDays, setNewAlertDays] = useState([1, 2, 3, 4, 5, 6, 7])
 
   useEffect(() => {
     if (!id) return
@@ -169,34 +175,93 @@ export function TrackerDetailPage() {
       </div>
 
       {/* Config drawer */}
-      <ConfigDrawer open={configOpen} onClose={() => setConfigOpen(false)} title={tracker.name} description="Manage alerts and pulse settings">
-        <div className="space-y-6">
-          {/* Alerts */}
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-secondary/50">
-              <h3 className="text-[12px] font-bold flex items-center gap-2 uppercase tracking-wider text-muted-foreground">
+      <ConfigDrawer open={configOpen} onClose={() => { setConfigOpen(false); setShowAddAlert(false) }} title={tracker.name} description="Manage alerts and pulse settings">
+        <div className="space-y-5">
+          {/* Alerts section */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-[11px] font-bold uppercase tracking-[1.5px] text-muted-foreground flex items-center gap-1.5">
                 <Bell className="h-3.5 w-3.5 text-primary" /> Reminders
               </h3>
-              <button className="text-[11px] font-bold text-primary hover:underline">+ Add</button>
+              {!showAddAlert && (
+                <button onClick={() => setShowAddAlert(true)} className="text-[11px] font-bold text-primary hover:underline">
+                  + Add
+                </button>
+              )}
             </div>
+
+            {/* Add alert form */}
+            {showAddAlert && (
+              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 mb-3 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[12px] font-bold">New Reminder</span>
+                  <button onClick={() => setShowAddAlert(false)} className="text-[10px] text-muted-foreground hover:text-foreground">Cancel</button>
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Time</label>
+                  <Input type="time" value={newAlertTime} onChange={(e) => setNewAlertTime(e.target.value)} className="w-full" />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Label (optional)</label>
+                  <Input value={newAlertLabel} onChange={(e) => setNewAlertLabel(e.target.value)} placeholder="e.g. Morning reminder" className="w-full" />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-muted-foreground block mb-1.5">Repeat on</label>
+                  <div className="flex gap-1.5">
+                    {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d, i) => {
+                      const dayNum = i + 1
+                      const active = newAlertDays.includes(dayNum)
+                      return (
+                        <button key={d} type="button"
+                          onClick={() => setNewAlertDays(prev => active ? prev.filter(x => x !== dayNum) : [...prev, dayNum])}
+                          className={`flex-1 rounded-lg py-1.5 text-[10px] font-bold transition-all ${
+                            active ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground border border-border"
+                          }`}>
+                          {d}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+                <Button size="sm" className="w-full mt-1"
+                  onClick={async () => {
+                    try {
+                      await api.post(`/trackers/${tracker.id}/alerts`, {
+                        alert_time: newAlertTime,
+                        alert_days: newAlertDays,
+                        label: newAlertLabel || null,
+                        enabled: true,
+                      })
+                      setShowAddAlert(false)
+                      setNewAlertLabel("")
+                      setNewAlertTime("08:00")
+                      setNewAlertDays([1,2,3,4,5,6,7])
+                      // Refresh tracker data
+                      const t = await fetchTracker(tracker.id)
+                      setTracker(t)
+                    } catch { /* */ }
+                  }}>
+                  Save Reminder
+                </Button>
+              </div>
+            )}
+
+            {/* Existing alerts */}
             {tracker.alerts && tracker.alerts.length > 0 ? (
-              <div className="divide-y divide-border">
+              <div className="space-y-2">
                 {tracker.alerts.map((alert) => (
-                  <div key={alert.id} className="px-4 py-3">
+                  <div key={alert.id} className="rounded-xl border border-border bg-card p-3.5">
                     <div className="flex items-center justify-between mb-2">
-                      <div className="text-[22px] font-extrabold tracking-tight">{alert.alert_time}</div>
+                      <div className="text-[20px] font-extrabold tracking-tight">{alert.alert_time}</div>
                       <Switch checked={alert.enabled} />
                     </div>
-                    <div className="flex gap-1 mb-1.5">
+                    <div className="flex gap-1.5 mb-1.5">
                       {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => {
-                        const dayNum = i + 1
-                        const active = (alert.alert_days || [1,2,3,4,5,6,7]).includes(dayNum)
+                        const active = (alert.alert_days || [1,2,3,4,5,6,7]).includes(i + 1)
                         return (
-                          <div key={i} className={`flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold ${
-                            active ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
-                          }`}>
-                            {d}
-                          </div>
+                          <div key={i} className={`flex h-6 w-6 items-center justify-center rounded-full text-[9px] font-bold ${
+                            active ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground/50"
+                          }`}>{d}</div>
                         )
                       })}
                     </div>
@@ -204,30 +269,33 @@ export function TrackerDetailPage() {
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="p-8 text-center">
-                <Bell className="h-8 w-8 text-muted-foreground/20 mx-auto mb-2" />
+            ) : !showAddAlert ? (
+              <div className="rounded-xl border border-dashed border-border p-6 text-center">
+                <Bell className="h-6 w-6 text-muted-foreground/20 mx-auto mb-2" />
                 <p className="text-[12px] text-muted-foreground">No reminders set</p>
-                <p className="text-[10px] text-muted-foreground/60 mt-0.5">Add one to get notified</p>
+                <button onClick={() => setShowAddAlert(true)} className="text-[11px] font-bold text-primary mt-1 hover:underline">
+                  Add your first reminder
+                </button>
               </div>
-            )}
+            ) : null}
           </div>
 
-          {/* Pulse details */}
-          <div className="rounded-xl border border-border bg-card overflow-hidden">
-            <div className="px-4 py-3 border-b border-border bg-secondary/50">
-              <h3 className="text-[12px] font-bold flex items-center gap-2 uppercase tracking-wider text-muted-foreground">
-                <Settings2 className="h-3.5 w-3.5 text-primary" /> Details
-              </h3>
-            </div>
-            <div className="divide-y divide-border">
+          {/* Separator */}
+          <div className="border-t border-border" />
+
+          {/* Details */}
+          <div>
+            <h3 className="text-[11px] font-bold uppercase tracking-[1.5px] text-muted-foreground flex items-center gap-1.5 mb-3">
+              <Settings2 className="h-3.5 w-3.5 text-primary" /> Details
+            </h3>
+            <div className="space-y-2.5">
               {[
                 { label: "Type", value: { NUMERIC: "Number", DUAL_NUMERIC: "Dual Number", BOOLEAN: "Yes / No", DURATION: "Duration", TIME: "Time", TEXT: "Notes" }[tracker.type] || tracker.type },
                 ...(tracker.unit ? [{ label: "Unit", value: tracker.unit }] : []),
                 ...(tracker.target_value ? [{ label: "Daily Target", value: `${tracker.target_value} ${tracker.unit || ""}` }] : []),
                 { label: "When Not Logged", value: { CARRY_FORWARD: "Use yesterday's value", ZERO: "Default to 0", NULL: "Leave empty" }[tracker.default_behavior] || tracker.default_behavior },
               ].map((row) => (
-                <div key={row.label} className="flex items-center justify-between px-4 py-3">
+                <div key={row.label} className="flex items-center justify-between">
                   <span className="text-[12px] text-muted-foreground">{row.label}</span>
                   <span className="text-[12px] font-bold">{row.value}</span>
                 </div>
