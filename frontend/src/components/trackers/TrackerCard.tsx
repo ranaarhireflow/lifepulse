@@ -88,10 +88,10 @@ export function TrackerCard({ data, onUpdate }: TrackerCardProps) {
           </div>
         </div>
 
-        {/* Completed overlay */}
-        {hasValue && (
-          <div className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-primary/80 backdrop-blur-sm">
-            <span className="text-[14px] text-white font-bold">✓</span>
+        {/* Completed overlay — subtle only */}
+        {false && hasValue && (
+          <div className="hidden">
+            <span>✓</span>
           </div>
         )}
       </motion.div>
