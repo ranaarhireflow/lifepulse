@@ -87,7 +87,7 @@ export function EntryInput({
 
   // Fixed-width container so all input types align consistently
   return (
-    <div className="flex w-[160px] shrink-0 items-center justify-end">
+    <div className="flex w-[100px] shrink-0 items-center justify-end">
       {content}
     </div>
   )

@@ -7,11 +7,8 @@ interface DurationInputProps {
 }
 
 export function DurationInput({ value, onChange }: DurationInputProps) {
-  const hours = value !== null ? Math.floor(value / 60) : 0
-  const minutes = value !== null ? value % 60 : 0
-
-  const [localH, setLocalH] = useState(value !== null ? String(hours) : "")
-  const [localM, setLocalM] = useState(value !== null ? String(minutes) : "")
+  const [localH, setLocalH] = useState(value !== null ? String(Math.floor(value / 60)) : "")
+  const [localM, setLocalM] = useState(value !== null ? String(value % 60) : "")
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   useEffect(() => {
@@ -33,24 +30,17 @@ export function DurationInput({ value, onChange }: DurationInputProps) {
     }, 600)
   }
 
+  const inputClass = "h-[34px] w-[36px] rounded-lg border border-border bg-secondary text-center text-[14px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10"
+
   return (
     <div className="flex items-center gap-1">
-      <input
-        type="number" inputMode="numeric" min={0}
-        value={localH} placeholder="0"
+      <input type="number" inputMode="numeric" min={0} value={localH} placeholder="0"
         onChange={(e) => { setLocalH(e.target.value); handleChange(e.target.value, localM) }}
-        className="h-[34px] w-[44px] rounded-[9px] border-[1.5px] border-border bg-secondary dark:bg-muted text-center text-[14px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/10"
-        style={{ fontFamily: "inherit" }}
-      />
+        className={inputClass} style={{ fontFamily: "inherit" }} />
       <span className="text-muted-foreground font-bold text-xs">:</span>
-      <input
-        type="number" inputMode="numeric" min={0} max={59}
-        value={localM} placeholder="0"
+      <input type="number" inputMode="numeric" min={0} max={59} value={localM} placeholder="00"
         onChange={(e) => { setLocalM(e.target.value); handleChange(localH, e.target.value) }}
-        className="h-[34px] w-[44px] rounded-[9px] border-[1.5px] border-border bg-secondary dark:bg-muted text-center text-[14px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/10"
-        style={{ fontFamily: "inherit" }}
-      />
-      <span className="text-[10px] text-muted-foreground font-semibold">hrs</span>
+        className={inputClass} style={{ fontFamily: "inherit" }} />
     </div>
   )
 }

@@ -179,26 +179,26 @@ export function TrackerCreatePage() {
             />
           </div>
 
-          {/* Type */}
+          {/* Type — grid selector */}
           <div className="space-y-2">
             <Label>Tracking Type</Label>
-            <Select value={type} onValueChange={(v) => v && setType(v)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TRACKER_TYPES.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    <div>
-                      <span className="font-medium">{t.label}</span>
-                      <span className="ml-2 text-muted-foreground text-xs">
-                        {t.desc}
-                      </span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="grid grid-cols-3 gap-2">
+              {TRACKER_TYPES.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => setType(t.value)}
+                  className={`rounded-xl border p-3 text-left transition-all ${
+                    type === t.value
+                      ? "border-primary bg-primary/5 ring-1 ring-primary"
+                      : "border-border bg-card hover:border-primary/30"
+                  }`}
+                >
+                  <p className="text-[12px] font-bold">{t.label}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{t.desc}</p>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Unit */}
@@ -261,17 +261,30 @@ export function TrackerCreatePage() {
           )}
 
           {/* Reminder */}
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <div>
-              <p className="text-sm font-medium">Enable Reminders</p>
-              <p className="text-xs text-muted-foreground">
-                Get notified to log this tracker
-              </p>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between rounded-xl border border-border bg-card p-3">
+              <div>
+                <p className="text-[13px] font-bold">Enable Reminders</p>
+                <p className="text-[11px] text-muted-foreground">Get notified to log this pulse</p>
+              </div>
+              <Switch checked={reminderEnabled} onCheckedChange={setReminderEnabled} />
             </div>
-            <Switch
-              checked={reminderEnabled}
-              onCheckedChange={setReminderEnabled}
-            />
+            {reminderEnabled && (
+              <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+                <Label className="text-[12px]">Reminder Time</Label>
+                <Input type="time" defaultValue="08:00" className="w-[140px]" />
+                <Label className="text-[12px]">Repeat On</Label>
+                <div className="flex gap-1.5">
+                  {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+                    <button key={d} type="button"
+                      className="flex-1 rounded-lg border border-primary bg-primary/5 py-1.5 text-[10px] font-bold text-primary">
+                      {d}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[10px] text-muted-foreground">You can add more alerts after creating the pulse.</p>
+              </div>
+            )}
           </div>
 
           {/* Submit */}

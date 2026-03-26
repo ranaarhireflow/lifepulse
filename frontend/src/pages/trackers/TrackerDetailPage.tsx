@@ -168,40 +168,66 @@ export function TrackerDetailPage() {
       </div>
 
       {/* Config drawer */}
-      <ConfigDrawer open={configOpen} onClose={() => setConfigOpen(false)} title={`${tracker.name} Settings`} description="Configure alerts, defaults, and targets">
-        <div className="space-y-6">
-          {/* Alerts section */}
+      <ConfigDrawer open={configOpen} onClose={() => setConfigOpen(false)} title={`${tracker.name}`} description="Manage alerts and pulse settings">
+        <div className="space-y-8">
+          {/* Alerts */}
           <div>
-            <h3 className="text-sm font-bold flex items-center gap-2 mb-3">
-              <Bell className="h-4 w-4 text-primary" /> Alerts & Reminders
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-[13px] font-bold flex items-center gap-2">
+                <Bell className="h-4 w-4 text-primary" /> Alerts & Reminders
+              </h3>
+              <button className="text-[11px] font-bold text-primary hover:underline">+ Add Alert</button>
+            </div>
             {tracker.alerts && tracker.alerts.length > 0 ? (
               <div className="space-y-2">
                 {tracker.alerts.map((alert) => (
-                  <div key={alert.id} className="flex items-center justify-between rounded-lg border border-border bg-secondary p-3">
-                    <div>
-                      <p className="text-sm font-semibold">{alert.alert_time}</p>
-                      {alert.label && <p className="text-xs text-muted-foreground">{alert.label}</p>}
+                  <div key={alert.id} className="rounded-xl border border-border bg-card p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="text-[18px] font-extrabold text-foreground">{alert.alert_time}</div>
+                        <div className="flex flex-wrap gap-1">
+                          {(alert.alert_days || [1,2,3,4,5,6,7]).map((d) => (
+                            <span key={d} className="text-[9px] font-bold bg-secondary rounded px-1.5 py-0.5">
+                              {["", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][d]}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <button
+                        className={`relative h-6 w-11 rounded-full transition-colors ${alert.enabled ? "bg-primary" : "bg-border"}`}
+                      >
+                        <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${alert.enabled ? "left-[22px]" : "left-0.5"}`} />
+                      </button>
                     </div>
-                    <div className={`text-xs font-bold px-2 py-0.5 rounded-full ${alert.enabled ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
-                      {alert.enabled ? "On" : "Off"}
-                    </div>
+                    {alert.label && <p className="text-[11px] text-muted-foreground mt-1.5">{alert.label}</p>}
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No alerts configured. Alerts help you remember to log this pulse daily.</p>
+              <div className="rounded-xl border border-dashed border-border p-6 text-center">
+                <Bell className="h-6 w-6 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-[12px] text-muted-foreground">No alerts set. Add one to get reminded.</p>
+              </div>
             )}
           </div>
 
-          {/* Pulse info */}
+          {/* Pulse details */}
           <div>
-            <h3 className="text-sm font-bold mb-3">Pulse Details</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-muted-foreground">Type</span><span className="font-semibold">{tracker.type}</span></div>
-              {tracker.unit && <div className="flex justify-between"><span className="text-muted-foreground">Unit</span><span className="font-semibold">{tracker.unit}</span></div>}
-              {tracker.target_value && <div className="flex justify-between"><span className="text-muted-foreground">Target</span><span className="font-semibold">{tracker.target_value} {tracker.unit}</span></div>}
-              <div className="flex justify-between"><span className="text-muted-foreground">Default</span><span className="font-semibold">{tracker.default_behavior}</span></div>
+            <h3 className="text-[13px] font-bold mb-4 flex items-center gap-2">
+              <Settings2 className="h-4 w-4 text-primary" /> Pulse Details
+            </h3>
+            <div className="rounded-xl border border-border bg-card divide-y divide-border">
+              {[
+                { label: "Type", value: { NUMERIC: "Number", DUAL_NUMERIC: "Dual Number", BOOLEAN: "Yes / No", DURATION: "Duration", TIME: "Time", TEXT: "Notes" }[tracker.type] || tracker.type },
+                ...(tracker.unit ? [{ label: "Unit", value: tracker.unit }] : []),
+                ...(tracker.target_value ? [{ label: "Daily Target", value: `${tracker.target_value} ${tracker.unit || ""}` }] : []),
+                { label: "When Not Logged", value: { CARRY_FORWARD: "Use yesterday's value", ZERO: "Default to 0", NULL: "Leave empty" }[tracker.default_behavior] || tracker.default_behavior },
+              ].map((row) => (
+                <div key={row.label} className="flex items-center justify-between px-4 py-3">
+                  <span className="text-[12px] text-muted-foreground">{row.label}</span>
+                  <span className="text-[12px] font-semibold">{row.value}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

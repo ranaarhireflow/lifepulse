@@ -12,34 +12,25 @@ export function BooleanToggle({ value, onChange }: BooleanToggleProps) {
 
   return (
     <motion.button
-      whileTap={{ scale: 0.85 }}
+      whileTap={{ scale: 0.9 }}
       onClick={() => onChange(!isChecked)}
-      className={`relative flex h-[42px] w-[42px] items-center justify-center rounded-[12px] border-2 transition-all duration-200 ${
+      className={`flex h-[34px] w-[64px] items-center justify-center rounded-lg border text-[13px] font-bold transition-all ${
         isChecked
-          ? "border-primary bg-accent text-primary"
-          : "border-border bg-card text-muted-foreground/30"
+          ? "border-primary bg-primary/10 text-primary"
+          : "border-border bg-secondary text-muted-foreground"
       }`}
     >
       <AnimatePresence mode="wait">
         {isChecked ? (
-          <motion.div
-            key="check"
-            initial={{ scale: 0, rotate: -45 }}
-            animate={{ scale: 1, rotate: 0 }}
-            exit={{ scale: 0 }}
+          <motion.div key="y" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
             transition={{ type: "spring", stiffness: 500, damping: 20 }}
-          >
-            <Check className="h-5 w-5" strokeWidth={3} />
+            className="flex items-center gap-1">
+            <Check className="h-4 w-4" strokeWidth={3} />
+            <span>Yes</span>
           </motion.div>
         ) : (
-          <motion.span
-            key="x"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="text-[14px]"
-          >
-            ✗
+          <motion.span key="n" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            No
           </motion.span>
         )}
       </AnimatePresence>

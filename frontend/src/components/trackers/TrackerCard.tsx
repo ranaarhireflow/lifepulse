@@ -17,8 +17,8 @@ export function TrackerCard({ data, onUpdate }: TrackerCardProps) {
       : null
 
   const metaText = tracker.target_value && tracker.unit
-    ? `Target: ${tracker.target_value} ${tracker.unit}`
-    : tracker.unit || (tracker.type === "BOOLEAN" ? "Yes / No" : tracker.type === "TIME" ? "Time" : "")
+    ? `${tracker.unit} · target ${tracker.target_value}`
+    : tracker.unit || (tracker.type === "BOOLEAN" ? "yes / no" : tracker.type === "TIME" ? "time" : tracker.type === "DURATION" ? "hours" : "")
 
   return (
     <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-2.5 transition-all hover:border-primary/20">
