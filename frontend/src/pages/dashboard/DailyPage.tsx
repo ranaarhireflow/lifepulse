@@ -141,25 +141,6 @@ export function DailyPage() {
           className="shrink-0 rounded-lg p-1 text-muted-foreground hover:text-white disabled:opacity-20 transition-all"><ChevronRight className="h-4 w-4" /></button>
       </div>
 
-      {/* To-do / Done tabs */}
-      {!loading && totalTrackers > 0 && (
-        <div className="flex gap-2">
-          {([
-            { key: "todo" as const, label: "To-do", count: todoItems.length },
-            { key: "done" as const, label: "Done", count: doneItems.length },
-          ]).map((tab) => (
-            <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-[13px] font-bold transition-all ${
-                activeTab === tab.key ? "bg-card border border-primary/20 text-white" : "text-muted-foreground hover:text-white"
-              }`}>
-              {tab.label}
-              <span className={`text-[11px] rounded-full px-1.5 py-0.5 ${activeTab === tab.key ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}`}>
-                {tab.count}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* Loading */}
       {loading && <div className="flex items-center justify-center py-16"><Loader2 className="h-7 w-7 animate-spin text-primary" /></div>}
@@ -175,18 +156,11 @@ export function DailyPage() {
       {/* Pulse cards */}
       {!loading && !error && dailyData.length > 0 && (
         <div className="space-y-3">
-          <AnimatePresence mode="popLayout">
-            {(activeTab === "todo" ? todoItems : doneItems).map((item, i) => (
-              <motion.div key={item.tracker.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ delay: i * 0.04 }}>
-                <TrackerCard data={item} onUpdate={(updates) => handleUpdate(item.tracker.id, updates)} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-          {(activeTab === "todo" ? todoItems : doneItems).length === 0 && (
-            <div className="text-center py-8 text-muted-foreground text-sm">
-              {activeTab === "todo" ? "All pulses logged! 🎉" : "Nothing logged yet today."}
-            </div>
-          )}
+          {dailyData.map((item, i) => (
+            <motion.div key={item.tracker.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
+              <TrackerCard data={item} onUpdate={(updates) => handleUpdate(item.tracker.id, updates)} />
+            </motion.div>
+          ))}
         </div>
       )}
 
