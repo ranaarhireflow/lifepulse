@@ -56,10 +56,10 @@ export function TrackersPage() {
 
   const loadTrackers = async () => {
     setLoading(true)
-    try { setTrackers(await fetchTrackers(showArchived)) } catch { setTrackers([]) } finally { setLoading(false) }
+    try { setTrackers(await fetchTrackers(true)) } catch { setTrackers([]) } finally { setLoading(false) }
   }
 
-  useEffect(() => { loadTrackers() }, [showArchived])
+  useEffect(() => { loadTrackers() }, [])
 
   const handleArchive = async (tracker: Tracker) => {
     try {

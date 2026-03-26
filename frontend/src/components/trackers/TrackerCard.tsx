@@ -1,4 +1,4 @@
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Bell } from "lucide-react"
 import { EntryInput } from "@/components/entries/EntryInput"
 import { NavLink } from "react-router-dom"
 import type { DailyTrackerEntry, Entry } from "@/services/trackers"
@@ -29,7 +29,12 @@ export function TrackerCard({ data, onUpdate }: TrackerCardProps) {
 
       {/* Name + meta */}
       <div className="min-w-0 flex-1">
-        <p className="text-[13px] font-bold truncate leading-tight">{tracker.name}</p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-[13px] font-bold truncate leading-tight">{tracker.name}</p>
+          {tracker.reminder_enabled && (
+            <Bell className="h-3 w-3 text-primary shrink-0" />
+          )}
+        </div>
         {metaText && <p className="text-[10px] text-muted-foreground truncate">{metaText}</p>}
         {targetPct !== null && (
           <div className="flex items-center gap-1.5 mt-0.5">

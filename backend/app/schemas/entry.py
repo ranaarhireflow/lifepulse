@@ -45,5 +45,6 @@ class TrackerBrief(BaseModel):
     unit_secondary: str | None
     default_behavior: str
     target_value: float | None
+    reminder_enabled: bool = False
 
     model_config = {"from_attributes": True}

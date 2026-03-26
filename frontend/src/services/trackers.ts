@@ -63,6 +63,7 @@ export interface DailyTrackerEntry {
     unit_secondary: string | null
     default_behavior: string
     target_value: number | null
+    reminder_enabled: boolean
   }
   entry: Entry | null
   default_value: number | null

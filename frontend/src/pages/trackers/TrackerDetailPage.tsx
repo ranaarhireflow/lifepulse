@@ -109,23 +109,26 @@ export function TrackerDetailPage() {
     } catch { /* */ }
   }
 
+  // Initial load — tracker + heatmap (doesn't depend on range)
   useEffect(() => {
     if (!id) return
     setLoading(true)
-    const { from, to } = getDateRange(range)
-
     Promise.all([
       fetchTracker(id),
-      fetchAnalytics(id, from, to),
       fetchHeatmap(id, format(subYears(new Date(), 1), "yyyy-MM-dd"), format(new Date(), "yyyy-MM-dd")),
     ])
-      .then(([t, a, h]) => {
-        setTracker(t)
-        setAnalytics(a)
-        setHeatmap(h)
-      })
+      .then(([t, h]) => { setTracker(t); setHeatmap(h) })
       .catch(() => {})
       .finally(() => setLoading(false))
+  }, [id])
+
+  // Trend data — only re-fetches analytics when range changes (no full page reload)
+  useEffect(() => {
+    if (!id) return
+    const { from, to } = getDateRange(range)
+    fetchAnalytics(id, from, to)
+      .then((a) => setAnalytics(a))
+      .catch(() => {})
   }, [id, range])
 
   const color = tracker?.color || "#16A34A"
@@ -199,9 +202,6 @@ export function TrackerDetailPage() {
             </div>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setConfigOpen(true)} className="gap-1.5 text-xs">
-          <Settings2 className="h-3.5 w-3.5" /> Configure
-        </Button>
       </div>
 
       {/* Config drawer */}
@@ -413,6 +413,43 @@ export function TrackerDetailPage() {
             {s.sub && <p className="text-[10px] text-muted-foreground mt-1">{s.sub}</p>}
           </div>
         ))}
+      </div>
+
+      {/* Alerts section — visible on page */}
+      <div className="rounded-xl border border-border bg-card p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-[11px] font-bold uppercase tracking-[1.5px] text-muted-foreground flex items-center gap-1.5">
+            <Bell className="h-3.5 w-3.5 text-primary" /> Reminders
+          </h3>
+          <button onClick={() => setConfigOpen(true)} className="text-[11px] font-bold text-primary hover:underline">
+            {tracker.alerts && tracker.alerts.length > 0 ? "Edit" : "+ Add"}
+          </button>
+        </div>
+        {tracker.alerts && tracker.alerts.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {tracker.alerts.map((alert) => (
+              <div key={alert.id} className="flex items-center gap-2 rounded-lg border border-border bg-secondary px-3 py-1.5">
+                <span className="text-[13px] font-bold">{alert.alert_time}</span>
+                <div className="flex gap-0.5">
+                  {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => {
+                    const active = (alert.alert_days || [1,2,3,4,5,6,7]).includes(i + 1)
+                    return (
+                      <span key={i} className={`text-[8px] font-bold ${active ? "text-primary" : "text-muted-foreground/30"}`}>{d}</span>
+                    )
+                  })}
+                </div>
+                {!alert.enabled && <span className="text-[9px] text-muted-foreground">off</span>}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[12px] text-muted-foreground">
+            No reminders set.{" "}
+            <button onClick={() => { setConfigOpen(true); setShowAddAlert(true) }} className="text-primary font-bold hover:underline">
+              Add one
+            </button>
+          </p>
+        )}
       </div>
 
       {/* GitHub-style heatmap */}
