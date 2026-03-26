@@ -62,10 +62,10 @@ export function Header() {
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <div className="px-2 py-1.5">
-              <p className="text-sm font-medium">{user?.display_name}</p>
-              <p className="text-xs text-muted-foreground">{user?.email}</p>
+          <DropdownMenuContent align="end" className="min-w-[240px]">
+            <div className="px-3 py-2">
+              <p className="text-sm font-bold">{user?.display_name}</p>
+              <p className="text-xs text-muted-foreground break-all">{user?.email}</p>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={signOut} className="text-destructive">

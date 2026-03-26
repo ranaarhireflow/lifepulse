@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ConfigDrawer } from "@/components/common/ConfigDrawer"
+import { Switch } from "@/components/ui/switch"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -168,55 +169,58 @@ export function TrackerDetailPage() {
       </div>
 
       {/* Config drawer */}
-      <ConfigDrawer open={configOpen} onClose={() => setConfigOpen(false)} title={`${tracker.name}`} description="Manage alerts and pulse settings">
-        <div className="space-y-8">
+      <ConfigDrawer open={configOpen} onClose={() => setConfigOpen(false)} title={tracker.name} description="Manage alerts and pulse settings">
+        <div className="space-y-6">
           {/* Alerts */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[13px] font-bold flex items-center gap-2">
-                <Bell className="h-4 w-4 text-primary" /> Alerts & Reminders
+          <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-secondary/50">
+              <h3 className="text-[12px] font-bold flex items-center gap-2 uppercase tracking-wider text-muted-foreground">
+                <Bell className="h-3.5 w-3.5 text-primary" /> Reminders
               </h3>
-              <button className="text-[11px] font-bold text-primary hover:underline">+ Add Alert</button>
+              <button className="text-[11px] font-bold text-primary hover:underline">+ Add</button>
             </div>
             {tracker.alerts && tracker.alerts.length > 0 ? (
-              <div className="space-y-2">
+              <div className="divide-y divide-border">
                 {tracker.alerts.map((alert) => (
-                  <div key={alert.id} className="rounded-xl border border-border bg-card p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="text-[18px] font-extrabold text-foreground">{alert.alert_time}</div>
-                        <div className="flex flex-wrap gap-1">
-                          {(alert.alert_days || [1,2,3,4,5,6,7]).map((d) => (
-                            <span key={d} className="text-[9px] font-bold bg-secondary rounded px-1.5 py-0.5">
-                              {["", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][d]}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <button
-                        className={`relative h-6 w-11 rounded-full transition-colors ${alert.enabled ? "bg-primary" : "bg-border"}`}
-                      >
-                        <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${alert.enabled ? "left-[22px]" : "left-0.5"}`} />
-                      </button>
+                  <div key={alert.id} className="px-4 py-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-[22px] font-extrabold tracking-tight">{alert.alert_time}</div>
+                      <Switch checked={alert.enabled} />
                     </div>
-                    {alert.label && <p className="text-[11px] text-muted-foreground mt-1.5">{alert.label}</p>}
+                    <div className="flex gap-1 mb-1.5">
+                      {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => {
+                        const dayNum = i + 1
+                        const active = (alert.alert_days || [1,2,3,4,5,6,7]).includes(dayNum)
+                        return (
+                          <div key={i} className={`flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold ${
+                            active ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+                          }`}>
+                            {d}
+                          </div>
+                        )
+                      })}
+                    </div>
+                    {alert.label && <p className="text-[11px] text-muted-foreground">{alert.label}</p>}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="rounded-xl border border-dashed border-border p-6 text-center">
-                <Bell className="h-6 w-6 text-muted-foreground/30 mx-auto mb-2" />
-                <p className="text-[12px] text-muted-foreground">No alerts set. Add one to get reminded.</p>
+              <div className="p-8 text-center">
+                <Bell className="h-8 w-8 text-muted-foreground/20 mx-auto mb-2" />
+                <p className="text-[12px] text-muted-foreground">No reminders set</p>
+                <p className="text-[10px] text-muted-foreground/60 mt-0.5">Add one to get notified</p>
               </div>
             )}
           </div>
 
           {/* Pulse details */}
-          <div>
-            <h3 className="text-[13px] font-bold mb-4 flex items-center gap-2">
-              <Settings2 className="h-4 w-4 text-primary" /> Pulse Details
-            </h3>
-            <div className="rounded-xl border border-border bg-card divide-y divide-border">
+          <div className="rounded-xl border border-border bg-card overflow-hidden">
+            <div className="px-4 py-3 border-b border-border bg-secondary/50">
+              <h3 className="text-[12px] font-bold flex items-center gap-2 uppercase tracking-wider text-muted-foreground">
+                <Settings2 className="h-3.5 w-3.5 text-primary" /> Details
+              </h3>
+            </div>
+            <div className="divide-y divide-border">
               {[
                 { label: "Type", value: { NUMERIC: "Number", DUAL_NUMERIC: "Dual Number", BOOLEAN: "Yes / No", DURATION: "Duration", TIME: "Time", TEXT: "Notes" }[tracker.type] || tracker.type },
                 ...(tracker.unit ? [{ label: "Unit", value: tracker.unit }] : []),
@@ -225,7 +229,7 @@ export function TrackerDetailPage() {
               ].map((row) => (
                 <div key={row.label} className="flex items-center justify-between px-4 py-3">
                   <span className="text-[12px] text-muted-foreground">{row.label}</span>
-                  <span className="text-[12px] font-semibold">{row.value}</span>
+                  <span className="text-[12px] font-bold">{row.value}</span>
                 </div>
               ))}
             </div>
