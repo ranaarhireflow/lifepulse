@@ -161,56 +161,22 @@ export function TrackerDetailPage() {
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-              <Flame className="h-4 w-4" style={{ color }} />
-              <span className="text-xs">Current Streak</span>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {[
+          { icon: Flame, label: "Current Streak", value: String(analytics.current_streak), sub: `Best: ${analytics.longest_streak}` },
+          { icon: Target, label: "Completion", value: `${analytics.completion_rate}%`, sub: `${analytics.total_entries} entries` },
+          { icon: TrendingUp, label: "Average", value: analytics.average !== null ? String(analytics.average) : "—", sub: analytics.min_value !== null ? `${analytics.min_value} – ${analytics.max_value}` : "" },
+          { icon: Hash, label: "Total Entries", value: String(analytics.total_entries), sub: "" },
+        ].map((s) => (
+          <div key={s.label} className="rounded-xl border border-border bg-card p-3.5">
+            <div className="flex items-center gap-1.5 mb-2">
+              <s.icon className="h-3.5 w-3.5 text-primary" />
+              <span className="text-[10px] font-semibold text-muted-foreground">{s.label}</span>
             </div>
-            <p className="text-2xl font-bold">{analytics.current_streak}</p>
-            <p className="text-xs text-muted-foreground">
-              Best: {analytics.longest_streak}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-              <Target className="h-4 w-4" style={{ color }} />
-              <span className="text-xs">Completion</span>
-            </div>
-            <p className="text-2xl font-bold">{analytics.completion_rate}%</p>
-            <p className="text-xs text-muted-foreground">
-              {analytics.total_entries} entries
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-              <TrendingUp className="h-4 w-4" style={{ color }} />
-              <span className="text-xs">Average</span>
-            </div>
-            <p className="text-2xl font-bold">
-              {analytics.average !== null ? analytics.average : "—"}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {analytics.min_value !== null
-                ? `${analytics.min_value} – ${analytics.max_value}`
-                : "No data"}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-              <Hash className="h-4 w-4" style={{ color }} />
-              <span className="text-xs">Total Entries</span>
-            </div>
-            <p className="text-2xl font-bold">{analytics.total_entries}</p>
-          </CardContent>
-        </Card>
+            <p className="text-[22px] font-extrabold text-[#1A3526] dark:text-foreground leading-none">{s.value}</p>
+            {s.sub && <p className="text-[10px] text-muted-foreground mt-1">{s.sub}</p>}
+          </div>
+        ))}
       </div>
 
       {/* GitHub-style heatmap */}

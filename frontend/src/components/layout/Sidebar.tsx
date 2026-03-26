@@ -45,7 +45,7 @@ export function Sidebar({ className }: { className?: string }) {
         {!collapsed && (
           <button
             onClick={() => setCollapsed(true)}
-            className="rounded-lg p-1.5 text-white/25 hover:text-white/50 hover:bg-white/5 transition-all"
+            className="rounded-lg p-1.5 text-white/60 hover:text-white hover:bg-white/10 transition-all"
           >
             <PanelLeftClose className="h-4 w-4" />
           </button>
@@ -56,7 +56,7 @@ export function Sidebar({ className }: { className?: string }) {
       {collapsed && (
         <button
           onClick={() => setCollapsed(false)}
-          className="flex w-full items-center justify-center rounded-lg p-2 mb-4 text-white/30 hover:text-white/60 hover:bg-white/5 transition-all"
+          className="flex w-full items-center justify-center rounded-lg p-2 mb-4 text-white/60 hover:text-white hover:bg-white/10 transition-all"
         >
           <PanelLeft className="h-4 w-4" />
         </button>
