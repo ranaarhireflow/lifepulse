@@ -3,7 +3,8 @@ import { NavLink } from "react-router-dom"
 import {
   LayoutGrid,
   Activity,
-  BarChart3,
+  Zap,
+  Trophy,
   Settings,
   Plus,
   PanelLeftClose,
@@ -16,7 +17,8 @@ import { PulseLogo } from "@/components/common/PulseLogo"
 const NAV_ITEMS = [
   { to: "/", icon: LayoutGrid, label: "Today", end: true },
   { to: "/trackers", icon: Activity, label: "My Pulses", end: false },
-  { to: "/analytics", icon: BarChart3, label: "Analytics", end: false },
+  { to: "/score", icon: Zap, label: "Monk Score", end: false },
+  { to: "/achievements", icon: Trophy, label: "Achievements", end: false },
   { to: "/settings", icon: Settings, label: "Settings", end: false },
 ]
 

@@ -9,7 +9,8 @@ import { DailyPage } from "@/pages/dashboard/DailyPage"
 import { TrackersPage } from "@/pages/trackers/TrackersPage"
 import { TrackerCreatePage } from "@/pages/trackers/TrackerCreatePage"
 import { TrackerDetailPage } from "@/pages/trackers/TrackerDetailPage"
-import { AnalyticsPage } from "@/pages/analytics/AnalyticsPage"
+import { MonkScorePage } from "@/pages/score/MonkScorePage"
+import { AchievementsPage } from "@/pages/achievements/AchievementsPage"
 import { SettingsPage } from "@/pages/settings/SettingsPage"
 
 export default function App() {
@@ -31,7 +32,8 @@ export default function App() {
                 <Route path="trackers" element={<TrackersPage />} />
                 <Route path="trackers/new" element={<TrackerCreatePage />} />
                 <Route path="trackers/:id" element={<TrackerDetailPage />} />
-                <Route path="analytics" element={<AnalyticsPage />} />
+                <Route path="score" element={<MonkScorePage />} />
+                <Route path="achievements" element={<AchievementsPage />} />
                 <Route path="settings" element={<SettingsPage />} />
               </Route>
             </Routes>
