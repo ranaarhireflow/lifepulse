@@ -7,7 +7,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 
 from app.config import settings
-from app.routers import health, auth, trackers, entries, analytics, push, templates
+from app.routers import health, auth, trackers, entries, analytics, push, templates, gamification
 
 
 @asynccontextmanager
@@ -61,3 +61,4 @@ app.include_router(entries.router, prefix="/api/v1/entries", tags=["Entries"])
 app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["Analytics"])
 app.include_router(push.router, prefix="/api/v1/push", tags=["Push Notifications"])
 app.include_router(templates.router, prefix="/api/v1/templates", tags=["Templates"])
+app.include_router(gamification.router, prefix="/api/v1/gamification", tags=["Gamification"])

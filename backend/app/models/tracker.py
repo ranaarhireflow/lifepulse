@@ -42,6 +42,8 @@ class Tracker(Base):
     max_value: Mapped[float | None] = mapped_column(Float)
     streak_goal: Mapped[int | None] = mapped_column(Integer)
     target_value: Mapped[float | None] = mapped_column(Float)
+    difficulty: Mapped[int] = mapped_column(Integer, default=1)  # 1-5 stars
+    dimension: Mapped[str | None] = mapped_column(String(32))  # wisdom, strength, focus, discipline, confidence
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     deleted_at: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
