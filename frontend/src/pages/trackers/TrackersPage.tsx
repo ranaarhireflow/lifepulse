@@ -150,9 +150,6 @@ export function TrackersPage() {
                       <DropdownMenuItem onClick={() => navigate(`/trackers/${tracker.id}`)}>
                         <Pencil className="mr-2 h-4 w-4" />View & Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/trackers/${tracker.id}`)}>
-                        <Bell className="mr-2 h-4 w-4" />Configure Alerts
-                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleArchive(tracker)}>
                         <Archive className="mr-2 h-4 w-4" />Archive
                       </DropdownMenuItem>
