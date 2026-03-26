@@ -1,13 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+@import "@fontsource-variable/dm-sans";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
     --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
+    --font-sans: 'DM Sans Variable', 'DM Sans', sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -48,32 +48,67 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* LifePulse Deep Green Theme */
+/* LifePulse v2 — Dark Mode First ("Monk Mode") */
 :root {
-    --background: #E8ECE8;
+    --background: #0A0F0C;
+    --foreground: #E8EDE8;
+    --card: #111A14;
+    --card-foreground: #E8EDE8;
+    --popover: #142019;
+    --popover-foreground: #E8EDE8;
+    --primary: #16A34A;
+    --primary-foreground: #FFFFFF;
+    --secondary: #162B1E;
+    --secondary-foreground: #B5C8B5;
+    --muted: #162B1E;
+    --muted-foreground: #5A7A5A;
+    --accent: #1A3525;
+    --accent-foreground: #B5C8B5;
+    --destructive: #EF4444;
+    --border: #1E3828;
+    --input: #1E3828;
+    --ring: #16A34A;
+    --chart-1: #22C55E;
+    --chart-2: #16A34A;
+    --chart-3: #FBBF24;
+    --chart-4: #34D399;
+    --chart-5: #4ADE80;
+    --radius: 0.75rem;
+    --sidebar: #060D08;
+    --sidebar-foreground: #E8EDE8;
+    --sidebar-primary: #16A34A;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: rgba(22,163,74,0.12);
+    --sidebar-accent-foreground: #22C55E;
+    --sidebar-border: rgba(22,163,74,0.08);
+    --sidebar-ring: #16A34A;
+}
+
+/* Light mode (opt-in via toggle) */
+.light {
+    --background: #F0F3F0;
     --foreground: #141A14;
-    --card: #EFF3EF;
+    --card: #FFFFFF;
     --card-foreground: #141A14;
-    --popover: #F2F5F2;
+    --popover: #FFFFFF;
     --popover-foreground: #141A14;
     --primary: #16A34A;
     --primary-foreground: #FFFFFF;
-    --secondary: #DDE5DD;
+    --secondary: #E5EBE5;
     --secondary-foreground: #1A3526;
-    --muted: #DDE5DD;
-    --muted-foreground: #4B5E4B;
+    --muted: #E5EBE5;
+    --muted-foreground: #5F6B5F;
     --accent: #D2E8D8;
     --accent-foreground: #1A3526;
     --destructive: #DC2626;
-    --border: #C8D5C8;
-    --input: #C8D5C8;
+    --border: #D0DDD0;
+    --input: #D0DDD0;
     --ring: #16A34A;
     --chart-1: #16A34A;
     --chart-2: #0E8A5F;
     --chart-3: #D97706;
     --chart-4: #1A7A42;
     --chart-5: #22C55E;
-    --radius: 0.75rem;
     --sidebar: #0F1F17;
     --sidebar-foreground: #FFFFFF;
     --sidebar-primary: #16A34A;
@@ -84,48 +119,14 @@
     --sidebar-ring: #16A34A;
 }
 
-.dark {
-    --background: #0A1210;
-    --foreground: #D5E0D5;
-    --card: #111D15;
-    --card-foreground: #D5E0D5;
-    --popover: #142019;
-    --popover-foreground: #D5E0D5;
-    --primary: #22C55E;
-    --primary-foreground: #0A1210;
-    --secondary: #162B1E;
-    --secondary-foreground: #B5C8B5;
-    --muted: #162B1E;
-    --muted-foreground: #6A8A6A;
-    --accent: #1A3525;
-    --accent-foreground: #B5C8B5;
-    --destructive: #EF4444;
-    --border: #1E3828;
-    --input: #1E3828;
-    --ring: #22C55E;
-    --chart-1: #22C55E;
-    --chart-2: #16A34A;
-    --chart-3: #FBBF24;
-    --chart-4: #34D399;
-    --chart-5: #4ADE80;
-    --sidebar: #070D09;
-    --sidebar-foreground: #D5E0D5;
-    --sidebar-primary: #22C55E;
-    --sidebar-primary-foreground: #0A1210;
-    --sidebar-accent: rgba(34,197,94,0.12);
-    --sidebar-accent-foreground: #22C55E;
-    --sidebar-border: rgba(34,197,94,0.08);
-    --sidebar-ring: #22C55E;
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
   body {
     @apply bg-background text-foreground;
-    }
+  }
   html {
-    @apply font-sans;
-    }
+    @apply font-sans antialiased;
+  }
 }
