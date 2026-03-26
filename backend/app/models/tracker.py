@@ -42,9 +42,11 @@ class Tracker(Base):
     max_value: Mapped[float | None] = mapped_column(Float)
     streak_goal: Mapped[int | None] = mapped_column(Integer)
     target_value: Mapped[float | None] = mapped_column(Float)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    deleted_at: Mapped[DateTime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     user = relationship("User", back_populates="trackers")
-    entries = relationship("Entry", back_populates="tracker", cascade="all, delete-orphan")
+    entries = relationship("Entry", back_populates="tracker")
     alerts = relationship("TrackerAlert", back_populates="tracker", cascade="all, delete-orphan")

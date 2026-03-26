@@ -27,7 +27,7 @@ def list_trackers(
     db: Session = Depends(get_db),
     include_archived: bool = False,
 ):
-    query = db.query(Tracker).filter(Tracker.user_id == user.id)
+    query = db.query(Tracker).filter(Tracker.user_id == user.id, Tracker.is_active == True)
     if not include_archived:
         query = query.filter(Tracker.archived == False)
     return query.order_by(Tracker.sort_order, Tracker.created_at).all()
@@ -120,7 +120,10 @@ def delete_tracker(
     tracker = db.query(Tracker).filter(Tracker.id == tracker_id, Tracker.user_id == user.id).first()
     if not tracker:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tracker not found")
-    db.delete(tracker)
+    # Soft delete — never hard delete user data
+    from datetime import datetime, timezone
+    tracker.is_active = False
+    tracker.deleted_at = datetime.now(timezone.utc)
     db.commit()
 
 
@@ -132,7 +135,7 @@ def reorder_trackers(
 ):
     for idx, tracker_id in enumerate(data.tracker_ids):
         db.query(Tracker).filter(
-            Tracker.id == uuid.UUID(tracker_id),
+            Tracker.id == tracker_id,
             Tracker.user_id == user.id,
         ).update({"sort_order": idx})
     db.commit()

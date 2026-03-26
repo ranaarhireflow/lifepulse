@@ -1,3 +1,5 @@
+import uuid
+
 from pydantic import BaseModel, Field
 from app.models.tracker import TrackerType, DefaultBehavior
 
@@ -10,7 +12,7 @@ class TrackerAlertCreate(BaseModel):
 
 
 class TrackerAlertResponse(BaseModel):
-    id: str
+    id: uuid.UUID
     alert_time: str
     alert_days: list[int]
     label: str | None
@@ -50,7 +52,7 @@ class TrackerUpdate(BaseModel):
 
 
 class TrackerResponse(BaseModel):
-    id: str
+    id: uuid.UUID
     name: str
     icon: str | None
     color: str | None
@@ -71,4 +73,4 @@ class TrackerResponse(BaseModel):
 
 
 class TrackerReorder(BaseModel):
-    tracker_ids: list[str]
+    tracker_ids: list[uuid.UUID]

@@ -1,8 +1,10 @@
+import traceback
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import JSONResponse
 
 from app.config import settings
 from app.routers import health, auth, trackers, entries, analytics, push, templates
@@ -16,7 +18,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="myPersonalTracker API",
+    title="LifePulse API",
     version="1.0.0",
     lifespan=lifespan,
     docs_url="/api/docs",
@@ -30,7 +32,7 @@ app.add_middleware(
     allow_origins=settings.CORS_ORIGINS.split(","),
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_headers=["Authorization", "Content-Type", "X-Dev-Mode"],
     max_age=600,
 )
 
@@ -39,6 +41,17 @@ app.add_middleware(
     TrustedHostMiddleware,
     allowed_hosts=["*"],  # Restrict in production
 )
+
+# Global exception handler for debugging
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    tb = traceback.format_exc()
+    print(f"ERROR: {exc}\n{tb}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc), "type": type(exc).__name__},
+    )
+
 
 # Routers
 app.include_router(health.router, prefix="/api/v1", tags=["Health"])

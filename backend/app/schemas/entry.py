@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 from pydantic import BaseModel, Field
 
@@ -14,8 +15,8 @@ class EntryUpsert(BaseModel):
 
 
 class EntryResponse(BaseModel):
-    id: str
-    tracker_id: str
+    id: uuid.UUID
+    tracker_id: uuid.UUID
     date: datetime.date
     value_numeric: float | None
     value_numeric2: float | None
@@ -35,7 +36,7 @@ class DailyTrackerEntry(BaseModel):
 
 
 class TrackerBrief(BaseModel):
-    id: str
+    id: uuid.UUID
     name: str
     icon: str | None
     color: str | None

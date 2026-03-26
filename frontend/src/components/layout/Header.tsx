@@ -26,9 +26,9 @@ export function Header() {
       {/* Mobile: logo */}
       <div className="flex items-center gap-2 lg:hidden">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
-          T
+          LP
         </div>
-        <span className="font-bold">myTracker</span>
+        <span className="font-bold">LifePulse</span>
       </div>
 
       {/* Desktop: empty left space */}

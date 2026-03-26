@@ -1,8 +1,10 @@
+import uuid
+
 from pydantic import BaseModel
 
 
 class TemplateResponse(BaseModel):
-    id: str
+    id: uuid.UUID
     name: str
     icon: str | None
     color: str | None

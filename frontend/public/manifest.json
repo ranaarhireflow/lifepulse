@@ -1,7 +1,7 @@
 {
-  "name": "myTracker - Personal Tracker",
-  "short_name": "myTracker",
-  "description": "Track anything. See your progress. Build better habits.",
+  "name": "LifePulse — Track Your Day",
+  "short_name": "LifePulse",
+  "description": "Track anything. Build streaks. See your progress. Your life, one tap at a time.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",

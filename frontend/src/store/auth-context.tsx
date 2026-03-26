@@ -58,6 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   id_token: token,
                 })
                 setUser(res.data)
+                // Auto-detect and sync timezone
+                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+                if (res.data.timezone !== tz) {
+                  api.patch("/auth/me", { timezone: tz }).catch(() => {})
+                }
               } catch {
                 setUser(null)
               }

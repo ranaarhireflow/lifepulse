@@ -48,7 +48,7 @@ self.addEventListener("fetch", (event) => {
 
 // Push notifications
 self.addEventListener("push", (event) => {
-  let data = { title: "myTracker", body: "Time to log your tracker!" };
+  let data = { title: "LifePulse", body: "Time to log your tracker!" };
 
   try {
     data = event.data.json();

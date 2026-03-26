@@ -57,7 +57,7 @@ export function SettingsPage() {
     const permission = await Notification.requestPermission()
     setNotifPermission(permission)
     if (permission === "granted") {
-      new Notification("myTracker", {
+      new Notification("LifePulse", {
         body: "Notifications enabled! You'll receive reminders for your trackers.",
         icon: "/favicon.svg",
       })
@@ -191,7 +191,7 @@ export function SettingsPage() {
             Install App
           </CardTitle>
           <CardDescription>
-            Install myTracker on your device for a native app experience
+            Install LifePulse on your device for a native app experience
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -246,7 +246,7 @@ export function SettingsPage() {
 
       {/* Version */}
       <p className="text-center text-xs text-muted-foreground pb-4">
-        myTracker v1.0.0 — Track anything, anywhere
+        LifePulse v1.0.0 — Track anything, anywhere
       </p>
 
       {/* Delete confirmation */}

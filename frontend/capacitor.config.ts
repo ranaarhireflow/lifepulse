@@ -2,7 +2,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "app.mypersonaltracker.tracker",
-  appName: "myTracker",
+  appName: "LifePulse",
   webDir: "dist",
   server: {
     // For development: point to Vite dev server

@@ -26,7 +26,7 @@ def list_entries(
     date_from: datetime.date | None = Query(None, alias="from"),
     date_to: datetime.date | None = Query(None, alias="to"),
 ):
-    query = db.query(Entry).filter(Entry.user_id == user.id)
+    query = db.query(Entry).filter(Entry.user_id == user.id, Entry.is_active == True)
 
     if date:
         query = query.filter(Entry.date == date)
@@ -127,11 +127,13 @@ def upsert_entry(
     if entry:
         for field, value in data.model_dump(exclude_unset=True).items():
             setattr(entry, field, value)
+        entry.logged_timezone = user.timezone
     else:
         entry = Entry(
             tracker_id=tracker_id,
             user_id=user.id,
             date=date,
+            logged_timezone=user.timezone,
             **data.model_dump(exclude_unset=True),
         )
         db.add(entry)
@@ -155,5 +157,8 @@ def delete_entry(
     ).first()
     if not entry:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entry not found")
-    db.delete(entry)
+    # Soft delete
+    from datetime import timezone as tz
+    entry.is_active = False
+    entry.deleted_at = datetime.datetime.now(tz.utc)
     db.commit()

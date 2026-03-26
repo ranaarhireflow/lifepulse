@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 from pydantic import BaseModel
 
@@ -11,7 +12,7 @@ class DataPoint(BaseModel):
 
 
 class TrackerAnalytics(BaseModel):
-    tracker_id: str
+    tracker_id: uuid.UUID
     tracker_name: str
     tracker_type: str
     unit: str | None
@@ -32,5 +33,5 @@ class HeatmapDay(BaseModel):
 
 
 class HeatmapData(BaseModel):
-    tracker_id: str
+    tracker_id: uuid.UUID
     days: list[HeatmapDay]
