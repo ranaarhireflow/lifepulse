@@ -9,20 +9,20 @@ interface TrackerCardProps {
   onUpdate: (data: Partial<Entry>) => void
 }
 
-// Dark mode: rich gradients. Light mode: soft pastel tints
+// Dark mode: rich gradients. Light mode: vivid pastels
 const COLORS: Record<string, { dark: string; light: string; iconBg: string }> = {
-  "💧": { dark: "from-blue-800/60 via-blue-900/40 to-cyan-900/50", light: "from-blue-50 to-cyan-50", iconBg: "bg-blue-100 dark:bg-black/25" },
-  "🏋️": { dark: "from-orange-800/60 via-amber-900/40 to-yellow-900/50", light: "from-orange-50 to-amber-50", iconBg: "bg-orange-100 dark:bg-black/25" },
-  "🧠": { dark: "from-violet-800/60 via-purple-900/40 to-indigo-900/50", light: "from-violet-50 to-purple-50", iconBg: "bg-violet-100 dark:bg-black/25" },
-  "📖": { dark: "from-emerald-800/60 via-green-900/40 to-teal-900/50", light: "from-emerald-50 to-green-50", iconBg: "bg-emerald-100 dark:bg-black/25" },
-  "⚖️": { dark: "from-indigo-800/60 via-blue-900/40 to-violet-900/50", light: "from-indigo-50 to-blue-50", iconBg: "bg-indigo-100 dark:bg-black/25" },
-  "🌙": { dark: "from-slate-800/60 via-indigo-900/40 to-blue-900/50", light: "from-slate-50 to-indigo-50", iconBg: "bg-slate-100 dark:bg-black/25" },
-  "🪥": { dark: "from-teal-800/60 via-cyan-900/40 to-sky-900/50", light: "from-teal-50 to-cyan-50", iconBg: "bg-teal-100 dark:bg-black/25" },
-  "❤️": { dark: "from-red-800/60 via-rose-900/40 to-pink-900/50", light: "from-red-50 to-pink-50", iconBg: "bg-red-100 dark:bg-black/25" },
-  "🌅": { dark: "from-amber-800/60 via-orange-900/40 to-red-900/50", light: "from-amber-50 to-orange-50", iconBg: "bg-amber-100 dark:bg-black/25" },
-  "🔥": { dark: "from-red-800/60 via-orange-900/40 to-amber-900/50", light: "from-red-50 to-orange-50", iconBg: "bg-red-100 dark:bg-black/25" },
-  "🏃": { dark: "from-teal-800/60 via-emerald-900/40 to-green-900/50", light: "from-teal-50 to-emerald-50", iconBg: "bg-teal-100 dark:bg-black/25" },
-  "💓": { dark: "from-pink-800/60 via-rose-900/40 to-red-900/50", light: "from-pink-50 to-rose-50", iconBg: "bg-pink-100 dark:bg-black/25" },
+  "💧": { dark: "from-blue-800/60 via-blue-900/40 to-cyan-900/50", light: "from-blue-100 to-cyan-100", iconBg: "bg-blue-200 dark:bg-black/25" },
+  "🏋️": { dark: "from-orange-800/60 via-amber-900/40 to-yellow-900/50", light: "from-orange-100 to-amber-100", iconBg: "bg-orange-200 dark:bg-black/25" },
+  "🧠": { dark: "from-violet-800/60 via-purple-900/40 to-indigo-900/50", light: "from-violet-100 to-purple-100", iconBg: "bg-violet-200 dark:bg-black/25" },
+  "📖": { dark: "from-emerald-800/60 via-green-900/40 to-teal-900/50", light: "from-emerald-100 to-green-100", iconBg: "bg-emerald-200 dark:bg-black/25" },
+  "⚖️": { dark: "from-indigo-800/60 via-blue-900/40 to-violet-900/50", light: "from-indigo-100 to-blue-100", iconBg: "bg-indigo-200 dark:bg-black/25" },
+  "🌙": { dark: "from-slate-800/60 via-indigo-900/40 to-blue-900/50", light: "from-slate-100 to-indigo-100", iconBg: "bg-slate-200 dark:bg-black/25" },
+  "🪥": { dark: "from-teal-800/60 via-cyan-900/40 to-sky-900/50", light: "from-teal-100 to-cyan-100", iconBg: "bg-teal-200 dark:bg-black/25" },
+  "❤️": { dark: "from-red-800/60 via-rose-900/40 to-pink-900/50", light: "from-red-100 to-pink-100", iconBg: "bg-red-200 dark:bg-black/25" },
+  "🌅": { dark: "from-amber-800/60 via-orange-900/40 to-red-900/50", light: "from-amber-100 to-orange-100", iconBg: "bg-amber-200 dark:bg-black/25" },
+  "🔥": { dark: "from-red-800/60 via-orange-900/40 to-amber-900/50", light: "from-red-100 to-orange-100", iconBg: "bg-red-200 dark:bg-black/25" },
+  "🏃": { dark: "from-teal-800/60 via-emerald-900/40 to-green-900/50", light: "from-teal-100 to-emerald-100", iconBg: "bg-teal-200 dark:bg-black/25" },
+  "💓": { dark: "from-pink-800/60 via-rose-900/40 to-red-900/50", light: "from-pink-100 to-rose-100", iconBg: "bg-pink-200 dark:bg-black/25" },
 }
 
 const DEFAULT_COLORS = { dark: "from-[#1A3520]/60 via-[#162B1E]/40 to-[#111A14]/50", light: "from-green-50 to-emerald-50", iconBg: "bg-green-100 dark:bg-black/25" }
