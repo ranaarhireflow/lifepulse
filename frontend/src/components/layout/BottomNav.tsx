@@ -1,26 +1,26 @@
 import { NavLink } from "react-router-dom"
-import { LayoutGrid, Activity, Zap, Settings } from "lucide-react"
+import { LayoutGrid, TrendingUp, Zap, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const NAV_ITEMS = [
+const TABS = [
   { to: "/", icon: LayoutGrid, label: "Today" },
-  { to: "/trackers", icon: Activity, label: "Pulses" },
+  { to: "/progress", icon: TrendingUp, label: "Progress" },
   { to: "/score", icon: Zap, label: "Score" },
-  { to: "/settings", icon: Settings, label: "Settings" },
+  { to: "/profile", icon: User, label: "Profile" },
 ]
 
-export function BottomNav({ className }: { className?: string }) {
+export function BottomNav() {
   return (
-    <nav className={cn("fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 backdrop-blur-xl safe-area-bottom", className)}>
-      <div className="flex items-center justify-around py-2 px-4">
-        {NAV_ITEMS.map((item) => (
-          <NavLink key={item.to} to={item.to} end={item.to === "/"}
-            className={({ isActive }) =>
-              cn("flex flex-col items-center gap-0.5 py-1 px-4 rounded-xl transition-all",
-                isActive ? "text-primary" : "text-muted-foreground")
-            }>
-            <item.icon className="h-5 w-5" />
-            <span className="text-[10px] font-semibold">{item.label}</span>
+    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-32px)] max-w-lg">
+      <div className="flex items-center justify-around rounded-2xl bg-card/80 backdrop-blur-xl border border-border py-2 px-2 shadow-2xl">
+        {TABS.map((tab) => (
+          <NavLink key={tab.to} to={tab.to} end={tab.to === "/"}
+            className={({ isActive }) => cn(
+              "flex flex-col items-center gap-0.5 py-2 px-5 rounded-xl transition-all",
+              isActive ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
+            )}>
+            <tab.icon className="h-5 w-5" />
+            <span className="text-[10px] font-semibold">{tab.label}</span>
           </NavLink>
         ))}
       </div>

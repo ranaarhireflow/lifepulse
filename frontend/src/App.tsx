@@ -31,12 +31,13 @@ export default function App() {
                 }
               >
                 <Route index element={<DailyPage />} />
+                <Route path="progress" element={<TrackerDetailPage />} />
+                <Route path="score" element={<MonkScorePage />} />
+                <Route path="achievements" element={<AchievementsPage />} />
+                <Route path="profile" element={<SettingsPage />} />
                 <Route path="trackers" element={<TrackersPage />} />
                 <Route path="trackers/new" element={<TrackerCreatePage />} />
                 <Route path="trackers/:id" element={<TrackerDetailPage />} />
-                <Route path="score" element={<MonkScorePage />} />
-                <Route path="achievements" element={<AchievementsPage />} />
-                <Route path="settings" element={<SettingsPage />} />
               </Route>
             </Routes>
           </TooltipProvider>
