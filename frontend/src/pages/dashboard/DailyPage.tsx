@@ -195,8 +195,11 @@ export function DailyPage() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card p-14 text-center">
           <Sparkles className="h-10 w-10 text-primary mb-4" />
           <h3 className="text-lg font-extrabold text-white mb-1">Begin Your Journey</h3>
-          <p className="mb-5 text-muted-foreground text-sm">Create your first pulse to start monk mode.</p>
-          <NavLink to="/trackers/new"><Button className="gap-2 rounded-xl px-6"><Plus className="h-4 w-4" />Create First Pulse</Button></NavLink>
+          <p className="mb-5 text-muted-foreground text-sm max-w-xs">Take the monk quiz to discover your personalized plan, or create pulses manually.</p>
+          <div className="flex gap-3">
+            <NavLink to="/quiz"><Button className="gap-2 rounded-xl px-6"><Sparkles className="h-4 w-4" />Take the Quiz</Button></NavLink>
+            <NavLink to="/trackers/new"><Button variant="outline" className="gap-2 rounded-xl px-6"><Plus className="h-4 w-4" />Create Manually</Button></NavLink>
+          </div>
         </motion.div>
       )}
     </div>

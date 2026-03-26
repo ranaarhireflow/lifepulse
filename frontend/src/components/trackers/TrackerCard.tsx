@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { Flame, ChevronRight, Star } from "lucide-react"
+import { Flame, Star } from "lucide-react"
 import { EntryInput } from "@/components/entries/EntryInput"
 import { NavLink } from "react-router-dom"
 import type { DailyTrackerEntry, Entry } from "@/services/trackers"
@@ -10,59 +10,91 @@ interface TrackerCardProps {
 }
 
 const GRADIENTS: Record<string, string> = {
-  "💧": "from-blue-900/40 to-cyan-900/30",
-  "🏋️": "from-orange-900/40 to-amber-900/30",
-  "🧠": "from-violet-900/40 to-purple-900/30",
-  "📖": "from-emerald-900/40 to-green-900/30",
-  "⚖️": "from-indigo-900/40 to-blue-900/30",
-  "🌙": "from-indigo-900/40 to-slate-900/30",
-  "🪥": "from-teal-900/40 to-cyan-900/30",
-  "❤️": "from-red-900/40 to-pink-900/30",
-  "🌅": "from-amber-900/40 to-orange-900/30",
-  "🔥": "from-red-900/40 to-orange-900/30",
-  "🏃": "from-teal-900/40 to-emerald-900/30",
-  "💓": "from-pink-900/40 to-rose-900/30",
+  "💧": "from-blue-800/60 via-blue-900/40 to-cyan-900/50",
+  "🏋️": "from-orange-800/60 via-amber-900/40 to-yellow-900/50",
+  "🧠": "from-violet-800/60 via-purple-900/40 to-indigo-900/50",
+  "📖": "from-emerald-800/60 via-green-900/40 to-teal-900/50",
+  "⚖️": "from-indigo-800/60 via-blue-900/40 to-violet-900/50",
+  "🌙": "from-slate-800/60 via-indigo-900/40 to-blue-900/50",
+  "🪥": "from-teal-800/60 via-cyan-900/40 to-sky-900/50",
+  "❤️": "from-red-800/60 via-rose-900/40 to-pink-900/50",
+  "🌅": "from-amber-800/60 via-orange-900/40 to-red-900/50",
+  "🔥": "from-red-800/60 via-orange-900/40 to-amber-900/50",
+  "🏃": "from-teal-800/60 via-emerald-900/40 to-green-900/50",
+  "💓": "from-pink-800/60 via-rose-900/40 to-red-900/50",
 }
 
 export function TrackerCard({ data, onUpdate }: TrackerCardProps) {
   const { tracker, entry, default_value } = data
   const hasValue = entry !== null
-  const gradient = GRADIENTS[tracker.icon || ""] || "from-[#1A2E1F] to-[#162B1E]"
+  const gradient = GRADIENTS[tracker.icon || ""] || "from-[#1A3520]/60 via-[#162B1E]/40 to-[#111A14]/50"
   const metaText = tracker.unit || (tracker.type === "BOOLEAN" ? "yes / no" : tracker.type === "TIME" ? "time" : tracker.type === "DURATION" ? "hours" : "")
 
   return (
-    <motion.div layout className={`relative overflow-hidden rounded-2xl border transition-all ${hasValue ? "border-primary/20 opacity-75" : "border-border hover:border-primary/30"}`}>
-      <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
-      <div className="relative flex items-center gap-3 px-4 py-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-black/20 text-[22px] backdrop-blur-sm">
-          {tracker.icon || "📊"}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <p className="text-[15px] font-bold text-white truncate">{tracker.name}</p>
-            <span className="flex items-center gap-0.5 text-[11px] font-bold text-amber-400">
-              <Flame className="h-3 w-3" />3
-            </span>
+    <NavLink to={`/trackers/${tracker.id}`}>
+      <motion.div
+        layout
+        whileTap={{ scale: 0.98 }}
+        className={`relative overflow-hidden rounded-2xl border transition-all cursor-pointer ${
+          hasValue ? "border-primary/30" : "border-white/5 hover:border-white/10"
+        }`}
+      >
+        {/* Gradient bg */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
+
+        {/* Content */}
+        <div className="relative p-5">
+          {/* Top row: icon + name + streak */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-black/30 text-[28px] backdrop-blur-sm shadow-lg">
+                {tracker.icon || "📊"}
+              </div>
+              <div>
+                <h3 className="text-[18px] font-extrabold text-white tracking-tight">{tracker.name}</h3>
+                <p className="text-[12px] text-white/40 mt-0.5">
+                  {tracker.target_value ? `${metaText} · target ${tracker.target_value}` : metaText}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 bg-black/20 rounded-lg px-2 py-1 backdrop-blur-sm">
+              <Flame className="h-3.5 w-3.5 text-amber-400" />
+              <span className="text-[12px] font-bold text-amber-400">3</span>
+            </div>
           </div>
-          <p className="text-[11px] text-white/40 mt-0.5">
-            {tracker.target_value ? `${metaText} · target ${tracker.target_value}` : metaText}
-          </p>
-          <div className="flex gap-0.5 mt-1">
+
+          {/* Difficulty stars */}
+          <div className="flex gap-1 mb-4">
             {[1, 2, 3, 4, 5].map((s) => (
-              <Star key={s} className={`h-2.5 w-2.5 ${s <= 1 ? "text-amber-400 fill-amber-400" : "text-white/15"}`} />
+              <Star key={s} className={`h-3 w-3 ${s <= 1 ? "text-amber-400 fill-amber-400" : "text-white/10"}`} />
             ))}
+            <span className="text-[10px] text-white/30 ml-1">Repeat: Everyday</span>
+          </div>
+
+          {/* Input area */}
+          <div className="flex items-center justify-between" onClick={(e) => e.preventDefault()}>
+            <div className="text-[11px] text-white/30">
+              {hasValue ? "✓ Logged" : "Swipe or tap to log"}
+            </div>
+            <EntryInput
+              type={tracker.type}
+              unit={tracker.unit}
+              unitSecondary={tracker.unit_secondary}
+              entry={entry}
+              defaultValue={default_value}
+              color={tracker.color}
+              onUpdate={onUpdate}
+            />
           </div>
         </div>
-        <EntryInput type={tracker.type} unit={tracker.unit} unitSecondary={tracker.unit_secondary} entry={entry} defaultValue={default_value} color={tracker.color} onUpdate={onUpdate} />
-        <NavLink to={`/trackers/${tracker.id}`} className="shrink-0 text-white/20 hover:text-white/50 transition-colors" onClick={(e) => e.stopPropagation()}>
-          <ChevronRight className="h-4 w-4" />
-        </NavLink>
-      </div>
-      {hasValue && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-primary/5 pointer-events-none flex items-center justify-end pr-20">
-          <span className="text-[28px] opacity-15">✓</span>
-        </motion.div>
-      )}
-    </motion.div>
+
+        {/* Completed overlay */}
+        {hasValue && (
+          <div className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-primary/80 backdrop-blur-sm">
+            <span className="text-[14px] text-white font-bold">✓</span>
+          </div>
+        )}
+      </motion.div>
+    </NavLink>
   )
 }
