@@ -82,7 +82,7 @@ export function DailyPage() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
             <motion.div initial={{ scale: 0.8, y: 20 }} animate={{ scale: 1, y: 0 }} className="flex flex-col items-center gap-3 rounded-2xl bg-card p-8 shadow-2xl border border-primary/20">
               <Trophy className="h-14 w-14 text-amber-400" />
-              <h2 className="text-xl font-extrabold text-white">All Pulses Logged!</h2>
+              <h2 className="text-xl font-extrabold text-foreground">All Pulses Logged!</h2>
               <p className="text-muted-foreground text-sm">Monk mode activated. XP gained.</p>
             </motion.div>
           </motion.div>
@@ -98,7 +98,7 @@ export function DailyPage() {
       <div className="flex items-start justify-between">
         <div>
           <p className="text-[13px] text-muted-foreground">{getGreeting()}</p>
-          <h1 className="text-[28px] font-extrabold tracking-tight text-white leading-tight">
+          <h1 className="text-[28px] font-extrabold tracking-tight text-foreground leading-tight">
             {isToday(selectedDate) ? "Today" : isYesterday(selectedDate) ? "Yesterday" : format(selectedDate, "EEEE")}
           </h1>
           <p className="text-[12px] text-muted-foreground">{format(selectedDate, "MMMM d, yyyy")}</p>
@@ -174,7 +174,7 @@ export function DailyPage() {
       {!loading && !error && dailyData.length === 0 && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card p-14 text-center">
           <Sparkles className="h-10 w-10 text-primary mb-4" />
-          <h3 className="text-lg font-extrabold text-white mb-1">Begin Your Journey</h3>
+          <h3 className="text-lg font-extrabold text-foreground mb-1">Begin Your Journey</h3>
           <p className="mb-5 text-muted-foreground text-sm max-w-xs">Take the monk quiz to discover your personalized plan, or create pulses manually.</p>
           <div className="flex gap-3">
             <NavLink to="/quiz"><Button className="gap-2 rounded-xl px-6"><Sparkles className="h-4 w-4" />Take the Quiz</Button></NavLink>

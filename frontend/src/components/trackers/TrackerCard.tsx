@@ -36,11 +36,12 @@ export function TrackerCard({ data, onUpdate }: TrackerCardProps) {
         layout
         whileTap={{ scale: 0.98 }}
         className={`relative overflow-hidden rounded-2xl border transition-all cursor-pointer ${
-          hasValue ? "border-primary/30" : "border-white/5 hover:border-white/10"
+          hasValue ? "border-primary/30" : "border-border hover:border-primary/20"
         }`}
       >
-        {/* Gradient bg */}
-        <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
+        {/* Gradient bg — visible in dark, subtle in light */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${gradient} dark:opacity-100`} />
+        <div className="absolute inset-0 bg-card light:opacity-90 dark:opacity-0" />
 
         {/* Content */}
         <div className="relative px-4 py-3.5">
@@ -51,8 +52,8 @@ export function TrackerCard({ data, onUpdate }: TrackerCardProps) {
                 {tracker.icon || "📊"}
               </div>
               <div>
-                <h3 className="text-[15px] font-bold text-white tracking-tight">{tracker.name}</h3>
-                <p className="text-[12px] text-white/40 mt-0.5">
+                <h3 className="text-[15px] font-bold text-foreground tracking-tight">{tracker.name}</h3>
+                <p className="text-[12px] text-muted-foreground mt-0.5">
                   {tracker.target_value ? `${metaText} · target ${tracker.target_value}` : metaText}
                 </p>
               </div>
@@ -66,14 +67,14 @@ export function TrackerCard({ data, onUpdate }: TrackerCardProps) {
           {/* Difficulty stars */}
           <div className="flex gap-1 mb-2.5">
             {[1, 2, 3, 4, 5].map((s) => (
-              <Star key={s} className={`h-3 w-3 ${s <= 1 ? "text-amber-400 fill-amber-400" : "text-white/10"}`} />
+              <Star key={s} className={`h-3 w-3 ${s <= 1 ? "text-amber-400 fill-amber-400" : "text-muted-foreground/30"}`} />
             ))}
-            <span className="text-[10px] text-white/30 ml-1">Repeat: Everyday</span>
+            <span className="text-[10px] text-muted-foreground ml-1">Repeat: Everyday</span>
           </div>
 
           {/* Input area */}
           <div className="flex items-center justify-between" onClick={(e) => e.preventDefault()}>
-            <div className="text-[11px] text-white/30">
+            <div className="text-[11px] text-muted-foreground">
               {hasValue ? "✓ Logged" : "Swipe or tap to log"}
             </div>
             <EntryInput

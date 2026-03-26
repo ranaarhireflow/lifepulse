@@ -42,7 +42,7 @@ export function MonkScorePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[28px] font-extrabold tracking-tight text-white">Monk Score</h1>
+        <h1 className="text-[28px] font-extrabold tracking-tight text-foreground">Monk Score</h1>
         <p className="text-[13px] text-muted-foreground">Your journey to monk mode</p>
       </div>
 
@@ -50,7 +50,7 @@ export function MonkScorePage() {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
         className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/15 to-primary/5 p-6">
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-foreground">
             <span className="text-[24px] font-extrabold">{score.level}</span>
           </div>
           <div className="flex-1">
@@ -85,7 +85,7 @@ export function MonkScorePage() {
               <dim.icon className="h-5 w-5 shrink-0" style={{ color: dim.color }} />
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[13px] font-bold text-white">{dim.label}</span>
+                  <span className="text-[13px] font-bold text-foreground">{dim.label}</span>
                   <span className="text-[15px] font-extrabold" style={{ color: dim.color }}>{val}</span>
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/30">

@@ -1,9 +1,10 @@
 import { NavLink } from "react-router-dom"
-import { LayoutGrid, Activity, Zap, Trophy, Settings, Plus, LogOut } from "lucide-react"
+import { LayoutGrid, Activity, Zap, Trophy, Settings, Plus, LogOut, Sun, Moon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { BRAND } from "@/lib/brand"
 import { PulseLogo } from "@/components/common/PulseLogo"
 import { useAuth } from "@/store/auth-context"
+import { useTheme } from "@/hooks/useTheme"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const NAV_ITEMS = [
@@ -15,6 +16,7 @@ const NAV_ITEMS = [
 
 export function Sidebar({ className }: { className?: string }) {
   const { user, signOut } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const initials = user?.display_name?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?"
 
   return (
@@ -61,6 +63,11 @@ export function Sidebar({ className }: { className?: string }) {
           }>
           <Settings className="h-[20px] w-[20px]" />
         </NavLink>
+
+        <button onClick={toggleTheme} title={theme === "dark" ? "Switch to light" : "Switch to dark"}
+          className="flex h-11 w-11 items-center justify-center rounded-xl text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all">
+          {theme === "dark" ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
+        </button>
 
         <button onClick={signOut} title="Sign out"
           className="flex h-11 w-11 items-center justify-center rounded-xl text-white/20 hover:text-red-400 hover:bg-red-400/10 transition-all">

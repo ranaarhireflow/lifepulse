@@ -39,7 +39,7 @@ export function AchievementsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[28px] font-extrabold tracking-tight text-white">Achievements</h1>
+        <h1 className="text-[28px] font-extrabold tracking-tight text-foreground">Achievements</h1>
         <p className="text-[13px] text-muted-foreground">
           <span className="text-primary font-bold">{unlocked}</span> of {achievements.length} unlocked
         </p>
