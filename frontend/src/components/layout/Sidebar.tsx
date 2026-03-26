@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { NavLink } from "react-router-dom"
 import {
   LayoutGrid,
@@ -5,6 +6,8 @@ import {
   BarChart3,
   Settings,
   Plus,
+  PanelLeftClose,
+  PanelLeft,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { BRAND } from "@/lib/brand"
@@ -18,25 +21,48 @@ const NAV_ITEMS = [
 ]
 
 export function Sidebar({ className }: { className?: string }) {
+  const [collapsed, setCollapsed] = useState(false)
+
   return (
     <aside
       className={cn(
-        "w-[248px] flex-col bg-[#0F1F17] p-4 text-white",
+        "flex-col bg-[#0F1F17] transition-all duration-300",
+        collapsed ? "w-[68px] p-3" : "w-[248px] p-4",
         className
       )}
     >
-      {/* Logo */}
-      <div className="mb-10 flex items-center gap-3 px-2.5 pt-2">
-        <PulseLogo size={40} />
-        <div>
-          <h1 className="text-[19px] font-extrabold tracking-tight">{BRAND.name}</h1>
-          <p className="text-[8.5px] font-bold uppercase tracking-[2px] text-white/35">
-            {BRAND.tagline}
-          </p>
+      {/* Logo + Collapse */}
+      <div className={cn("flex items-center mb-8", collapsed ? "justify-center pt-1" : "gap-3 px-2.5 pt-2 justify-between")}>
+        <div className="flex items-center gap-3">
+          <PulseLogo size={collapsed ? 36 : 40} />
+          {!collapsed && (
+            <div>
+              <h1 className="text-[19px] font-extrabold tracking-tight text-white">{BRAND.name}</h1>
+              <p className="text-[8.5px] font-bold uppercase tracking-[2px] text-white/35">{BRAND.tagline}</p>
+            </div>
+          )}
         </div>
+        {!collapsed && (
+          <button
+            onClick={() => setCollapsed(true)}
+            className="rounded-lg p-1.5 text-white/25 hover:text-white/50 hover:bg-white/5 transition-all"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
-      {/* Nav links */}
+      {/* Expand button when collapsed */}
+      {collapsed && (
+        <button
+          onClick={() => setCollapsed(false)}
+          className="flex w-full items-center justify-center rounded-lg p-2 mb-4 text-white/30 hover:text-white/60 hover:bg-white/5 transition-all"
+        >
+          <PanelLeft className="h-4 w-4" />
+        </button>
+      )}
+
+      {/* Nav */}
       <nav className="flex flex-1 flex-col gap-0.5">
         {NAV_ITEMS.map((item) => (
           <NavLink
@@ -45,55 +71,60 @@ export function Sidebar({ className }: { className?: string }) {
             end={item.end}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 rounded-[10px] px-3.5 py-2.5 text-[13.5px] font-semibold transition-all duration-200",
+                "flex items-center rounded-[10px] text-[13.5px] font-semibold transition-all duration-200",
+                collapsed ? "justify-center p-2.5" : "gap-3 px-3.5 py-2.5",
                 isActive
                   ? "bg-white/[0.12] text-[#22C55E]"
                   : "text-white/40 hover:bg-white/[0.06] hover:text-white/65"
               )
             }
+            title={collapsed ? item.label : undefined}
           >
-            <item.icon className="h-[18px] w-[18px]" />
-            {item.label}
+            <item.icon className="h-[18px] w-[18px] shrink-0" />
+            {!collapsed && item.label}
           </NavLink>
         ))}
       </nav>
 
-      {/* Bottom section */}
-      <div className="mt-auto space-y-4">
+      {/* Bottom */}
+      <div className="mt-auto pt-4 flex flex-col gap-5">
         <NavLink to="/trackers/new">
-          <button className="flex w-full items-center justify-center gap-2 rounded-[10px] border border-dashed border-white/20 bg-white/[0.08] px-4 py-2.5 text-[13px] font-bold text-white transition-all hover:bg-white/[0.14]">
-            <Plus className="h-4 w-4" />
-            New Pulse
+          <button className={cn(
+            "flex w-full items-center justify-center rounded-[10px] bg-primary text-primary-foreground font-bold transition-all hover:bg-[#15903F]",
+            collapsed ? "p-2.5" : "gap-2 px-4 py-2.5 text-[13px]"
+          )}>
+            <Plus className="h-4 w-4 shrink-0" />
+            {!collapsed && "New Pulse"}
           </button>
         </NavLink>
 
         {/* Streak card */}
-        <div className="rounded-[14px] border border-[#16A34A]/20 bg-[#16A34A]/10 p-4">
-          <div className="flex items-center justify-between">
+        <div className={cn(
+          "rounded-[14px] border border-[#16A34A]/20 bg-[#16A34A]/10",
+          collapsed ? "p-2.5 text-center" : "p-4"
+        )}>
+          {collapsed ? (
             <div>
-              <div className="text-[28px] font-extrabold leading-none text-[#22C55E]">
-                12
-              </div>
-              <div className="mt-1 text-[9px] font-bold uppercase tracking-[1.5px] text-white/30">
-                Day Streak
-              </div>
+              <span className="text-[18px]">🔥</span>
+              <div className="text-[16px] font-extrabold text-[#22C55E] mt-0.5">12</div>
             </div>
-            <span className="text-[24px]">🔥</span>
-          </div>
-          <div className="mt-3 flex gap-[3px]">
-            {Array.from({ length: 15 }).map((_, i) => (
-              <div
-                key={i}
-                className={cn(
-                  "h-[3px] flex-1 rounded-sm",
-                  i < 12 ? "bg-[#16A34A]" : "bg-white/10"
-                )}
-              />
-            ))}
-          </div>
-          <p className="mt-2 text-[10px] text-white/25">
-            3 more to beat your best!
-          </p>
+          ) : (
+            <>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-[28px] font-extrabold leading-none text-[#22C55E]">12</div>
+                  <div className="mt-1 text-[9px] font-bold uppercase tracking-[1.5px] text-white/30">Day Streak</div>
+                </div>
+                <span className="text-[24px]">🔥</span>
+              </div>
+              <div className="mt-3 flex gap-[3px]">
+                {Array.from({ length: 15 }).map((_, i) => (
+                  <div key={i} className={cn("h-[3px] flex-1 rounded-sm", i < 12 ? "bg-[#16A34A]" : "bg-white/10")} />
+                ))}
+              </div>
+              <p className="mt-2 text-[10px] text-white/25">3 more to beat your best!</p>
+            </>
+          )}
         </div>
       </div>
     </aside>

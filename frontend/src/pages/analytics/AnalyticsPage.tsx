@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { format, subDays } from "date-fns"
-import { BarChart3, Flame, Target, Loader2 } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import { BarChart3, Flame, Target, Loader2, ChevronRight } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
-import "react-circular-progressbar/dist/styles.css"
 import {
   fetchTrackers,
   fetchAnalytics,
@@ -13,11 +10,7 @@ import {
   type TrackerAnalytics,
 } from "@/services/trackers"
 
-const RANGES: Record<string, number> = {
-  "7d": 7,
-  "30d": 30,
-  "90d": 90,
-}
+const RANGES: Record<string, number> = { "7d": 7, "30d": 30, "90d": 90 }
 
 export function AnalyticsPage() {
   const navigate = useNavigate()
@@ -32,185 +25,128 @@ export function AnalyticsPage() {
       try {
         const tracks = await fetchTrackers()
         setTrackers(tracks)
-
         const days = RANGES[range] || 30
         const to = format(new Date(), "yyyy-MM-dd")
         const from = format(subDays(new Date(), days), "yyyy-MM-dd")
-
-        const results = await Promise.all(
-          tracks.map((t) => fetchAnalytics(t.id, from, to).catch(() => null))
-        )
-
+        const results = await Promise.all(tracks.map((t) => fetchAnalytics(t.id, from, to).catch(() => null)))
         const map: Record<string, TrackerAnalytics> = {}
-        results.forEach((r) => {
-          if (r) map[r.tracker_id] = r
-        })
+        results.forEach((r) => { if (r) map[r.tracker_id] = r })
         setAnalyticsMap(map)
-      } catch {
-        // Silently fail
-      } finally {
-        setLoading(false)
-      }
+      } catch { /* silent */ } finally { setLoading(false) }
     }
     load()
   }, [range])
 
-  // Overall stats
   const allAnalytics = Object.values(analyticsMap)
-  const avgCompletion =
-    allAnalytics.length > 0
-      ? Math.round(
-          allAnalytics.reduce((sum, a) => sum + a.completion_rate, 0) /
-            allAnalytics.length
-        )
-      : 0
-  const bestStreak = allAnalytics.reduce(
-    (max, a) => Math.max(max, a.current_streak),
-    0
-  )
-  const totalEntries = allAnalytics.reduce(
-    (sum, a) => sum + a.total_entries,
-    0
-  )
+  const avgCompletion = allAnalytics.length > 0
+    ? Math.round(allAnalytics.reduce((s, a) => s + a.completion_rate, 0) / allAnalytics.length)
+    : 0
+  const bestStreak = allAnalytics.reduce((m, a) => Math.max(m, a.current_streak), 0)
+  const totalEntries = allAnalytics.reduce((s, a) => s + a.total_entries, 0)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Analytics</h1>
-          <p className="text-sm text-muted-foreground">
-            Your tracking insights
-          </p>
+          <h1 className="text-[24px] font-extrabold tracking-tight">Analytics</h1>
+          <p className="text-[12px] text-muted-foreground">Your tracking insights</p>
         </div>
-        <Tabs value={range} onValueChange={setRange}>
-          <TabsList className="h-8">
-            <TabsTrigger value="7d" className="text-xs px-2.5 py-1">
-              Week
-            </TabsTrigger>
-            <TabsTrigger value="30d" className="text-xs px-2.5 py-1">
-              Month
-            </TabsTrigger>
-            <TabsTrigger value="90d" className="text-xs px-2.5 py-1">
-              3 Months
-            </TabsTrigger>
+        <Tabs value={range} onValueChange={(v) => v && setRange(v)}>
+          <TabsList className="h-8 bg-secondary">
+            <TabsTrigger value="7d" className="text-xs px-2.5 py-1">Week</TabsTrigger>
+            <TabsTrigger value="30d" className="text-xs px-2.5 py-1">Month</TabsTrigger>
+            <TabsTrigger value="90d" className="text-xs px-2.5 py-1">3 Mo</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
-      {loading && (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
-      )}
+      {loading && <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}
 
       {!loading && trackers.length === 0 && (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border p-12 text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
-            <BarChart3 className="h-8 w-8" />
-          </div>
-          <h3 className="text-lg font-semibold">No data yet</h3>
-          <p className="text-sm text-muted-foreground">
-            Start tracking to see analytics here.
-          </p>
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card p-12 text-center">
+          <BarChart3 className="h-8 w-8 text-primary mb-3" />
+          <h3 className="text-lg font-bold">No data yet</h3>
+          <p className="text-sm text-muted-foreground">Start tracking to see analytics.</p>
         </div>
       )}
 
       {!loading && trackers.length > 0 && (
         <>
-          {/* Overall summary */}
-          <div className="grid grid-cols-3 gap-3">
-            <Card>
-              <CardContent className="flex flex-col items-center p-4">
-                <div className="mb-2 h-16 w-16">
-                  <CircularProgressbar
-                    value={avgCompletion}
-                    text={`${avgCompletion}%`}
-                    styles={buildStyles({
-                      textSize: "24px",
-                      textColor: "var(--foreground)",
-                      pathColor: "#16A34A",
-                      trailColor: "var(--border)",
-                    })}
-                  />
+          {/* Summary — 3 stat cards */}
+          <div className="flex gap-2">
+            <div className="flex-1 rounded-xl border border-border bg-card p-4 text-center">
+              <div className="mx-auto mb-2 relative h-[52px] w-[52px]">
+                <svg viewBox="0 0 52 52" className="h-full w-full -rotate-90">
+                  <circle cx="26" cy="26" r="22" fill="none" stroke="var(--border)" strokeWidth="5" />
+                  <circle cx="26" cy="26" r="22" fill="none" stroke="#16A34A" strokeWidth="5" strokeLinecap="round"
+                    strokeDasharray="138.2" strokeDashoffset={138.2 - (138.2 * avgCompletion) / 100} />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[13px] font-extrabold">{avgCompletion}%</span>
                 </div>
-                <p className="text-xs text-muted-foreground">Avg Completion</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="flex flex-col items-center p-4">
-                <div className="mb-2 flex h-16 w-16 items-center justify-center">
-                  <Flame className="h-8 w-8 text-orange-500" />
-                </div>
-                <p className="text-2xl font-bold">{bestStreak}</p>
-                <p className="text-xs text-muted-foreground">Best Streak</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="flex flex-col items-center p-4">
-                <div className="mb-2 flex h-16 w-16 items-center justify-center">
-                  <Target className="h-8 w-8 text-primary" />
-                </div>
-                <p className="text-2xl font-bold">{totalEntries}</p>
-                <p className="text-xs text-muted-foreground">Total Entries</p>
-              </CardContent>
-            </Card>
+              </div>
+              <p className="text-[10px] text-muted-foreground font-semibold">Avg Completion</p>
+            </div>
+            <div className="flex-1 rounded-xl border border-border bg-card p-4 text-center">
+              <div className="flex items-center justify-center h-[52px] mb-2">
+                <Flame className="h-7 w-7 text-amber-600" />
+              </div>
+              <p className="text-[20px] font-extrabold text-[#1A3526]">{bestStreak}</p>
+              <p className="text-[10px] text-muted-foreground font-semibold">Best Streak</p>
+            </div>
+            <div className="flex-1 rounded-xl border border-border bg-card p-4 text-center">
+              <div className="flex items-center justify-center h-[52px] mb-2">
+                <Target className="h-7 w-7 text-primary" />
+              </div>
+              <p className="text-[20px] font-extrabold text-[#1A3526]">{totalEntries}</p>
+              <p className="text-[10px] text-muted-foreground font-semibold">Total Entries</p>
+            </div>
           </div>
 
-          {/* Per-tracker summary */}
-          <div className="space-y-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Per Pulse
-            </h2>
-            {trackers.map((tracker) => {
-              const a = analyticsMap[tracker.id]
-              if (!a) return null
-              const color = tracker.color || "#16A34A"
+          {/* Per Pulse */}
+          <div>
+            <h2 className="text-[11px] font-bold uppercase tracking-[1.5px] text-muted-foreground mb-2.5">Per Pulse</h2>
+            <div className="space-y-[6px]">
+              {trackers.map((tracker) => {
+                const a = analyticsMap[tracker.id]
+                if (!a) return null
 
-              return (
-                <Card
-                  key={tracker.id}
-                  className="cursor-pointer transition-shadow hover:shadow-md"
-                  onClick={() => navigate(`/trackers/${tracker.id}`)}
-                >
-                  <CardContent className="flex items-center gap-4 p-4">
-                    <div
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xl"
-                      style={{ backgroundColor: `${color}12` }}
-                    >
+                return (
+                  <div
+                    key={tracker.id}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 cursor-pointer hover:border-primary/20 hover:shadow-sm transition-all"
+                    onClick={() => navigate(`/trackers/${tracker.id}`)}
+                  >
+                    <div className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[10px] bg-accent text-lg">
                       {tracker.icon || "📊"}
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium">{tracker.name}</p>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-bold truncate">{tracker.name}</p>
+                      <div className="flex items-center gap-3 text-[10px] text-muted-foreground mt-0.5">
                         <span className="flex items-center gap-1">
-                          <Flame className="h-3 w-3" style={{ color }} />
+                          <Flame className="h-3 w-3 text-amber-600" />
                           {a.current_streak} streak
                         </span>
                         <span>{a.total_entries} entries</span>
-                        {a.average !== null && (
-                          <span>
-                            avg {a.average}
-                            {tracker.unit ? ` ${tracker.unit}` : ""}
-                          </span>
-                        )}
+                        {a.average !== null && <span>avg {a.average}{tracker.unit ? ` ${tracker.unit}` : ""}</span>}
                       </div>
                     </div>
-                    <div className="h-10 w-10 shrink-0">
-                      <CircularProgressbar
-                        value={a.completion_rate}
-                        text={`${Math.round(a.completion_rate)}%`}
-                        styles={buildStyles({
-                          textSize: "28px",
-                          textColor: "var(--foreground)",
-                          pathColor: color,
-                          trailColor: "var(--border)",
-                        })}
-                      />
+                    {/* Mini progress ring */}
+                    <div className="relative h-[36px] w-[36px] shrink-0">
+                      <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90">
+                        <circle cx="18" cy="18" r="14" fill="none" stroke="var(--border)" strokeWidth="3.5" />
+                        <circle cx="18" cy="18" r="14" fill="none" stroke="#16A34A" strokeWidth="3.5" strokeLinecap="round"
+                          strokeDasharray="88" strokeDashoffset={88 - (88 * a.completion_rate) / 100} />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-[9px] font-extrabold">{Math.round(a.completion_rate)}%</span>
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
+                    <ChevronRight className="h-4 w-4 text-muted-foreground/30 shrink-0" />
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </>
       )}
