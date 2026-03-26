@@ -103,18 +103,24 @@ export function DailyPage() {
           </h1>
           <p className="text-[12px] text-muted-foreground">{format(selectedDate, "MMMM d, yyyy")}</p>
         </div>
+        {/* Streak + Progress */}
         {!loading && totalTrackers > 0 && (
-          <div className="flex items-center gap-3 rounded-xl bg-primary/10 border border-primary/20 px-4 py-2.5">
-            <div className="relative h-[40px] w-[40px]">
-              <svg viewBox="0 0 40 40" className="h-full w-full -rotate-90">
-                <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
-                <circle cx="20" cy="20" r="16" fill="none" stroke="#22C55E" strokeWidth="4" strokeLinecap="round"
-                  strokeDasharray="100.5" strokeDashoffset={100.5 - (100.5 * completionPct) / 100} />
-              </svg>
+          <div className="flex items-center gap-2">
+            {/* Streak */}
+            <div className="flex items-center gap-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-2">
+              <Flame className="h-4 w-4 text-amber-400" />
+              <span className="text-[16px] font-extrabold text-amber-400">12</span>
             </div>
-            <div>
-              <div className="text-[18px] font-extrabold text-white leading-none">{completionPct}%</div>
-              <div className="text-[9px] text-white/40 font-semibold">{completedTrackers}/{totalTrackers} logged</div>
+            {/* Progress */}
+            <div className="flex items-center gap-2 rounded-xl bg-primary/10 border border-primary/20 px-3 py-2">
+              <div className="relative h-[28px] w-[28px]">
+                <svg viewBox="0 0 28 28" className="h-full w-full -rotate-90">
+                  <circle cx="14" cy="14" r="11" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
+                  <circle cx="14" cy="14" r="11" fill="none" stroke="#22C55E" strokeWidth="3" strokeLinecap="round"
+                    strokeDasharray="69.1" strokeDashoffset={69.1 - (69.1 * completionPct) / 100} />
+                </svg>
+              </div>
+              <span className="text-[14px] font-extrabold text-white">{completionPct}%</span>
             </div>
           </div>
         )}
