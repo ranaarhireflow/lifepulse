@@ -74,6 +74,7 @@ export function TrackerDetailPage() {
   const [analytics, setAnalytics] = useState<TrackerAnalytics | null>(null)
   const [heatmap, setHeatmap] = useState<HeatmapData | null>(null)
   const [range, setRange] = useState("30d")
+  const [heatmapRange, setHeatmapRange] = useState<"3m" | "6m" | "1y">("1y")
   const [loading, setLoading] = useState(true)
   const [configOpen, setConfigOpen] = useState(false)
   const [showAddAlert, setShowAddAlert] = useState(false)
@@ -109,18 +110,25 @@ export function TrackerDetailPage() {
     } catch { /* */ }
   }
 
-  // Initial load — tracker + heatmap (doesn't depend on range)
+  // Initial load — tracker only
   useEffect(() => {
     if (!id) return
     setLoading(true)
-    Promise.all([
-      fetchTracker(id),
-      fetchHeatmap(id, format(subYears(new Date(), 1), "yyyy-MM-dd"), format(new Date(), "yyyy-MM-dd")),
-    ])
-      .then(([t, h]) => { setTracker(t); setHeatmap(h) })
+    fetchTracker(id)
+      .then((t) => setTracker(t))
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [id])
+
+  // Heatmap — re-fetches when heatmapRange changes (no full page reload)
+  useEffect(() => {
+    if (!id) return
+    const now = new Date()
+    const from = heatmapRange === "3m" ? subDays(now, 90) : heatmapRange === "6m" ? subDays(now, 180) : subYears(now, 1)
+    fetchHeatmap(id, format(from, "yyyy-MM-dd"), format(now, "yyyy-MM-dd"))
+      .then((h) => setHeatmap(h))
+      .catch(() => {})
+  }, [id, heatmapRange])
 
   // Trend data — only re-fetches analytics when range changes (no full page reload)
   useEffect(() => {
@@ -455,10 +463,25 @@ export function TrackerDetailPage() {
       {/* GitHub-style heatmap */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Calendar className="h-4 w-4" />
-            Activity
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Calendar className="h-4 w-4" />
+              Activity
+            </CardTitle>
+            <div className="flex gap-1 rounded-lg bg-secondary p-0.5">
+              {([["3m", "3 Mo"], ["6m", "6 Mo"], ["1y", "Year"]] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setHeatmapRange(key)}
+                  className={`rounded-md px-2.5 py-1 text-[10px] font-bold transition-all ${
+                    heatmapRange === key ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           {heatmapActivities.length > 0 && (
