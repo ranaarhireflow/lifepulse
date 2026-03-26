@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { useNavigate, NavLink } from "react-router-dom"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -12,7 +10,18 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { ArrowLeft, Loader2, Sparkles } from "lucide-react"
+import {
+  ArrowLeft,
+  Loader2,
+  Plus,
+  Hash,
+  ToggleLeft,
+  Clock,
+  Timer,
+  FileText,
+  GitCommitHorizontal,
+} from "lucide-react"
+import { PulseLogo } from "@/components/common/PulseLogo"
 import {
   fetchTemplates,
   createFromTemplate,
@@ -21,12 +30,12 @@ import {
 } from "@/services/trackers"
 
 const TRACKER_TYPES = [
-  { value: "NUMERIC", label: "Number", desc: "Weight, pages, glasses" },
-  { value: "DUAL_NUMERIC", label: "Dual Number", desc: "Blood pressure (120/80)" },
-  { value: "BOOLEAN", label: "Yes / No", desc: "Gym, journaling" },
-  { value: "DURATION", label: "Duration", desc: "Deep work hours" },
-  { value: "TIME", label: "Time", desc: "Sleep time, wake time" },
-  { value: "TEXT", label: "Notes", desc: "Workout routine, gratitude" },
+  { value: "NUMERIC", label: "Number", desc: "Weight, pages, glasses", icon: Hash },
+  { value: "DUAL_NUMERIC", label: "Dual Number", desc: "Blood pressure (120/80)", icon: GitCommitHorizontal },
+  { value: "BOOLEAN", label: "Yes / No", desc: "Gym, journaling", icon: ToggleLeft },
+  { value: "DURATION", label: "Duration", desc: "Deep work hours", icon: Timer },
+  { value: "TIME", label: "Time", desc: "Sleep time, wake time", icon: Clock },
+  { value: "TEXT", label: "Notes", desc: "Workout routine, gratitude", icon: FileText },
 ]
 
 const DEFAULT_BEHAVIORS = [
@@ -48,6 +57,9 @@ const PRESET_ICONS = [
   "✍️", "📱", "🥗", "🚫", "🙏", "😊", "💰", "🪥",
   "🌙", "☕", "🎯", "💪", "🎵", "🌿", "🍎", "✨",
 ]
+
+const inputClasses =
+  "h-12 rounded-xl bg-card border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-[#22C55E] focus-visible:ring-2"
 
 export function TrackerCreatePage() {
   const navigate = useNavigate()
@@ -116,88 +128,111 @@ export function TrackerCreatePage() {
     {} as Record<string, TrackerTemplate[]>
   )
 
+  /* ───────── CUSTOM FORM ───────── */
   if (showCustomForm) {
     return (
-      <div className="space-y-6">
+      <div className="max-w-md mx-auto px-5 pt-6 pb-10 space-y-6">
+        {/* Back + header */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => setShowCustomForm(false)}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+          <button
+            onClick={() => setShowCustomForm(false)}
+            className="flex h-10 w-10 items-center justify-center rounded-2xl bg-card border border-border transition-colors hover:bg-secondary"
+          >
+            <ArrowLeft className="h-5 w-5 text-foreground" />
+          </button>
           <div>
-            <h1 className="text-2xl font-bold">Custom Tracker</h1>
+            <h1 className="text-2xl font-bold text-foreground">Custom Tracker</h1>
             <p className="text-sm text-muted-foreground">Configure your tracker</p>
           </div>
         </div>
 
-        <div className="space-y-5">
-          {/* Icon + Color picker */}
-          <div className="flex gap-6">
-            <div className="space-y-2">
-              <Label>Icon</Label>
-              <div className="grid grid-cols-8 gap-1.5">
-                {PRESET_ICONS.map((i) => (
-                  <button
-                    key={i}
-                    onClick={() => setIcon(i)}
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg text-lg transition-all ${
-                      icon === i
-                        ? "ring-2 ring-primary bg-accent scale-110"
-                        : "hover:bg-accent/50"
-                    }`}
-                  >
-                    {i}
-                  </button>
-                ))}
-              </div>
+        <div className="space-y-6">
+          {/* Icon picker */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold text-foreground">Icon</Label>
+            <div className="grid grid-cols-8 gap-2">
+              {PRESET_ICONS.map((i) => (
+                <button
+                  key={i}
+                  onClick={() => setIcon(i)}
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl text-xl transition-all ${
+                    icon === i
+                      ? "bg-[#22C55E]/15 ring-2 ring-[#22C55E] shadow-[0_0_12px_rgba(34,197,94,0.3)] scale-110"
+                      : "bg-card hover:bg-secondary"
+                  }`}
+                >
+                  {i}
+                </button>
+              ))}
             </div>
-            <div className="space-y-2">
-              <Label>Color</Label>
-              <div className="grid grid-cols-4 gap-1.5">
-                {PRESET_COLORS.map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setColor(c)}
-                    className={`h-8 w-8 rounded-lg transition-all ${
-                      color === c ? "ring-2 ring-foreground scale-110" : ""
-                    }`}
-                    style={{ backgroundColor: c }}
-                  />
-                ))}
-              </div>
+          </div>
+
+          {/* Color picker */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold text-foreground">Color</Label>
+            <div className="grid grid-cols-8 gap-2">
+              {PRESET_COLORS.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setColor(c)}
+                  className={`h-10 w-10 rounded-full transition-all ${
+                    color === c
+                      ? "ring-2 ring-[#22C55E] ring-offset-2 ring-offset-background scale-110"
+                      : "hover:scale-105"
+                  }`}
+                  style={{ backgroundColor: c }}
+                />
+              ))}
             </div>
           </div>
 
           {/* Name */}
           <div className="space-y-2">
-            <Label htmlFor="name">Tracker Name</Label>
+            <Label htmlFor="name" className="text-sm font-semibold text-foreground">
+              Tracker Name
+            </Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Water Intake, Push-ups, Mood..."
-              className="text-lg"
+              className={`${inputClasses} text-lg`}
             />
           </div>
 
-          {/* Type — grid selector */}
-          <div className="space-y-2">
-            <Label>Tracking Type</Label>
-            <div className="grid grid-cols-3 gap-2">
-              {TRACKER_TYPES.map((t) => (
-                <button
-                  key={t.value}
-                  type="button"
-                  onClick={() => setType(t.value)}
-                  className={`rounded-xl border p-3 text-left transition-all ${
-                    type === t.value
-                      ? "border-primary bg-primary/5 ring-1 ring-primary"
-                      : "border-border bg-card hover:border-primary/30"
-                  }`}
-                >
-                  <p className="text-[12px] font-bold">{t.label}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{t.desc}</p>
-                </button>
-              ))}
+          {/* Type — 2-column grid with icons */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold text-foreground">Tracking Type</Label>
+            <div className="grid grid-cols-2 gap-3">
+              {TRACKER_TYPES.map((t) => {
+                const Icon = t.icon
+                return (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => setType(t.value)}
+                    className={`flex items-center gap-3 rounded-2xl border p-4 text-left transition-all ${
+                      type === t.value
+                        ? "border-[#22C55E] bg-[#22C55E]/10 shadow-[0_0_16px_rgba(34,197,94,0.15)]"
+                        : "border-border bg-card hover:border-foreground/20"
+                    }`}
+                  >
+                    <div
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${
+                        type === t.value
+                          ? "bg-[#22C55E]/20 text-[#22C55E]"
+                          : "bg-secondary text-muted-foreground"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-bold text-foreground">{t.label}</p>
+                      <p className="text-[11px] text-muted-foreground leading-tight">{t.desc}</p>
+                    </div>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
@@ -205,7 +240,7 @@ export function TrackerCreatePage() {
           {(type === "NUMERIC" || type === "DUAL_NUMERIC") && (
             <div className="flex gap-4">
               <div className="flex-1 space-y-2">
-                <Label htmlFor="unit">
+                <Label htmlFor="unit" className="text-sm font-semibold text-foreground">
                   {type === "DUAL_NUMERIC" ? "First Unit" : "Unit"}
                 </Label>
                 <Input
@@ -213,16 +248,20 @@ export function TrackerCreatePage() {
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
                   placeholder="e.g., kg, pages, glasses"
+                  className={inputClasses}
                 />
               </div>
               {type === "DUAL_NUMERIC" && (
                 <div className="flex-1 space-y-2">
-                  <Label htmlFor="unit2">Second Unit</Label>
+                  <Label htmlFor="unit2" className="text-sm font-semibold text-foreground">
+                    Second Unit
+                  </Label>
                   <Input
                     id="unit2"
                     value={unitSecondary}
                     onChange={(e) => setUnitSecondary(e.target.value)}
                     placeholder="e.g., diastolic"
+                    className={inputClasses}
                   />
                 </div>
               )}
@@ -231,14 +270,14 @@ export function TrackerCreatePage() {
 
           {/* Default behavior */}
           <div className="space-y-2">
-            <Label>Default When Not Logged</Label>
+            <Label className="text-sm font-semibold text-foreground">Default When Not Logged</Label>
             <Select value={defaultBehavior} onValueChange={(v) => v && setDefaultBehavior(v)}>
-              <SelectTrigger>
-                <SelectValue />
+              <SelectTrigger className="h-12 w-full rounded-xl bg-card border-border text-foreground overflow-hidden focus:ring-[#22C55E]">
+                <span className="truncate"><SelectValue /></span>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-xl bg-card border-border">
                 {DEFAULT_BEHAVIORS.map((b) => (
-                  <SelectItem key={b.value} value={b.value}>
+                  <SelectItem key={b.value} value={b.value} className="text-sm">
                     {b.label}
                   </SelectItem>
                 ))}
@@ -249,123 +288,152 @@ export function TrackerCreatePage() {
           {/* Target value */}
           {type !== "TEXT" && type !== "BOOLEAN" && (
             <div className="space-y-2">
-              <Label htmlFor="target">Daily Target (optional)</Label>
+              <Label htmlFor="target" className="text-sm font-semibold text-foreground">
+                Daily Target (optional)
+              </Label>
               <Input
                 id="target"
                 type="number"
                 value={targetValue}
                 onChange={(e) => setTargetValue(e.target.value)}
                 placeholder="e.g., 8 glasses, 10000 steps"
+                className={inputClasses}
               />
             </div>
           )}
 
           {/* Reminder */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between rounded-xl border border-border bg-card p-3">
+            <div className="flex items-center justify-between rounded-2xl border border-border bg-card p-4">
               <div>
-                <p className="text-[13px] font-bold">Enable Reminders</p>
-                <p className="text-[11px] text-muted-foreground">Get notified to log this pulse</p>
+                <p className="text-[14px] font-bold text-foreground">Enable Reminders</p>
+                <p className="text-[12px] text-muted-foreground">Get notified to log this pulse</p>
               </div>
               <Switch checked={reminderEnabled} onCheckedChange={setReminderEnabled} />
             </div>
             {reminderEnabled && (
-              <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-                <Label className="text-[12px]">Reminder Time</Label>
-                <Input type="time" defaultValue="08:00" className="w-[140px]" />
-                <Label className="text-[12px]">Repeat On</Label>
-                <div className="flex gap-1.5">
-                  {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
-                    <button key={d} type="button"
-                      className="flex-1 rounded-lg border border-primary bg-primary/5 py-1.5 text-[10px] font-bold text-primary">
-                      {d}
-                    </button>
-                  ))}
+              <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-[13px] font-semibold text-foreground">Reminder Time</Label>
+                  <Input
+                    type="time"
+                    defaultValue="08:00"
+                    className="w-[160px] h-11 rounded-xl bg-secondary border-border text-foreground focus-visible:ring-[#22C55E] focus-visible:ring-2"
+                  />
                 </div>
-                <p className="text-[10px] text-muted-foreground">You can add more alerts after creating the pulse.</p>
+                <div className="space-y-2">
+                  <Label className="text-[13px] font-semibold text-foreground">Repeat On</Label>
+                  <div className="flex gap-2">
+                    {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+                      <button
+                        key={d}
+                        type="button"
+                        className="flex-1 rounded-xl border border-[#22C55E]/40 bg-[#22C55E]/10 py-2 text-[11px] font-bold text-[#22C55E] transition-colors hover:bg-[#22C55E]/20"
+                      >
+                        {d}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  You can add more alerts after creating the pulse.
+                </p>
               </div>
             )}
           </div>
 
           {/* Submit */}
-          <Button
+          <button
             onClick={handleCreateCustom}
             disabled={!name.trim() || creating}
-            className="w-full h-11"
+            className="w-full h-13 rounded-2xl bg-[#22C55E] hover:bg-[#16A34A] text-white text-base font-bold shadow-[0_0_24px_rgba(34,197,94,0.35)] transition-all hover:shadow-[0_0_32px_rgba(34,197,94,0.5)] disabled:opacity-40 disabled:shadow-none flex items-center justify-center gap-2"
           >
-            {creating ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : null}
+            {creating && <Loader2 className="h-5 w-5 animate-spin" />}
             Create Tracker
-          </Button>
+          </button>
         </div>
       </div>
     )
   }
 
+  /* ───────── TEMPLATE SELECTION ───────── */
   return (
-    <div className="space-y-8">
+    <div className="max-w-md mx-auto px-5 pt-6 pb-10 space-y-8">
+      {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
+        <button
+          onClick={() => navigate(-1)}
+          className="flex h-10 w-10 items-center justify-center rounded-2xl bg-card border border-border transition-colors hover:bg-secondary"
+        >
+          <ArrowLeft className="h-5 w-5 text-foreground" />
+        </button>
+        <NavLink to="/">
+          <PulseLogo size={28} />
+        </NavLink>
         <div>
-          <h1 className="text-2xl font-bold">Create Tracker</h1>
-          <p className="text-sm text-muted-foreground">
-            Pick a template or build your own
-          </p>
+          <h1 className="text-2xl font-bold text-foreground">Create Tracker</h1>
+          <p className="text-sm text-muted-foreground">Pick a template or build your own</p>
         </div>
       </div>
 
-      {/* Custom tracker */}
-      <Card
-        className="cursor-pointer border-dashed transition-all hover:shadow-md hover:border-primary/30"
+      {/* Custom tracker — gradient hero card */}
+      <button
+        className="w-full rounded-2xl bg-gradient-to-br from-[#22C55E]/20 via-[#16A34A]/10 to-transparent border border-[#22C55E]/30 p-5 transition-all hover:shadow-[0_0_24px_rgba(34,197,94,0.2)] hover:border-[#22C55E]/50 active:scale-[0.98] text-left"
         onClick={() => setShowCustomForm(true)}
       >
-        <CardContent className="flex items-center gap-4 p-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <Sparkles className="h-6 w-6" />
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#22C55E]/20 border border-[#22C55E]/30">
+            <Plus className="h-7 w-7 text-[#22C55E]" />
           </div>
           <div>
-            <p className="font-semibold">Custom Tracker</p>
-            <p className="text-sm text-muted-foreground">
-              Create your own with any name, type, and configuration
+            <p className="text-lg font-bold text-foreground">Custom Tracker</p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Create your own with any name, type & config
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </button>
 
-      {/* Templates */}
+      {/* Templates by category */}
       {Object.entries(grouped).map(([category, temps]) => (
-        <div key={category}>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <div key={category} className="space-y-3">
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground pl-1">
             {category}
           </h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {temps.map((t) => (
-              <Card
-                key={t.id}
-                className="cursor-pointer transition-all hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
-                onClick={() => handleCreateFromTemplate(t.id)}
-              >
-                <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
+          <div className="grid grid-cols-2 gap-3">
+            {temps.map((t) => {
+              const tColor = t.color || "#16A34A"
+              return (
+                <button
+                  key={t.id}
+                  className="relative overflow-hidden rounded-2xl border border-border bg-card p-4 text-left transition-all hover:border-foreground/20 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                  onClick={() => handleCreateFromTemplate(t.id)}
+                >
+                  {/* Colored left accent bar */}
                   <div
-                    className="flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
-                    style={{ backgroundColor: `${t.color || "#16A34A"}12` }}
-                  >
-                    {t.icon || "📊"}
+                    className="absolute left-0 top-3 bottom-3 w-[3px] rounded-full"
+                    style={{ backgroundColor: tColor }}
+                  />
+                  <div className="pl-2">
+                    <div
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-2xl mb-2.5"
+                      style={{ backgroundColor: `${tColor}18` }}
+                    >
+                      {t.icon || "📊"}
+                    </div>
+                    <p className="text-[14px] font-bold text-foreground leading-tight">{t.name}</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{category}</p>
                   </div>
-                  <p className="text-sm font-medium leading-tight">{t.name}</p>
-                </CardContent>
-              </Card>
-            ))}
+                </button>
+              )
+            })}
           </div>
         </div>
       ))}
 
       {creating && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <Loader2 className="h-8 w-8 animate-spin text-[#22C55E]" />
         </div>
       )}
     </div>

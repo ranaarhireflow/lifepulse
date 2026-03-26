@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useParams, useNavigate, NavLink } from "react-router-dom"
 import { format, subDays, startOfYear, subYears } from "date-fns"
 import {
-  ArrowLeft,
+  ChevronLeft,
   Flame,
   Target,
   TrendingUp,
@@ -13,7 +13,10 @@ import {
   Settings2,
   Trash2,
   Pencil,
+  Zap,
+  Star,
 } from "lucide-react"
+import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { ConfigDrawer } from "@/components/common/ConfigDrawer"
 import { Switch } from "@/components/ui/switch"
@@ -34,20 +37,43 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts"
+import { PulseLogo } from "@/components/common/PulseLogo"
 import {
   fetchTracker,
   fetchAnalytics,
   fetchHeatmap,
+  updateTracker,
+  deleteTracker,
   type Tracker,
   type TrackerAnalytics,
   type HeatmapData,
 } from "@/services/trackers"
 
+// CSS artwork scenes (same as TrackerCard)
+const SCENES: Record<string, { bg: string; narrative: string }> = {
+  "\u{1F4A7}": { bg: "radial-gradient(ellipse at 30% 80%, #0c4a6e 0%, #0e7490 35%, #155e75 60%, #164e63 100%)", narrative: "Stay hydrated, stay sharp" },
+  "\u{1F3CB}\u{FE0F}": { bg: "radial-gradient(ellipse at 70% 20%, #ea580c 0%, #c2410c 30%, #9a3412 55%, #7c2d12 100%)", narrative: "Build strength, build character" },
+  "\u{1F9E0}": { bg: "radial-gradient(circle at 80% 10%, #7c3aed 0%, #4c1d95 35%, #2e1065 60%, #1e1b4b 100%)", narrative: "Focus is your superpower" },
+  "\u{1F4D6}": { bg: "radial-gradient(ellipse at 20% 70%, #059669 0%, #047857 35%, #065f46 60%, #064e3b 100%)", narrative: "Feed your mind daily" },
+  "\u{2696}\u{FE0F}": { bg: "radial-gradient(ellipse at 50% 30%, #4338ca 0%, #3730a3 35%, #312e81 60%, #1e1b4b 100%)", narrative: "Track your body's journey" },
+  "\u{1F319}": { bg: "radial-gradient(circle at 70% 20%, #312e81 0%, #1e1b4b 40%, #0f0a2e 70%, #000 100%)", narrative: "Rest well, rise strong" },
+  "\u{1FAA5}": { bg: "radial-gradient(ellipse at 30% 40%, #0891b2 0%, #0e7490 35%, #155e75 60%, #164e63 100%)", narrative: "Start every day right" },
+  "\u{2764}\u{FE0F}": { bg: "radial-gradient(ellipse at 50% 50%, #e11d48 0%, #be123c 35%, #9f1239 60%, #881337 100%)", narrative: "Know your numbers" },
+  "\u{1F305}": { bg: "radial-gradient(ellipse at 50% 80%, #f59e0b 0%, #d97706 25%, #b45309 50%, #92400e 100%)", narrative: "Rise before everyone" },
+  "\u{1F525}": { bg: "radial-gradient(ellipse at 40% 60%, #dc2626 0%, #b91c1c 30%, #991b1b 55%, #7f1d1d 100%)", narrative: "Push beyond your limits" },
+  "\u{1F3C3}": { bg: "radial-gradient(ellipse at 60% 30%, #0d9488 0%, #0f766e 35%, #115e59 60%, #134e4a 100%)", narrative: "Every step counts" },
+  "\u{1F493}": { bg: "radial-gradient(circle at 50% 40%, #ec4899 0%, #db2777 35%, #be185d 60%, #9d174d 100%)", narrative: "Listen to your heart" },
+}
+const DEFAULT_SCENE = {
+  bg: "radial-gradient(ellipse at 50% 50%, #16a34a 0%, #15803d 35%, #166534 60%, #14532d 100%)",
+  narrative: "Track it. Master it.",
+}
+
 const RANGES = [
   { key: "7d", label: "Week", days: 7 },
   { key: "30d", label: "Month", days: 30 },
-  { key: "90d", label: "3 Months", days: 90 },
-  { key: "180d", label: "6 Months", days: 180 },
+  { key: "90d", label: "3 Mo", days: 90 },
+  { key: "180d", label: "6 Mo", days: 180 },
   { key: "ytd", label: "YTD", days: 0 },
   { key: "1y", label: "Year", days: 365 },
   { key: "all", label: "All", days: 9999 },
@@ -65,6 +91,16 @@ function getDateRange(rangeKey: string) {
     from = subDays(to, range?.days || 30)
   }
   return { from: format(from, "yyyy-MM-dd"), to: format(to, "yyyy-MM-dd") }
+}
+
+// Type label map
+const TYPE_LABELS: Record<string, string> = {
+  NUMERIC: "Number",
+  DUAL_NUMERIC: "Dual",
+  BOOLEAN: "Yes/No",
+  DURATION: "Duration",
+  TIME: "Time",
+  TEXT: "Notes",
 }
 
 export function TrackerDetailPage() {
@@ -85,18 +121,53 @@ export function TrackerDetailPage() {
   const [editTime, setEditTime] = useState("")
   const [editLabel, setEditLabel] = useState("")
   const [editDays, setEditDays] = useState<number[]>([])
+  // Tracker edit state
+  const [trackerName, setTrackerName] = useState("")
+  const [trackerTarget, setTrackerTarget] = useState("")
+  const [trackerUnit, setTrackerUnit] = useState("")
+  const [deleting, setDeleting] = useState(false)
+
+  const openEditDrawer = () => {
+    if (!tracker) return
+    setTrackerName(tracker.name)
+    setTrackerTarget(tracker.target_value?.toString() || "")
+    setTrackerUnit(tracker.unit || "")
+    setConfigOpen(true)
+  }
+
+  const saveTrackerEdit = async () => {
+    if (!tracker) return
+    await updateTracker(tracker.id, {
+      name: trackerName,
+      target_value: trackerTarget ? parseFloat(trackerTarget) : null,
+      unit: trackerUnit || null,
+    })
+    const t = await fetchTracker(tracker.id)
+    setTracker(t)
+    setConfigOpen(false)
+  }
+
+  const handleDeleteTracker = async () => {
+    if (!tracker) return
+    setDeleting(true)
+    try {
+      await deleteTracker(tracker.id)
+      navigate("/progress")
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   const startEdit = (alert: { id: string; alert_time: string; label: string | null; alert_days: number[] }) => {
     setEditingAlertId(alert.id)
     setEditTime(alert.alert_time)
     setEditLabel(alert.label || "")
-    setEditDays(alert.alert_days || [1,2,3,4,5,6,7])
+    setEditDays(alert.alert_days || [1, 2, 3, 4, 5, 6, 7])
   }
 
   const saveEdit = async () => {
     if (!editingAlertId || !tracker) return
     try {
-      // Delete old + create new (no PATCH endpoint)
       await api.delete(`/trackers/${tracker.id}/alerts/${editingAlertId}`)
       await api.post(`/trackers/${tracker.id}/alerts`, {
         alert_time: editTime,
@@ -110,7 +181,7 @@ export function TrackerDetailPage() {
     } catch { /* */ }
   }
 
-  // Initial load — tracker only
+  // Initial load
   useEffect(() => {
     if (!id) return
     setLoading(true)
@@ -120,7 +191,7 @@ export function TrackerDetailPage() {
       .finally(() => setLoading(false))
   }, [id])
 
-  // Heatmap — re-fetches when heatmapRange changes (no full page reload)
+  // Heatmap
   useEffect(() => {
     if (!id) return
     const now = new Date()
@@ -130,7 +201,7 @@ export function TrackerDetailPage() {
       .catch(() => {})
   }, [id, heatmapRange])
 
-  // Trend data — only re-fetches analytics when range changes (no full page reload)
+  // Trend data
   useEffect(() => {
     if (!id) return
     const { from, to } = getDateRange(range)
@@ -139,9 +210,10 @@ export function TrackerDetailPage() {
       .catch(() => {})
   }, [id, range])
 
-  const color = tracker?.color || "#16A34A"
+  const color = tracker?.color || "#22C55E"
+  const scene = SCENES[tracker?.icon || ""] || DEFAULT_SCENE
 
-  // Transform heatmap data for react-activity-calendar
+  // Heatmap data
   const heatmapActivities = useMemo(() => {
     if (!heatmap) return []
     return heatmap.days.map((d) => ({
@@ -168,7 +240,7 @@ export function TrackerDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="h-6 w-6 animate-spin text-[#22C55E]" />
       </div>
     )
   }
@@ -185,36 +257,166 @@ export function TrackerDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div
-            className="flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
-            style={{ backgroundColor: `${color}15` }}
-          >
-            {tracker.icon || "📊"}
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">{tracker.name}</h1>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-[10px]">
-                {tracker.type}
-              </Badge>
-              {tracker.unit && (
-                <span className="text-sm text-muted-foreground">{tracker.unit}</span>
-              )}
-            </div>
-          </div>
-        </div>
+    <div className="space-y-5 pb-6 px-5 pt-4 max-w-md mx-auto">
+      {/* Back + Logo */}
+      <div className="flex items-center gap-2">
+        <button onClick={() => navigate(-1)} className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-accent transition-colors">
+          <ChevronLeft className="h-5 w-5 text-muted-foreground" />
+        </button>
+        <NavLink to="/"><PulseLogo size={28} /></NavLink>
       </div>
 
-      {/* Config drawer */}
-      <ConfigDrawer open={configOpen} onClose={() => { setConfigOpen(false); setShowAddAlert(false) }} title={tracker.name} description="Manage alerts and pulse settings">
+      {/* Pokemon Card — Hero Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-3xl"
+        style={{ minHeight: 220 }}
+      >
+        {/* Gradient background */}
+        <div className="absolute inset-0" style={{ background: scene.bg }} />
+
+        {/* Noise texture overlay */}
+        <div className="absolute inset-0 opacity-15" style={{
+          backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")"
+        }} />
+
+        {/* Bottom gradient for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+        {/* Holographic border effect */}
+        <div className="absolute inset-0 rounded-3xl border border-white/10" />
+
+        {/* Content */}
+        <div className="relative flex flex-col items-center justify-center py-8 px-6">
+          {/* Edit button — top right */}
+          <button
+            onClick={openEditDrawer}
+            className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-black/30 backdrop-blur text-white/60 hover:text-white hover:bg-black/50 transition-colors"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+
+          {/* Big emoji */}
+          <motion.div
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200 }}
+            className="text-[64px] mb-3 drop-shadow-2xl"
+          >
+            {tracker.icon || "\u{1F4CA}"}
+          </motion.div>
+
+          {/* Name */}
+          <h1
+            className="text-[26px] font-black text-white text-center tracking-tight"
+            style={{ textShadow: "0 2px 16px rgba(0,0,0,0.5)" }}
+          >
+            {tracker.name}
+          </h1>
+
+          {/* Streak badge */}
+          <div className="flex items-center gap-4 mt-3">
+            <div className="flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur-md px-3.5 py-1.5">
+              <Flame className="h-4 w-4 text-amber-400" />
+              <span className="text-[13px] font-bold text-amber-400">
+                {analytics.current_streak} day streak
+              </span>
+            </div>
+
+            {/* Level badge */}
+            <div className="flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur-md px-3.5 py-1.5">
+              <Zap className="h-3.5 w-3.5 text-[#22C55E]" />
+              <span className="text-[13px] font-bold text-[#22C55E]">
+                Level {Math.min(Math.floor(analytics.current_streak / 7) + 1, 10)}
+              </span>
+            </div>
+          </div>
+
+          {/* Type badge */}
+          <div className="flex items-center gap-2 mt-2">
+            <span className="rounded-full bg-white/15 backdrop-blur-md px-3 py-1 text-[10px] font-bold text-white/70 uppercase tracking-wider">
+              {TYPE_LABELS[tracker.type] || tracker.type}
+            </span>
+            {tracker.unit && (
+              <span className="rounded-full bg-white/15 backdrop-blur-md px-3 py-1 text-[10px] font-bold text-white/70 uppercase tracking-wider">
+                {tracker.unit}
+              </span>
+            )}
+          </div>
+
+          {/* Stars row */}
+          <div className="flex gap-1 mt-3">
+            {[1, 2, 3, 4, 5].map((s) => {
+              const filled = s <= Math.min(Math.floor(analytics.current_streak / 3) + 1, 5)
+              return (
+                <Star
+                  key={s}
+                  className={`h-4 w-4 ${filled ? "text-amber-400 fill-amber-400" : "text-white/15"}`}
+                />
+              )
+            })}
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Stats Grid — 2x2 */}
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { icon: Flame, label: "Current Streak", value: String(analytics.current_streak), sub: `Best: ${analytics.longest_streak}`, iconColor: "#F59E0B" },
+          { icon: Target, label: "Completion", value: `${analytics.completion_rate}%`, sub: `${analytics.total_entries} entries`, iconColor: "#22C55E" },
+          { icon: TrendingUp, label: "Average", value: analytics.average !== null ? String(analytics.average) : "\u{2014}", sub: analytics.min_value !== null ? `${analytics.min_value} \u{2013} ${analytics.max_value}` : "", iconColor: "#3B82F6" },
+          { icon: Hash, label: "Total Entries", value: String(analytics.total_entries), sub: "", iconColor: "#8B5CF6" },
+        ].map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 + i * 0.05 }}
+            className="rounded-2xl border border-border bg-card p-4"
+          >
+            <div className="flex items-center gap-2 mb-2.5">
+              <div
+                className="flex h-7 w-7 items-center justify-center rounded-lg"
+                style={{ backgroundColor: `${s.iconColor}20` }}
+              >
+                <s.icon className="h-3.5 w-3.5" style={{ color: s.iconColor }} />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{s.label}</span>
+            </div>
+            <p className="text-[28px] font-black text-foreground leading-none">{s.value}</p>
+            {s.sub && <p className="text-[11px] text-muted-foreground/70 mt-1 font-semibold">{s.sub}</p>}
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Config drawer (kept from original) */}
+      <ConfigDrawer open={configOpen} onClose={() => { setConfigOpen(false); setShowAddAlert(false) }} title={tracker.name} description="Edit tracker and manage alerts">
         <div className="space-y-5">
+          {/* Tracker edit fields */}
+          <div className="space-y-3">
+            <h3 className="text-[11px] font-bold uppercase tracking-[1.5px] text-muted-foreground flex items-center gap-1.5">
+              <Pencil className="h-3.5 w-3.5 text-primary" /> Edit Tracker
+            </h3>
+            <div>
+              <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Name</label>
+              <Input value={trackerName} onChange={(e) => setTrackerName(e.target.value)} className="w-full" />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Target Value</label>
+              <Input type="number" value={trackerTarget} onChange={(e) => setTrackerTarget(e.target.value)} placeholder="e.g. 72" className="w-full" />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Unit</label>
+              <Input value={trackerUnit} onChange={(e) => setTrackerUnit(e.target.value)} placeholder="e.g. kg, glasses" className="w-full" />
+            </div>
+            <Button onClick={saveTrackerEdit} className="w-full rounded-xl h-10 text-[13px] font-bold">
+              Save Changes
+            </Button>
+          </div>
+
+          <div className="border-t border-border" />
+
           {/* Alerts section */}
           <div>
             <div className="flex items-center justify-between mb-3">
@@ -273,8 +475,7 @@ export function TrackerDetailPage() {
                       setShowAddAlert(false)
                       setNewAlertLabel("")
                       setNewAlertTime("08:00")
-                      setNewAlertDays([1,2,3,4,5,6,7])
-                      // Refresh tracker data
+                      setNewAlertDays([1, 2, 3, 4, 5, 6, 7])
                       const t = await fetchTracker(tracker.id)
                       setTracker(t)
                     } catch { /* */ }
@@ -290,7 +491,6 @@ export function TrackerDetailPage() {
                 {tracker.alerts.map((alert) => (
                   <div key={alert.id} className="rounded-xl border border-border bg-card p-3.5">
                     {editingAlertId === alert.id ? (
-                      /* Edit mode */
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-[12px] font-bold">Edit Reminder</span>
@@ -325,16 +525,11 @@ export function TrackerDetailPage() {
                         <Button size="sm" className="w-full" onClick={saveEdit}>Save Changes</Button>
                       </div>
                     ) : (
-                      /* View mode */
                       <>
                         <div className="flex items-center justify-between mb-2">
                           <div className="text-[20px] font-extrabold tracking-tight">{alert.alert_time}</div>
                           <div className="flex items-center gap-1.5">
-                            <button
-                              onClick={() => startEdit(alert)}
-                              className="rounded-lg p-1 text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all"
-                              title="Edit reminder"
-                            >
+                            <button onClick={() => startEdit(alert)} className="rounded-lg p-1 text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all" title="Edit reminder">
                               <Pencil className="h-3.5 w-3.5" />
                             </button>
                             <button
@@ -354,7 +549,7 @@ export function TrackerDetailPage() {
                         </div>
                         <div className="flex gap-1.5 mb-1.5">
                           {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => {
-                            const active = (alert.alert_days || [1,2,3,4,5,6,7]).includes(i + 1)
+                            const active = (alert.alert_days || [1, 2, 3, 4, 5, 6, 7]).includes(i + 1)
                             return (
                               <div key={i} className={`flex h-6 w-6 items-center justify-center rounded-full text-[9px] font-bold ${
                                 active ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground/50"
@@ -379,7 +574,6 @@ export function TrackerDetailPage() {
             ) : null}
           </div>
 
-          {/* Separator */}
           <div className="border-t border-border" />
 
           {/* Details */}
@@ -389,7 +583,7 @@ export function TrackerDetailPage() {
             </h3>
             <div className="space-y-2.5">
               {[
-                { label: "Type", value: { NUMERIC: "Number", DUAL_NUMERIC: "Dual Number", BOOLEAN: "Yes / No", DURATION: "Duration", TIME: "Time", TEXT: "Notes" }[tracker.type] || tracker.type },
+                { label: "Type", value: TYPE_LABELS[tracker.type] || tracker.type },
                 ...(tracker.unit ? [{ label: "Unit", value: tracker.unit }] : []),
                 ...(tracker.target_value ? [{ label: "Daily Target", value: `${tracker.target_value} ${tracker.unit || ""}` }] : []),
                 { label: "When Not Logged", value: { CARRY_FORWARD: "Use yesterday's value", ZERO: "Default to 0", NULL: "Leave empty" }[tracker.default_behavior] || tracker.default_behavior },
@@ -401,89 +595,84 @@ export function TrackerDetailPage() {
               ))}
             </div>
           </div>
+          <div className="border-t border-border" />
+
+          {/* Delete tracker */}
+          <div>
+            <h3 className="text-[11px] font-bold uppercase tracking-[1.5px] text-muted-foreground flex items-center gap-1.5 mb-3">
+              <Trash2 className="h-3.5 w-3.5 text-destructive" /> Danger Zone
+            </h3>
+            <button
+              onClick={handleDeleteTracker}
+              disabled={deleting}
+              className="w-full flex items-center justify-center gap-2 rounded-xl border border-destructive/20 bg-destructive/5 py-3 text-[13px] font-bold text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
+            >
+              <Trash2 className="h-4 w-4" />
+              {deleting ? "Deleting..." : "Delete Tracker (7-day grace)"}
+            </button>
+          </div>
         </div>
       </ConfigDrawer>
 
-      {/* Stats cards */}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {[
-          { icon: Flame, label: "Current Streak", value: String(analytics.current_streak), sub: `Best: ${analytics.longest_streak}` },
-          { icon: Target, label: "Completion", value: `${analytics.completion_rate}%`, sub: `${analytics.total_entries} entries` },
-          { icon: TrendingUp, label: "Average", value: analytics.average !== null ? String(analytics.average) : "—", sub: analytics.min_value !== null ? `${analytics.min_value} – ${analytics.max_value}` : "" },
-          { icon: Hash, label: "Total Entries", value: String(analytics.total_entries), sub: "" },
-        ].map((s) => (
-          <div key={s.label} className="rounded-xl border border-border bg-card p-3.5">
-            <div className="flex items-center gap-1.5 mb-2">
-              <s.icon className="h-3.5 w-3.5 text-primary" />
-              <span className="text-[10px] font-semibold text-muted-foreground">{s.label}</span>
-            </div>
-            <p className="text-[22px] font-extrabold text-[#1A3526] dark:text-foreground leading-none">{s.value}</p>
-            {s.sub && <p className="text-[10px] text-muted-foreground mt-1">{s.sub}</p>}
-          </div>
-        ))}
-      </div>
-
-      {/* Alerts section — visible on page */}
-      <div className="rounded-xl border border-border bg-card p-4">
+      {/* Alerts section — on page */}
+      <div className="rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-[11px] font-bold uppercase tracking-[1.5px] text-muted-foreground flex items-center gap-1.5">
-            <Bell className="h-3.5 w-3.5 text-primary" /> Reminders
+          <h3 className="text-[11px] font-extrabold uppercase tracking-[2px] text-muted-foreground flex items-center gap-1.5">
+            <Bell className="h-3.5 w-3.5 text-[#22C55E]" /> Reminders
           </h3>
-          <button onClick={() => setConfigOpen(true)} className="text-[11px] font-bold text-primary hover:underline">
+          <button onClick={() => setConfigOpen(true)} className="text-[11px] font-bold text-[#22C55E] hover:underline">
             {tracker.alerts && tracker.alerts.length > 0 ? "Edit" : "+ Add"}
           </button>
         </div>
         {tracker.alerts && tracker.alerts.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {tracker.alerts.map((alert) => (
-              <div key={alert.id} className="flex items-center gap-2 rounded-lg border border-border bg-secondary px-3 py-1.5">
-                <span className="text-[13px] font-bold">{alert.alert_time}</span>
+              <div key={alert.id} className="flex items-center gap-2.5 rounded-xl border border-border bg-foreground/5 px-3.5 py-2">
+                <span className="text-[15px] font-black text-foreground tabular-nums">{alert.alert_time}</span>
                 <div className="flex gap-0.5">
                   {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => {
-                    const active = (alert.alert_days || [1,2,3,4,5,6,7]).includes(i + 1)
+                    const active = (alert.alert_days || [1, 2, 3, 4, 5, 6, 7]).includes(i + 1)
                     return (
-                      <span key={i} className={`text-[8px] font-bold ${active ? "text-primary" : "text-muted-foreground/30"}`}>{d}</span>
+                      <span key={i} className={`text-[8px] font-bold ${active ? "text-[#22C55E]" : "text-muted-foreground/40"}`}>{d}</span>
                     )
                   })}
                 </div>
-                {!alert.enabled && <span className="text-[9px] text-muted-foreground">off</span>}
+                {!alert.enabled && <span className="text-[9px] text-muted-foreground/70">off</span>}
               </div>
             ))}
           </div>
         ) : (
           <p className="text-[12px] text-muted-foreground">
             No reminders set.{" "}
-            <button onClick={() => { setConfigOpen(true); setShowAddAlert(true) }} className="text-primary font-bold hover:underline">
+            <button onClick={() => { setConfigOpen(true); setShowAddAlert(true) }} className="text-[#22C55E] font-bold hover:underline">
               Add one
             </button>
           </p>
         )}
       </div>
 
-      {/* GitHub-style heatmap */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Calendar className="h-4 w-4" />
-              Activity
-            </CardTitle>
-            <div className="flex gap-1 rounded-lg bg-secondary p-0.5">
-              {([["3m", "3 Mo"], ["6m", "6 Mo"], ["1y", "Year"]] as const).map(([key, label]) => (
-                <button
-                  key={key}
-                  onClick={() => setHeatmapRange(key)}
-                  className={`rounded-md px-2.5 py-1 text-[10px] font-bold transition-all ${
-                    heatmapRange === key ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+      {/* Heatmap */}
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="flex items-center gap-2 text-[14px] font-bold text-foreground">
+            <Calendar className="h-4 w-4 text-[#22C55E]" />
+            Activity
+          </h3>
+          <div className="flex gap-1 rounded-lg bg-foreground/5 p-0.5">
+            {([["3m", "3 Mo"], ["6m", "6 Mo"], ["1y", "Year"]] as const).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setHeatmapRange(key)}
+                className={`rounded-md px-2.5 py-1 text-[10px] font-bold transition-all ${
+                  heatmapRange === key ? "bg-secondary text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
-        </CardHeader>
-        <CardContent className="overflow-x-auto">
+        </div>
+        <div className="overflow-x-auto">
           {heatmapActivities.length > 0 && (
             <ActivityCalendar
               data={heatmapActivities}
@@ -493,121 +682,89 @@ export function TrackerDetailPage() {
               fontSize={11}
               theme={{
                 light: [
-                  "var(--border)",
+                  "#2A2A2C",
                   `${color}30`,
                   `${color}60`,
                   `${color}90`,
                   color,
                 ],
                 dark: [
-                  "var(--border)",
+                  "#2A2A2C",
                   `${color}30`,
                   `${color}60`,
                   `${color}90`,
                   color,
                 ],
               }}
-              labels={{
-                totalCount: "{{count}} entries in the last year",
-              }}
+              labels={{ totalCount: "{{count}} entries in the last year" }}
             />
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Date range selector + Chart */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Trend</CardTitle>
-            <Tabs value={range} onValueChange={setRange}>
-              <TabsList className="h-8">
-                {RANGES.map((r) => (
-                  <TabsTrigger
-                    key={r.key}
-                    value={r.key}
-                    className="text-xs px-2 py-1"
-                  >
-                    {r.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+      {/* Trend Chart */}
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-[14px] font-bold text-foreground">Trend</h3>
+          <div className="flex gap-0.5 rounded-lg bg-foreground/5 p-0.5 overflow-x-auto">
+            {RANGES.map((r) => (
+              <button
+                key={r.key}
+                onClick={() => setRange(r.key)}
+                className={`rounded-md px-2 py-1 text-[10px] font-bold whitespace-nowrap transition-all ${
+                  range === r.key ? "bg-secondary text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {r.label}
+              </button>
+            ))}
           </div>
-        </CardHeader>
-        <CardContent>
-          {chartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              {tracker.type === "BOOLEAN" ? (
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fontSize: 11 }}
-                    stroke="var(--muted-foreground)"
-                  />
-                  <YAxis
-                    tick={{ fontSize: 11 }}
-                    stroke="var(--muted-foreground)"
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "var(--popover)",
-                      border: "1px solid var(--border)",
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Bar dataKey="value" fill={color} radius={[4, 4, 0, 0]} />
-                </BarChart>
-              ) : (
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis
-                    dataKey="date"
-                    tick={{ fontSize: 11 }}
-                    stroke="var(--muted-foreground)"
-                  />
-                  <YAxis
-                    tick={{ fontSize: 11 }}
-                    stroke="var(--muted-foreground)"
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "var(--popover)",
-                      border: "1px solid var(--border)",
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="value"
-                    stroke={color}
-                    strokeWidth={2}
-                    dot={{ fill: color, r: 3 }}
-                    activeDot={{ r: 5 }}
-                  />
-                  {tracker.type === "DUAL_NUMERIC" && (
-                    <Line
-                      type="monotone"
-                      dataKey="value2"
-                      stroke={`${color}80`}
-                      strokeWidth={2}
-                      strokeDasharray="5 5"
-                      dot={{ fill: `${color}80`, r: 3 }}
-                    />
-                  )}
-                </LineChart>
-              )}
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">
-              No data for this period
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        </div>
+        {chartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={250}>
+            {tracker.type === "BOOLEAN" ? (
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2C" />
+                <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#666" }} stroke="#2A2A2C" />
+                <YAxis tick={{ fontSize: 11, fill: "#666" }} stroke="#2A2A2C" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1C1C1E",
+                    border: "1px solid #2A2A2C",
+                    borderRadius: "12px",
+                    fontSize: "12px",
+                    color: "#fff",
+                  }}
+                />
+                <Bar dataKey="value" fill={color} radius={[4, 4, 0, 0]} />
+              </BarChart>
+            ) : (
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2A2A2C" />
+                <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#666" }} stroke="#2A2A2C" />
+                <YAxis tick={{ fontSize: 11, fill: "#666" }} stroke="#2A2A2C" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1C1C1E",
+                    border: "1px solid #2A2A2C",
+                    borderRadius: "12px",
+                    fontSize: "12px",
+                    color: "#fff",
+                  }}
+                />
+                <Line type="monotone" dataKey="value" stroke={color} strokeWidth={2} dot={{ fill: color, r: 3 }} activeDot={{ r: 5 }} />
+                {tracker.type === "DUAL_NUMERIC" && (
+                  <Line type="monotone" dataKey="value2" stroke={`${color}80`} strokeWidth={2} strokeDasharray="5 5" dot={{ fill: `${color}80`, r: 3 }} />
+                )}
+              </LineChart>
+            )}
+          </ResponsiveContainer>
+        ) : (
+          <div className="flex items-center justify-center h-[200px] text-muted-foreground/70 text-sm">
+            No data for this period
+          </div>
+        )}
+      </div>
     </div>
   )
 }

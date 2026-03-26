@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
+import { PulseLogo } from "@/components/common/PulseLogo"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   LayoutGrid,
@@ -124,7 +125,10 @@ export function TrackersPage() {
   const archivedTrackers = trackers.filter((t) => t.archived)
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 px-5 pt-6 pb-6 max-w-md mx-auto">
+      <div className="flex items-center gap-3 mb-1">
+        <NavLink to="/"><PulseLogo size={28} /></NavLink>
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-[24px] font-extrabold tracking-tight">My Pulses</h1>

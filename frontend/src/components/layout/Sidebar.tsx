@@ -1,7 +1,6 @@
 import { NavLink } from "react-router-dom"
-import { LayoutGrid, Activity, Zap, Trophy, Settings, Plus, LogOut, Sun, Moon } from "lucide-react"
+import { LayoutGrid, TrendingUp, Zap, Bell, Settings, LogOut, Sun, Moon } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { BRAND } from "@/lib/brand"
 import { PulseLogo } from "@/components/common/PulseLogo"
 import { useAuth } from "@/store/auth-context"
 import { useTheme } from "@/hooks/useTheme"
@@ -9,9 +8,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const NAV_ITEMS = [
   { to: "/", icon: LayoutGrid, label: "Today", end: true },
-  { to: "/trackers", icon: Activity, label: "My Pulses", end: false },
-  { to: "/score", icon: Zap, label: "Monk Score", end: false },
-  { to: "/achievements", icon: Trophy, label: "Achievements", end: false },
+  { to: "/progress", icon: TrendingUp, label: "Progress", end: false },
+  { to: "/score", icon: Zap, label: "Score", end: false },
+  { to: "/alarms", icon: Bell, label: "Alarms", end: false },
+  { to: "/settings", icon: Settings, label: "Settings", end: false },
 ]
 
 export function Sidebar({ className }: { className?: string }) {
@@ -46,24 +46,10 @@ export function Sidebar({ className }: { className?: string }) {
             <item.icon className="h-[20px] w-[20px]" />
           </NavLink>
         ))}
-
-        {/* New Pulse */}
-        <NavLink to="/trackers/new" title="New Pulse"
-          className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-all mt-2">
-          <Plus className="h-[20px] w-[20px]" />
-        </NavLink>
       </nav>
 
-      {/* Bottom — Settings + Avatar */}
+      {/* Bottom — theme toggle, sign out, avatar */}
       <div className="flex flex-col items-center gap-3 mt-auto">
-        <NavLink to="/settings" title="Settings"
-          className={({ isActive }) =>
-            cn("flex h-11 w-11 items-center justify-center rounded-xl transition-all",
-              isActive ? "bg-primary/15 text-primary" : "text-sidebar-foreground/30 hover:text-sidebar-foreground/60 hover:bg-black-accent")
-          }>
-          <Settings className="h-[20px] w-[20px]" />
-        </NavLink>
-
         <button onClick={toggleTheme} title={theme === "dark" ? "Switch to light" : "Switch to dark"}
           className="flex h-11 w-11 items-center justify-center rounded-xl text-sidebar-foreground/30 hover:text-sidebar-foreground/60 hover:bg-black-accent transition-all">
           {theme === "dark" ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}

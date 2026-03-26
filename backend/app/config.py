@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     VAPID_PUBLIC_KEY: str = ""
     VAPID_PRIVATE_KEY: str = ""
     VAPID_EMAIL: str = "mailto:admin@mypersonaltracker.app"
-    CORS_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
+    CORS_ORIGINS: str = "http://localhost:5173,http://localhost:5174,http://localhost:3000"
 
     model_config = {"env_file": ".env", "extra": "ignore"}
 

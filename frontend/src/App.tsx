@@ -13,6 +13,8 @@ import { MonkScorePage } from "@/pages/score/MonkScorePage"
 import { AchievementsPage } from "@/pages/achievements/AchievementsPage"
 import { QuizFlow } from "@/pages/onboarding/QuizFlow"
 import { SettingsPage } from "@/pages/settings/SettingsPage"
+import { ProgressPage } from "@/pages/progress/ProgressPage"
+import { AlarmsPage } from "@/pages/alarms/AlarmsPage"
 
 export default function App() {
   return (
@@ -31,9 +33,11 @@ export default function App() {
                 }
               >
                 <Route index element={<DailyPage />} />
-                <Route path="progress" element={<TrackerDetailPage />} />
+                <Route path="progress" element={<ProgressPage />} />
                 <Route path="score" element={<MonkScorePage />} />
                 <Route path="achievements" element={<AchievementsPage />} />
+                <Route path="alarms" element={<AlarmsPage />} />
+                <Route path="settings" element={<SettingsPage />} />
                 <Route path="profile" element={<SettingsPage />} />
                 <Route path="trackers" element={<TrackersPage />} />
                 <Route path="trackers/new" element={<TrackerCreatePage />} />

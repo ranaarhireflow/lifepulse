@@ -72,16 +72,19 @@ All under `/api/v1`:
 
 | File | Purpose |
 |------|---------|
-| `frontend/src/pages/dashboard/DailyPage.tsx` | Main daily view — week strip, stats, pulse cards |
-| `frontend/src/components/trackers/TrackerCard.tsx` | Pulse card with type-dispatched input |
-| `frontend/src/components/entries/EntryInput.tsx` | Input dispatcher (120px fixed container) |
-| `frontend/src/components/common/ConfigDrawer.tsx` | Right-side sheet drawer (JiraForge pattern) |
+| `frontend/src/pages/dashboard/DailyPage.tsx` | Today — swipe card carousel with date dial |
+| `frontend/src/pages/progress/ProgressPage.tsx` | Progress — habit row list |
+| `frontend/src/pages/score/MonkScorePage.tsx` | Score — RPG stats, XP, suggested habits |
+| `frontend/src/pages/alarms/AlarmsPage.tsx` | Alarms — centralized reminder management |
+| `frontend/src/pages/trackers/TrackerDetailPage.tsx` | Pokemon card detail with edit + charts |
+| `frontend/src/pages/trackers/TrackerCreatePage.tsx` | Create tracker — templates + custom form |
+| `frontend/src/components/common/ConfigDrawer.tsx` | Bottom sheet drawer (phone-frame scoped) |
 | `frontend/src/components/common/PulseLogo.tsx` | SVG logo — monk + progress ring |
-| `frontend/src/lib/brand.ts` | Brand constants |
-| `frontend/src/index.css` | Full theme (green-tinted light + dark) |
+| `frontend/src/components/layout/AppLayout.tsx` | Phone frame wrapper with cream bg |
+| `frontend/src/components/layout/BottomNav.tsx` | 5-tab bottom navigation |
+| `frontend/src/index.css` | Theme (dark + light) with Plus Jakarta Sans |
 | `backend/app/models/` | All SQLAlchemy models |
 | `backend/app/routers/` | All API route handlers |
-| `backend/app/services/default_trackers.py` | 8 default trackers for new users |
 
 ## Commands
 
@@ -108,25 +111,40 @@ cd backend && python seed.py
 cd backend && python seed_dummy.py
 ```
 
-## v1.0.0 Status
+## v4.1.0 — Life Reset Redesign
 
-All core features built and functional:
+Major UI overhaul inspired by Life Reset app + Tinder swipe UX + RPG gamification.
+
+### New Features
+- **Swipe card carousel** — Tinder-style daily tracking, adjacent cards peek from sides
+- **Date dial** — Full week (Sun-Sat) with selectable past dates, future disabled
+- **RPG Score page** — 5 dimensions (Wisdom, Confidence, Strength, Discipline, Focus) with 64px numbers, XP/Level system, "No level cap. Keep rising."
+- **25 suggested habits** — Expandable row list with stat boosts and Accept/Decline
+- **Progress page** — Clean row list of all habits
+- **Centralized Alarms page** — Manage all reminders with toggles
+- **Achievements page** — Streak, entry, consistency, milestone badges
+- **Pokemon card detail** — Gradient hero, heatmap, trend charts, inline edit
+- **Phone frame on desktop** — Cream background with rounded phone container
+- **Plus Jakarta Sans** font
+- **Bottom sheet drawers** — Constrained to phone frame, not full viewport
+- **Logo on all pages** — Clicking navigates home
+
+### Design System
+- Dark mode: true black (#000) + card (#1C1C1E) + green (#22C55E)
+- Light mode: cream frame (#F5F0EB) + white cards + green accents
+- All pages mobile-width (max-w-md) centered
+- 5-tab bottom nav: Today, Progress, Score, Alarms, Settings
+
+### Previous (v1.0.0)
 - [x] Firebase Google auth + dev mode bypass
 - [x] 6 pulse types with all input variants
 - [x] Daily tracking with auto-save
-- [x] Week date strip navigation
-- [x] Progress ring + stats
 - [x] GitHub-style activity heatmap (3Mo/6Mo/Year)
 - [x] Trend charts (7 range options)
-- [x] Cross-pulse analytics with insights
 - [x] Alert management (add/edit/delete)
 - [x] Create pulse from templates or custom
 - [x] Edit pulse (name, icon, color, unit, target, default)
 - [x] Archive/unarchive/soft-delete
-- [x] Collapsible sidebar
-- [x] Dark mode
-- [x] PWA (manifest, service worker)
-- [x] Capacitor (iOS + Android initialized)
-- [x] Docker + Railway deployment config
+- [x] Dark mode + light mode
+- [x] PWA + Capacitor
 - [x] Soft-delete + 7-day grace period
-- [x] Timezone auto-detection

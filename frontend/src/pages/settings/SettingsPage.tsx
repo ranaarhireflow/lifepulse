@@ -20,6 +20,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { NavLink } from "react-router-dom"
+import { PulseLogo } from "@/components/common/PulseLogo"
 import {
   LogOut,
   Bell,
@@ -65,9 +67,12 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-5 pt-6 pb-6 max-w-md mx-auto">
       <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
+        <div className="flex items-center gap-3 mb-1">
+          <NavLink to="/"><PulseLogo size={28} /></NavLink>
+          <h1 className="text-2xl font-bold">Settings</h1>
+        </div>
         <p className="text-sm text-muted-foreground">
           Manage your account and preferences
         </p>
