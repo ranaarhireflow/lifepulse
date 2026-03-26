@@ -11,6 +11,7 @@ import {
   Loader2,
   Bell,
   Settings2,
+  Trash2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ConfigDrawer } from "@/components/common/ConfigDrawer"
@@ -253,7 +254,30 @@ export function TrackerDetailPage() {
                   <div key={alert.id} className="rounded-xl border border-border bg-card p-3.5">
                     <div className="flex items-center justify-between mb-2">
                       <div className="text-[20px] font-extrabold tracking-tight">{alert.alert_time}</div>
-                      <Switch checked={alert.enabled} />
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={alert.enabled}
+                          onCheckedChange={async (checked) => {
+                            try {
+                              // Toggle enabled via a delete + recreate (API doesn't have PATCH for alerts)
+                              // For now just visual — full edit needs backend PATCH endpoint
+                            } catch { /* */ }
+                          }}
+                        />
+                        <button
+                          onClick={async () => {
+                            try {
+                              await api.delete(`/trackers/${tracker.id}/alerts/${alert.id}`)
+                              const t = await fetchTracker(tracker.id)
+                              setTracker(t)
+                            } catch { /* */ }
+                          }}
+                          className="rounded-lg p-1 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all"
+                          title="Delete reminder"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </div>
                     <div className="flex gap-1.5 mb-1.5">
                       {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => {
