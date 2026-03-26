@@ -1,21 +1,17 @@
 import { Navigate } from "react-router-dom"
 import { useAuth } from "@/store/auth-context"
-import { Skeleton } from "@/components/ui/skeleton"
+import { PulseLogo } from "@/components/common/PulseLogo"
+import { Loader2 } from "lucide-react"
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center bg-[#0F1F17]">
         <div className="flex flex-col items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-sm animate-pulse shadow-lg shadow-indigo-500/30">
-            LP
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-48" />
-            <Skeleton className="h-4 w-32" />
-          </div>
+          <PulseLogo size={56} className="animate-pulse" />
+          <Loader2 className="h-5 w-5 animate-spin text-[#22C55E]" />
         </div>
       </div>
     )

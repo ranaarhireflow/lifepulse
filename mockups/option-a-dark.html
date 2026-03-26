@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option A: Dark & Bold</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #0f0e17; color: #fffffe; min-height: 100vh; }
+
+.app { display: flex; height: 100vh; }
+
+/* Sidebar */
+.sidebar { width: 240px; background: #16141f; border-right: 1px solid #ffffff08; padding: 24px 16px; display: flex; flex-direction: column; }
+.logo { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+.logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #ff8906, #f25f4c); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: #0f0e17; box-shadow: 0 4px 20px #ff890640; }
+.logo-text h1 { font-size: 18px; font-weight: 700; }
+.logo-text p { font-size: 9px; color: #a7a9be; text-transform: uppercase; letter-spacing: 2px; }
+
+.nav { display: flex; flex-direction: column; gap: 4px; }
+.nav a { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; color: #a7a9be; text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+.nav a.active { background: #ff890615; color: #ff8906; }
+.nav a:hover { background: #ffffff08; color: #fffffe; }
+.nav-icon { width: 18px; height: 18px; border-radius: 5px; background: currentColor; opacity: 0.3; }
+.nav a.active .nav-icon { opacity: 0.6; }
+
+/* Main */
+.main { flex: 1; overflow-y: auto; }
+.header { height: 56px; border-bottom: 1px solid #ffffff08; display: flex; align-items: center; justify-content: flex-end; padding: 0 24px; }
+.avatar { width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, #7f5af0, #2cb67d); }
+
+.content { max-width: 680px; margin: 0 auto; padding: 32px 24px; }
+
+/* Header */
+.greeting { color: #a7a9be; font-size: 13px; margin-bottom: 4px; }
+.day-title { font-size: 28px; font-weight: 800; margin-bottom: 2px; }
+.day-date { color: #a7a9be; font-size: 13px; }
+
+/* Progress */
+.progress-section { margin-top: 24px; }
+.progress-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.progress-label { color: #a7a9be; font-size: 13px; }
+.progress-pct { font-size: 22px; font-weight: 800; color: #ff8906; }
+.progress-bar { height: 6px; background: #ffffff10; border-radius: 99px; overflow: hidden; }
+.progress-fill { height: 100%; width: 67%; background: linear-gradient(90deg, #ff8906, #f25f4c); border-radius: 99px; }
+
+/* Cards */
+.cards { margin-top: 28px; display: flex; flex-direction: column; gap: 12px; }
+.card { background: #1a1826; border: 1px solid #ffffff08; border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; gap: 14px; transition: all 0.2s; position: relative; overflow: hidden; }
+.card:hover { border-color: #ffffff15; box-shadow: 0 4px 24px #00000040; transform: translateY(-1px); }
+.card-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 3px 0 0 3px; }
+.card-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.card-info { flex: 1; min-width: 0; }
+.card-name { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.card-meta { font-size: 11px; color: #a7a9be; margin-top: 2px; }
+.streak { display: inline-flex; align-items: center; gap: 3px; background: #ff890615; color: #ff8906; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+.card-input { flex-shrink: 0; }
+.input-num { width: 100px; background: #ffffff08; border: 1px solid #ffffff10; border-radius: 10px; padding: 8px 12px; color: #fffffe; font-size: 14px; font-weight: 600; text-align: center; font-family: 'Inter', sans-serif; }
+.input-num::placeholder { color: #a7a9be60; }
+.check-btn { width: 44px; height: 44px; border-radius: 12px; border: 2px solid #ffffff15; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s; }
+.check-btn.checked { border-color: #2cb67d; background: #2cb67d15; box-shadow: 0 0 16px #2cb67d25; }
+.target-bar { height: 3px; background: #ffffff08; border-radius: 99px; margin-top: 6px; max-width: 80px; overflow: hidden; }
+.target-fill { height: 100%; border-radius: 99px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">LP</div>
+      <div class="logo-text">
+        <h1>LifePulse</h1>
+        <p>Track Your Day</p>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="#" class="active"><div class="nav-icon"></div> Today</a>
+      <a href="#"><div class="nav-icon"></div> My Pulses</a>
+      <a href="#"><div class="nav-icon"></div> Analytics</a>
+      <a href="#"><div class="nav-icon"></div> Settings</a>
+    </nav>
+  </div>
+  <div class="main">
+    <div class="header">
+      <div class="avatar"></div>
+    </div>
+    <div class="content">
+      <p class="greeting">Good afternoon 👋</p>
+      <h1 class="day-title">Today</h1>
+      <p class="day-date">March 26, 2026</p>
+
+      <div class="progress-section">
+        <div class="progress-row">
+          <span class="progress-label">4 of 6 pulses logged</span>
+          <span class="progress-pct">67%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-accent" style="background:#7f5af0"></div>
+          <div class="card-icon" style="background:#7f5af015">⚖️</div>
+          <div class="card-info">
+            <div class="card-name">Weight <span class="streak">🔥 12</span></div>
+            <div class="target-bar"><div class="target-fill" style="width:95%;background:#7f5af0"></div></div>
+          </div>
+          <div class="card-input"><input class="input-num" value="73.2" placeholder="—"> <span style="color:#a7a9be;font-size:11px;margin-left:-30px">kg</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-accent" style="background:#2cb67d"></div>
+          <div class="card-icon" style="background:#2cb67d15">💧</div>
+          <div class="card-info">
+            <div class="card-name">Water Intake <span class="streak">🔥 8</span></div>
+            <div class="card-meta">6 / 8 glasses</div>
+            <div class="target-bar"><div class="target-fill" style="width:75%;background:#2cb67d"></div></div>
+          </div>
+          <div class="card-input"><input class="input-num" value="6" placeholder="—"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-accent" style="background:#f25f4c"></div>
+          <div class="card-icon" style="background:#f25f4c15">🏋️</div>
+          <div class="card-info">
+            <div class="card-name">Gym</div>
+            <div class="card-meta">Yes / No</div>
+          </div>
+          <div class="card-input"><button class="check-btn checked">✓</button></div>
+        </div>
+
+        <div class="card">
+          <div class="card-accent" style="background:#e53170"></div>
+          <div class="card-icon" style="background:#e5317015">🧠</div>
+          <div class="card-info">
+            <div class="card-name">Deep Work <span class="streak">🔥 5</span></div>
+            <div class="card-meta">3h 20m / 4h goal</div>
+            <div class="target-bar"><div class="target-fill" style="width:83%;background:#e53170"></div></div>
+          </div>
+          <div class="card-input"><input class="input-num" value="3:20" placeholder="h:m"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-accent" style="background:#72757e"></div>
+          <div class="card-icon" style="background:#72757e15">📖</div>
+          <div class="card-info">
+            <div class="card-name">Pages Read</div>
+            <div class="card-meta">pages</div>
+          </div>
+          <div class="card-input"><input class="input-num" placeholder="—"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-accent" style="background:#ff890640"></div>
+          <div class="card-icon" style="background:#ff890610">🌙</div>
+          <div class="card-info">
+            <div class="card-name">Sleep Time</div>
+            <div class="card-meta">time</div>
+          </div>
+          <div class="card-input"><input class="input-num" placeholder="22:30" type="text"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

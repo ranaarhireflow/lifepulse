@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V1: Warm Journal</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Nunito', sans-serif; background: #FFF8F0; color: #2D2013; min-height: 100vh; }
+
+.app { display: flex; height: 100vh; }
+
+/* Sidebar */
+.sidebar { width: 250px; background: #FFFDFB; border-right: 1px solid #F0E6DA; padding: 24px 16px; display: flex; flex-direction: column; }
+.logo { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; padding: 0 8px; }
+.logo-icon { width: 44px; height: 44px; background: linear-gradient(135deg, #FF6B6B, #FF8E53); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; color: white; box-shadow: 0 6px 20px #FF6B6B35; }
+.logo h1 { font-size: 20px; font-weight: 800; color: #2D2013; }
+.logo p { font-size: 9px; color: #A0896E; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+
+.nav { display: flex; flex-direction: column; gap: 4px; }
+.nav a { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 14px; color: #A0896E; text-decoration: none; font-size: 14px; font-weight: 700; transition: all 0.2s; }
+.nav a.active { background: linear-gradient(135deg, #FFF0E6, #FFE8D6); color: #FF6B6B; }
+.nav a:hover { background: #FFF5ED; }
+
+.streak-card { margin-top: auto; background: linear-gradient(135deg, #FF6B6B, #FF8E53); border-radius: 18px; padding: 20px; color: white; }
+.streak-num { font-size: 36px; font-weight: 900; line-height: 1; }
+.streak-label { font-size: 12px; font-weight: 700; opacity: 0.85; margin-top: 4px; }
+.streak-bar { height: 4px; background: #ffffff40; border-radius: 99px; margin-top: 12px; overflow: hidden; }
+.streak-bar-fill { height: 100%; width: 85%; background: white; border-radius: 99px; }
+.streak-sub { font-size: 10px; opacity: 0.7; margin-top: 6px; font-weight: 600; }
+
+/* Main */
+.main { flex: 1; overflow-y: auto; }
+.header { height: 60px; display: flex; align-items: center; justify-content: flex-end; padding: 0 28px; gap: 12px; }
+.notif { width: 40px; height: 40px; border-radius: 12px; background: white; border: 1px solid #F0E6DA; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; position: relative; }
+.notif-dot { width: 8px; height: 8px; background: #FF6B6B; border-radius: 50%; position: absolute; top: 8px; right: 8px; border: 2px solid #FFF8F0; }
+.avatar { width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg, #FFB4A2, #E8B4B8); }
+
+.content { max-width: 700px; margin: 0 auto; padding: 8px 28px 60px; }
+
+/* Hero */
+.hero { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+.greeting { font-size: 14px; color: #A0896E; font-weight: 600; }
+.hero-title { font-size: 32px; font-weight: 900; color: #2D2013; margin-top: 2px; }
+.hero-date { font-size: 13px; color: #C4A882; font-weight: 600; margin-top: 2px; }
+
+/* Progress circle */
+.progress-ring { position: relative; width: 100px; height: 100px; flex-shrink: 0; }
+.progress-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: #F0E6DA; stroke-width: 8; }
+.ring-fill { fill: none; stroke: url(#warmGrad); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 251.2; stroke-dashoffset: 83; }
+.ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring-pct { font-size: 24px; font-weight: 900; color: #2D2013; }
+.ring-label { font-size: 9px; color: #A0896E; font-weight: 700; letter-spacing: 1px; }
+
+/* Week strip */
+.week-strip { display: flex; gap: 8px; margin-bottom: 24px; background: white; border-radius: 18px; padding: 12px 16px; box-shadow: 0 2px 12px #2D201306; }
+.day { flex: 1; text-align: center; cursor: pointer; padding: 8px 4px; border-radius: 14px; transition: all 0.2s; }
+.day:hover { background: #FFF5ED; }
+.day.today { background: linear-gradient(135deg, #FF6B6B, #FF8E53); color: white; box-shadow: 0 4px 16px #FF6B6B30; }
+.day-name { font-size: 10px; font-weight: 700; opacity: 0.5; text-transform: uppercase; }
+.day.today .day-name { opacity: 0.8; }
+.day-num { font-size: 18px; font-weight: 800; margin-top: 2px; }
+.day-dots { display: flex; gap: 3px; justify-content: center; margin-top: 4px; }
+.day-dot { width: 4px; height: 4px; border-radius: 50%; }
+
+/* Encouragement banner */
+.encourage { background: linear-gradient(135deg, #E8F5E9, #F1F8E9); border-radius: 16px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; border: 1px solid #C8E6C9; }
+.encourage-icon { font-size: 28px; }
+.encourage-text { font-size: 13px; font-weight: 700; color: #2E7D32; }
+.encourage-sub { font-size: 11px; color: #66BB6A; font-weight: 600; }
+
+/* Section */
+.section-title { font-size: 11px; font-weight: 800; color: #C4A882; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; }
+
+/* Pulse cards */
+.cards { display: flex; flex-direction: column; gap: 10px; }
+.pulse { background: white; border-radius: 20px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 12px #2D201305; transition: all 0.25s; cursor: pointer; border: 1px solid transparent; }
+.pulse:hover { box-shadow: 0 6px 24px #2D201310; transform: translateY(-2px); border-color: #F0E6DA; }
+.pulse-icon { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.pulse-info { flex: 1; min-width: 0; }
+.pulse-name { font-size: 15px; font-weight: 800; color: #2D2013; display: flex; align-items: center; gap: 8px; }
+.pulse-meta { font-size: 11px; color: #A0896E; font-weight: 600; margin-top: 2px; }
+
+/* Streak badge */
+.streak { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: 800; background: #FFF3E0; color: #FF8F00; }
+
+/* Mini progress */
+.mini-prog { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.mini-bar { flex: 1; height: 5px; background: #F0E6DA; border-radius: 99px; overflow: hidden; max-width: 100px; }
+.mini-fill { height: 100%; border-radius: 99px; }
+.mini-pct { font-size: 10px; font-weight: 800; }
+
+/* Inputs */
+.pulse-input { flex-shrink: 0; display: flex; align-items: center; gap: 6px; }
+.num-input { width: 68px; background: #FFF8F0; border: 2px solid #F0E6DA; border-radius: 14px; padding: 10px 8px; color: #2D2013; font-size: 16px; font-weight: 800; text-align: center; font-family: 'Nunito', sans-serif; transition: all 0.2s; }
+.num-input:focus { outline: none; border-color: #FF6B6B; box-shadow: 0 0 0 3px #FF6B6B15; }
+.num-input::placeholder { color: #D4C4B0; }
+.unit { font-size: 11px; color: #A0896E; font-weight: 700; }
+
+.check-btn { width: 52px; height: 52px; border-radius: 16px; border: 2.5px solid #E0D5C8; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: all 0.2s; }
+.check-btn.on { border-color: #4CAF50; background: #E8F5E9; color: #4CAF50; box-shadow: 0 4px 16px #4CAF5020; }
+
+.pm-btn { width: 32px; height: 32px; border-radius: 10px; border: 2px solid #F0E6DA; background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: #A0896E; transition: all 0.15s; }
+.pm-btn:hover { border-color: #FF6B6B; color: #FF6B6B; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">LP</div>
+      <div>
+        <h1>LifePulse</h1>
+        <p>Track Your Day</p>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="#" class="active">📋 Today</a>
+      <a href="#">💫 My Pulses</a>
+      <a href="#">📊 Analytics</a>
+      <a href="#">⚙️ Settings</a>
+    </nav>
+    <div class="streak-card">
+      <div>🔥</div>
+      <div class="streak-num">12</div>
+      <div class="streak-label">Day Streak</div>
+      <div class="streak-bar"><div class="streak-bar-fill"></div></div>
+      <div class="streak-sub">3 more days to beat your record!</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="header">
+      <div class="notif">🔔<div class="notif-dot"></div></div>
+      <div class="avatar"></div>
+    </div>
+    <div class="content">
+      <div class="hero">
+        <div>
+          <p class="greeting">Good afternoon, Rajat 👋</p>
+          <h1 class="hero-title">Today</h1>
+          <p class="hero-date">Wednesday, March 26</p>
+        </div>
+        <div class="progress-ring">
+          <svg viewBox="0 0 100 100">
+            <defs><linearGradient id="warmGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF6B6B"/><stop offset="100%" stop-color="#FF8E53"/></linearGradient></defs>
+            <circle class="ring-bg" cx="50" cy="50" r="40"/>
+            <circle class="ring-fill" cx="50" cy="50" r="40"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-pct">67%</div>
+            <div class="ring-label">DONE</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Week strip -->
+      <div class="week-strip">
+        <div class="day"><div class="day-name">Mon</div><div class="day-num">24</div><div class="day-dots"><div class="day-dot" style="background:#4CAF50"></div><div class="day-dot" style="background:#FF6B6B"></div></div></div>
+        <div class="day"><div class="day-name">Tue</div><div class="day-num">25</div><div class="day-dots"><div class="day-dot" style="background:#4CAF50"></div><div class="day-dot" style="background:#4CAF50"></div></div></div>
+        <div class="day today"><div class="day-name">Wed</div><div class="day-num">26</div><div class="day-dots"><div class="day-dot" style="background:#ffffff80"></div></div></div>
+        <div class="day"><div class="day-name">Thu</div><div class="day-num">27</div></div>
+        <div class="day"><div class="day-name">Fri</div><div class="day-num">28</div></div>
+        <div class="day"><div class="day-name">Sat</div><div class="day-num">29</div></div>
+        <div class="day"><div class="day-name">Sun</div><div class="day-num">30</div></div>
+      </div>
+
+      <!-- Encouragement -->
+      <div class="encourage">
+        <div class="encourage-icon">💪</div>
+        <div>
+          <div class="encourage-text">You're on fire! 4 of 6 pulses logged</div>
+          <div class="encourage-sub">Just 2 more to complete your day</div>
+        </div>
+      </div>
+
+      <div class="section-title">Your Pulses</div>
+      <div class="cards">
+        <div class="pulse">
+          <div class="pulse-icon" style="background:linear-gradient(135deg,#EDE7F6,#D1C4E9)">⚖️</div>
+          <div class="pulse-info">
+            <div class="pulse-name">Weight <span class="streak">🔥 12</span></div>
+            <div class="pulse-meta">Target: 72 kg · You're 1.2 away!</div>
+            <div class="mini-prog"><div class="mini-bar"><div class="mini-fill" style="width:92%;background:linear-gradient(90deg,#7E57C2,#B39DDB)"></div></div><div class="mini-pct" style="color:#7E57C2">92%</div></div>
+          </div>
+          <div class="pulse-input">
+            <button class="pm-btn">−</button>
+            <input class="num-input" value="73.2">
+            <button class="pm-btn">+</button>
+          </div>
+        </div>
+
+        <div class="pulse">
+          <div class="pulse-icon" style="background:linear-gradient(135deg,#E3F2FD,#BBDEFB)">💧</div>
+          <div class="pulse-info">
+            <div class="pulse-name">Water <span class="streak">🔥 8</span></div>
+            <div class="pulse-meta">6 of 8 glasses today</div>
+            <div class="mini-prog"><div class="mini-bar"><div class="mini-fill" style="width:75%;background:linear-gradient(90deg,#42A5F5,#90CAF9)"></div></div><div class="mini-pct" style="color:#42A5F5">75%</div></div>
+          </div>
+          <div class="pulse-input">
+            <button class="pm-btn">−</button>
+            <input class="num-input" value="6">
+            <button class="pm-btn">+</button>
+          </div>
+        </div>
+
+        <div class="pulse">
+          <div class="pulse-icon" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9)">🏋️</div>
+          <div class="pulse-info">
+            <div class="pulse-name">Gym</div>
+            <div class="pulse-meta">4 times this week · Keep it up!</div>
+          </div>
+          <button class="check-btn on">✓</button>
+        </div>
+
+        <div class="pulse">
+          <div class="pulse-icon" style="background:linear-gradient(135deg,#FCE4EC,#F8BBD0)">🧠</div>
+          <div class="pulse-info">
+            <div class="pulse-name">Deep Work <span class="streak">🔥 5</span></div>
+            <div class="pulse-meta">3h 20m of 4h goal</div>
+            <div class="mini-prog"><div class="mini-bar"><div class="mini-fill" style="width:83%;background:linear-gradient(90deg,#EC407A,#F48FB1)"></div></div><div class="mini-pct" style="color:#EC407A">83%</div></div>
+          </div>
+          <div class="pulse-input">
+            <input class="num-input" value="3:20" style="width:72px">
+            <span class="unit">hrs</span>
+          </div>
+        </div>
+
+        <div class="pulse">
+          <div class="pulse-icon" style="background:linear-gradient(135deg,#FFF8E1,#FFECB3)">📖</div>
+          <div class="pulse-info">
+            <div class="pulse-name">Pages Read</div>
+            <div class="pulse-meta">10 pages daily goal</div>
+          </div>
+          <div class="pulse-input">
+            <button class="pm-btn">−</button>
+            <input class="num-input" placeholder="0">
+            <button class="pm-btn">+</button>
+          </div>
+        </div>
+
+        <div class="pulse">
+          <div class="pulse-icon" style="background:linear-gradient(135deg,#F3E5F5,#E1BEE7)">🌙</div>
+          <div class="pulse-info">
+            <div class="pulse-name">Sleep Time</div>
+            <div class="pulse-meta">Avg 22:45 this week</div>
+          </div>
+          <div class="pulse-input">
+            <input class="num-input" placeholder="22:30" style="width:76px">
+          </div>
+        </div>
+
+        <div class="pulse">
+          <div class="pulse-icon" style="background:linear-gradient(135deg,#E0F7FA,#B2EBF2)">🪥</div>
+          <div class="pulse-info">
+            <div class="pulse-name">Brush & Bathe</div>
+            <div class="pulse-meta">Morning routine</div>
+          </div>
+          <button class="check-btn">✗</button>
+        </div>
+
+        <div class="pulse">
+          <div class="pulse-icon" style="background:linear-gradient(135deg,#FBE9E7,#FFCCBC)">❤️</div>
+          <div class="pulse-info">
+            <div class="pulse-name">Blood Pressure</div>
+            <div class="pulse-meta">systolic / diastolic</div>
+          </div>
+          <div class="pulse-input" style="gap:4px">
+            <input class="num-input" value="120" style="width:56px;font-size:14px">
+            <span style="color:#A0896E;font-weight:800">/</span>
+            <input class="num-input" value="80" style="width:56px;font-size:14px">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LifePulse — Premium Design</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0c0c14; color: #ffffff; min-height: 100vh; overflow-x: hidden; }
+
+.app { display: flex; height: 100vh; }
+
+/* Sidebar */
+.sidebar { width: 260px; background: linear-gradient(180deg, #12121c, #0c0c14); padding: 28px 20px; display: flex; flex-direction: column; border-right: 1px solid #ffffff06; }
+.logo { display: flex; align-items: center; gap: 14px; margin-bottom: 40px; }
+.logo-icon { width: 44px; height: 44px; background: linear-gradient(135deg, #6c5ce7, #a855f7); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: white; box-shadow: 0 8px 32px #6c5ce740; position: relative; }
+.logo-icon::after { content: ''; position: absolute; inset: -2px; border-radius: 16px; background: linear-gradient(135deg, #6c5ce7, #a855f7); z-index: -1; opacity: 0.3; filter: blur(8px); }
+.logo-text h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+.logo-text p { font-size: 10px; color: #ffffff50; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; }
+
+.nav { display: flex; flex-direction: column; gap: 4px; }
+.nav a { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 14px; color: #ffffff45; text-decoration: none; font-size: 14px; font-weight: 600; transition: all 0.25s; }
+.nav a.active { background: linear-gradient(135deg, #6c5ce715, #a855f710); color: #a78bfa; }
+.nav a:hover { color: #ffffff80; }
+.nav svg { width: 20px; height: 20px; opacity: 0.7; }
+.nav a.active svg { opacity: 1; }
+
+.sidebar-footer { margin-top: auto; background: linear-gradient(135deg, #1a1a2e, #16162a); border-radius: 16px; padding: 18px; border: 1px solid #ffffff08; }
+.sidebar-footer .streak-big { font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #ff6b6b, #ffa726); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.sidebar-footer .streak-label { font-size: 11px; color: #ffffff50; font-weight: 600; margin-top: 2px; }
+
+/* Main */
+.main { flex: 1; overflow-y: auto; background: #0c0c14; }
+.header { height: 64px; display: flex; align-items: center; justify-content: flex-end; padding: 0 32px; gap: 16px; }
+.header-btn { width: 40px; height: 40px; border-radius: 12px; background: #ffffff08; border: 1px solid #ffffff08; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #ffffff50; font-size: 16px; }
+.avatar { width: 36px; height: 36px; border-radius: 12px; background: linear-gradient(135deg, #6c5ce7, #e17055); }
+
+.content { max-width: 720px; margin: 0 auto; padding: 8px 32px 60px; }
+
+/* Hero section */
+.hero { display: flex; align-items: center; gap: 32px; margin-bottom: 32px; }
+.hero-left { flex: 1; }
+.hero-greeting { color: #ffffff50; font-size: 14px; font-weight: 500; }
+.hero-title { font-size: 36px; font-weight: 800; letter-spacing: -1px; margin-top: 4px; }
+.hero-date { color: #ffffff40; font-size: 13px; margin-top: 4px; font-weight: 500; }
+
+/* Circular progress */
+.ring-container { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+.ring-bg { fill: none; stroke: #ffffff08; stroke-width: 8; }
+.ring-fill { fill: none; stroke: url(#ringGrad); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 339.292; stroke-dashoffset: 112; transform: rotate(-90deg); transform-origin: center; }
+.ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring-pct { font-size: 28px; font-weight: 800; }
+.ring-label { font-size: 10px; color: #ffffff50; font-weight: 600; }
+
+/* Stats row */
+.stats { display: flex; gap: 12px; margin-bottom: 28px; }
+.stat { flex: 1; background: linear-gradient(135deg, #1a1a2e, #14142a); border-radius: 18px; padding: 18px; border: 1px solid #ffffff06; position: relative; overflow: hidden; }
+.stat::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 2px; }
+.stat:nth-child(1)::before { background: linear-gradient(90deg, #6c5ce7, #a855f7); }
+.stat:nth-child(2)::before { background: linear-gradient(90deg, #ff6b6b, #ffa726); }
+.stat:nth-child(3)::before { background: linear-gradient(90deg, #00b894, #55efc4); }
+.stat-value { font-size: 24px; font-weight: 800; }
+.stat-label { font-size: 11px; color: #ffffff40; font-weight: 600; margin-top: 4px; }
+.stat-icon { position: absolute; right: 14px; top: 14px; font-size: 20px; opacity: 0.3; }
+
+/* Section */
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.section-title { font-size: 13px; font-weight: 700; color: #ffffff40; text-transform: uppercase; letter-spacing: 1.5px; }
+.section-link { font-size: 12px; color: #a78bfa; font-weight: 600; text-decoration: none; }
+
+/* Pulse cards */
+.cards { display: flex; flex-direction: column; gap: 10px; }
+.pulse-card { background: linear-gradient(135deg, #16162a, #1a1a30); border: 1px solid #ffffff06; border-radius: 20px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; transition: all 0.3s; cursor: pointer; position: relative; overflow: hidden; }
+.pulse-card:hover { border-color: #ffffff10; transform: translateY(-2px); box-shadow: 0 8px 32px #00000060; }
+.pulse-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 4px 0 0 4px; }
+
+.pulse-icon { width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; position: relative; }
+.pulse-icon::after { content: ''; position: absolute; inset: 0; border-radius: 16px; opacity: 0.15; filter: blur(4px); }
+
+.pulse-info { flex: 1; min-width: 0; }
+.pulse-name { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.pulse-meta { font-size: 11px; color: #ffffff40; margin-top: 3px; font-weight: 500; }
+
+/* Streak badge */
+.streak-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 800; }
+.streak-fire { background: linear-gradient(135deg, #ff6b6b15, #ffa72615); color: #ffa726; }
+
+/* Mini sparkline */
+.sparkline { display: flex; align-items: flex-end; gap: 2px; height: 24px; margin-top: 6px; }
+.spark-bar { width: 4px; border-radius: 2px; min-height: 3px; transition: height 0.3s; }
+
+/* Target progress */
+.target-ring { width: 44px; height: 44px; position: relative; flex-shrink: 0; }
+.target-ring svg { width: 44px; height: 44px; }
+.target-ring-bg { fill: none; stroke: #ffffff08; stroke-width: 4; }
+.target-ring-fill { fill: none; stroke-width: 4; stroke-linecap: round; transform: rotate(-90deg); transform-origin: center; }
+.target-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+
+/* Input styles */
+.pulse-input { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+.num-input { width: 72px; background: #ffffff08; border: 1px solid #ffffff10; border-radius: 12px; padding: 10px; color: #ffffff; font-size: 16px; font-weight: 700; text-align: center; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.2s; }
+.num-input:focus { outline: none; border-color: #a78bfa; box-shadow: 0 0 0 3px #a78bfa20; }
+.num-input::placeholder { color: #ffffff20; }
+.unit { font-size: 11px; color: #ffffff30; font-weight: 600; }
+
+.toggle-btn { width: 50px; height: 50px; border-radius: 16px; border: 2px solid #ffffff10; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: all 0.3s; color: #ffffff30; }
+.toggle-btn.on { border-color: #00b894; background: linear-gradient(135deg, #00b89415, #55efc415); color: #55efc4; box-shadow: 0 0 20px #00b89420; }
+
+/* Card-specific gradients */
+.c-purple::before { background: linear-gradient(180deg, #6c5ce7, #a855f7); }
+.c-purple .pulse-icon { background: linear-gradient(135deg, #6c5ce720, #a855f710); }
+.c-blue::before { background: linear-gradient(180deg, #0984e3, #74b9ff); }
+.c-blue .pulse-icon { background: linear-gradient(135deg, #0984e320, #74b9ff10); }
+.c-green::before { background: linear-gradient(180deg, #00b894, #55efc4); }
+.c-green .pulse-icon { background: linear-gradient(135deg, #00b89420, #55efc410); }
+.c-pink::before { background: linear-gradient(180deg, #e17055, #fab1a0); }
+.c-pink .pulse-icon { background: linear-gradient(135deg, #e1705520, #fab1a010); }
+.c-orange::before { background: linear-gradient(180deg, #ffa726, #ffcc80); }
+.c-orange .pulse-icon { background: linear-gradient(135deg, #ffa72620, #ffcc8010); }
+.c-cyan::before { background: linear-gradient(180deg, #00cec9, #81ecec); }
+.c-cyan .pulse-icon { background: linear-gradient(135deg, #00cec920, #81ecec10); }
+
+/* Glow effect on bg */
+.bg-glow { position: fixed; width: 600px; height: 600px; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
+.glow-1 { top: -200px; right: -200px; background: #6c5ce710; }
+.glow-2 { bottom: -300px; left: -200px; background: #e1705508; }
+</style>
+</head>
+<body>
+<div class="bg-glow glow-1"></div>
+<div class="bg-glow glow-2"></div>
+
+<div class="app" style="position:relative;z-index:1">
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">LP</div>
+      <div class="logo-text">
+        <h1>LifePulse</h1>
+        <p>Track Your Day</p>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="#" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
+        Today
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        My Pulses
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        Analytics
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div style="font-size: 20px; margin-bottom: 4px;">🔥</div>
+      <div class="streak-big">12</div>
+      <div class="streak-label">DAY STREAK</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="header">
+      <div class="header-btn">🔔</div>
+      <div class="avatar"></div>
+    </div>
+
+    <div class="content">
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-left">
+          <p class="hero-greeting">Good afternoon, Rajat 👋</p>
+          <h1 class="hero-title">Today</h1>
+          <p class="hero-date">Wednesday, March 26</p>
+        </div>
+        <div class="ring-container">
+          <svg viewBox="0 0 120 120">
+            <defs>
+              <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#6c5ce7"/>
+                <stop offset="100%" style="stop-color:#a855f7"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-bg" cx="60" cy="60" r="54"/>
+            <circle class="ring-fill" cx="60" cy="60" r="54"/>
+          </svg>
+          <div class="ring-text">
+            <div class="ring-pct">67%</div>
+            <div class="ring-label">DONE</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-value">4/6</div>
+          <div class="stat-label">Pulses Logged</div>
+        </div>
+        <div class="stat">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-value">12</div>
+          <div class="stat-label">Day Streak</div>
+        </div>
+        <div class="stat">
+          <div class="stat-icon">🏆</div>
+          <div class="stat-value">89%</div>
+          <div class="stat-label">This Week</div>
+        </div>
+      </div>
+
+      <!-- Pulses -->
+      <div class="section-header">
+        <span class="section-title">Your Pulses</span>
+        <a href="#" class="section-link">View All →</a>
+      </div>
+
+      <div class="cards">
+        <!-- Weight -->
+        <div class="pulse-card c-purple">
+          <div class="pulse-icon">⚖️</div>
+          <div class="pulse-info">
+            <div class="pulse-name">Weight <span class="streak-badge streak-fire">🔥 12</span></div>
+            <div class="pulse-meta">Target: 72 kg · Down 1.3 this month</div>
+            <div class="sparkline">
+              <div class="spark-bar" style="height:60%;background:#6c5ce760"></div>
+              <div class="spark-bar" style="height:55%;background:#6c5ce770"></div>
+              <div class="spark-bar" style="height:65%;background:#6c5ce780"></div>
+              <div class="spark-bar" style="height:50%;background:#6c5ce790"></div>
+              <div class="spark-bar" style="height:70%;background:#6c5ce7a0"></div>
+              <div class="spark-bar" style="height:45%;background:#6c5ce7b0"></div>
+              <div class="spark-bar" style="height:40%;background:#6c5ce7"></div>
+            </div>
+          </div>
+          <div class="pulse-input">
+            <input class="num-input" value="73.2">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+
+        <!-- Water -->
+        <div class="pulse-card c-blue">
+          <div class="pulse-icon">💧</div>
+          <div class="pulse-info">
+            <div class="pulse-name">Water <span class="streak-badge streak-fire">🔥 8</span></div>
+            <div class="pulse-meta">6 of 8 glasses · 75% of goal</div>
+            <div class="sparkline">
+              <div class="spark-bar" style="height:80%;background:#0984e360"></div>
+              <div class="spark-bar" style="height:100%;background:#0984e370"></div>
+              <div class="spark-bar" style="height:60%;background:#0984e380"></div>
+              <div class="spark-bar" style="height:90%;background:#0984e390"></div>
+              <div class="spark-bar" style="height:70%;background:#0984e3a0"></div>
+              <div class="spark-bar" style="height:100%;background:#0984e3b0"></div>
+              <div class="spark-bar" style="height:75%;background:#0984e3"></div>
+            </div>
+          </div>
+          <div class="pulse-input">
+            <input class="num-input" value="6">
+            <span class="unit">gl</span>
+          </div>
+        </div>
+
+        <!-- Gym -->
+        <div class="pulse-card c-green">
+          <div class="pulse-icon">🏋️</div>
+          <div class="pulse-info">
+            <div class="pulse-name">Gym</div>
+            <div class="pulse-meta">4 times this week · Keep it up!</div>
+          </div>
+          <button class="toggle-btn on">✓</button>
+        </div>
+
+        <!-- Deep Work -->
+        <div class="pulse-card c-pink">
+          <div class="pulse-icon">🧠</div>
+          <div class="pulse-info">
+            <div class="pulse-name">Deep Work <span class="streak-badge streak-fire">🔥 5</span></div>
+            <div class="pulse-meta">3h 20m of 4h goal · 83%</div>
+            <div class="sparkline">
+              <div class="spark-bar" style="height:90%;background:#e1705560"></div>
+              <div class="spark-bar" style="height:60%;background:#e1705570"></div>
+              <div class="spark-bar" style="height:100%;background:#e1705580"></div>
+              <div class="spark-bar" style="height:75%;background:#e1705590"></div>
+              <div class="spark-bar" style="height:80%;background:#e17055a0"></div>
+              <div class="spark-bar" style="height:95%;background:#e17055b0"></div>
+              <div class="spark-bar" style="height:83%;background:#e17055"></div>
+            </div>
+          </div>
+          <div class="pulse-input">
+            <input class="num-input" value="3:20">
+            <span class="unit">hrs</span>
+          </div>
+        </div>
+
+        <!-- Pages Read -->
+        <div class="pulse-card c-orange">
+          <div class="pulse-icon">📖</div>
+          <div class="pulse-info">
+            <div class="pulse-name">Pages Read</div>
+            <div class="pulse-meta">pages today</div>
+          </div>
+          <div class="pulse-input">
+            <input class="num-input" placeholder="0">
+            <span class="unit">pg</span>
+          </div>
+        </div>
+
+        <!-- Sleep -->
+        <div class="pulse-card c-cyan">
+          <div class="pulse-icon">🌙</div>
+          <div class="pulse-info">
+            <div class="pulse-name">Sleep Time</div>
+            <div class="pulse-meta">Last night · avg 22:45 this week</div>
+          </div>
+          <div class="pulse-input">
+            <input class="num-input" placeholder="22:30">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

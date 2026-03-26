@@ -1,19 +1,18 @@
 import { NavLink } from "react-router-dom"
 import {
-  CalendarCheck,
   LayoutGrid,
+  Activity,
   BarChart3,
   Settings,
   Plus,
-  Flame,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { BRAND } from "@/lib/brand"
-import { Button } from "@/components/ui/button"
+import { PulseLogo } from "@/components/common/PulseLogo"
 
 const NAV_ITEMS = [
-  { to: "/", icon: CalendarCheck, label: "Today", end: true },
-  { to: "/trackers", icon: LayoutGrid, label: "Trackers", end: false },
+  { to: "/", icon: LayoutGrid, label: "Today", end: true },
+  { to: "/trackers", icon: Activity, label: "My Pulses", end: false },
   { to: "/analytics", icon: BarChart3, label: "Analytics", end: false },
   { to: "/settings", icon: Settings, label: "Settings", end: false },
 ]
@@ -22,31 +21,23 @@ export function Sidebar({ className }: { className?: string }) {
   return (
     <aside
       className={cn(
-        "w-64 flex-col border-r border-border/50 bg-sidebar p-4",
+        "w-[248px] flex-col bg-[#0F1F17] p-4 text-white",
         className
       )}
     >
       {/* Logo */}
-      <div className="mb-8 flex items-center gap-3 px-2 pt-2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-purple-600 text-white font-bold text-sm shadow-md shadow-primary/25">
-          {BRAND.logo}
-        </div>
+      <div className="mb-10 flex items-center gap-3 px-2.5 pt-2">
+        <PulseLogo size={40} />
         <div>
-          <h1 className="text-lg font-bold tracking-tight">{BRAND.name}</h1>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-widest">{BRAND.tagline}</p>
+          <h1 className="text-[19px] font-extrabold tracking-tight">{BRAND.name}</h1>
+          <p className="text-[8.5px] font-bold uppercase tracking-[2px] text-white/35">
+            {BRAND.tagline}
+          </p>
         </div>
       </div>
 
-      {/* Quick add */}
-      <NavLink to="/trackers/new">
-        <Button className="mb-6 w-full gap-2 rounded-xl shadow-sm" size="sm">
-          <Plus className="h-4 w-4" />
-          New Tracker
-        </Button>
-      </NavLink>
-
       {/* Nav links */}
-      <nav className="flex flex-1 flex-col gap-1">
+      <nav className="flex flex-1 flex-col gap-0.5">
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
@@ -54,10 +45,10 @@ export function Sidebar({ className }: { className?: string }) {
             end={item.end}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                "flex items-center gap-3 rounded-[10px] px-3.5 py-2.5 text-[13.5px] font-semibold transition-all duration-200",
                 isActive
-                  ? "bg-primary/10 text-primary shadow-sm"
-                  : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+                  ? "bg-white/[0.12] text-[#22C55E]"
+                  : "text-white/40 hover:bg-white/[0.06] hover:text-white/65"
               )
             }
           >
@@ -67,15 +58,43 @@ export function Sidebar({ className }: { className?: string }) {
         ))}
       </nav>
 
-      {/* Motivation footer */}
-      <div className="mt-auto rounded-xl bg-gradient-to-br from-primary/5 to-purple-500/5 border border-primary/10 p-4">
-        <div className="flex items-center gap-2 mb-1">
-          <Flame className="h-4 w-4 text-orange-500" />
-          <span className="text-xs font-semibold">Stay Consistent</span>
+      {/* Bottom section */}
+      <div className="mt-auto space-y-3">
+        <NavLink to="/trackers/new">
+          <button className="flex w-full items-center justify-center gap-2 rounded-[10px] border border-dashed border-white/20 bg-white/[0.08] px-4 py-2.5 text-[13px] font-bold text-white transition-all hover:bg-white/[0.14]">
+            <Plus className="h-4 w-4" />
+            New Pulse
+          </button>
+        </NavLink>
+
+        {/* Streak card */}
+        <div className="rounded-[14px] border border-[#16A34A]/20 bg-[#16A34A]/10 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-[28px] font-extrabold leading-none text-[#22C55E]">
+                12
+              </div>
+              <div className="mt-1 text-[9px] font-bold uppercase tracking-[1.5px] text-white/30">
+                Day Streak
+              </div>
+            </div>
+            <span className="text-[24px]">🔥</span>
+          </div>
+          <div className="mt-3 flex gap-[3px]">
+            {Array.from({ length: 15 }).map((_, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "h-[3px] flex-1 rounded-sm",
+                  i < 12 ? "bg-[#16A34A]" : "bg-white/10"
+                )}
+              />
+            ))}
+          </div>
+          <p className="mt-2 text-[10px] text-white/25">
+            3 more to beat your best!
+          </p>
         </div>
-        <p className="text-[11px] text-muted-foreground leading-relaxed">
-          Small daily actions lead to big results. Keep tracking!
-        </p>
       </div>
     </aside>
   )

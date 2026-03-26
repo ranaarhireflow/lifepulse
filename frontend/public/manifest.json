@@ -4,8 +4,8 @@
   "description": "Track anything. Build streaks. See your progress. Your life, one tap at a time.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#6366f1",
+  "background_color": "#0F1F17",
+  "theme_color": "#16A34A",
   "orientation": "portrait-primary",
   "scope": "/",
   "icons": [

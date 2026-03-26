@@ -3,34 +3,15 @@ import { Navigate } from "react-router-dom"
 import { motion } from "framer-motion"
 import { useAuth } from "@/store/auth-context"
 import { BRAND } from "@/lib/brand"
+import { PulseLogo } from "@/components/common/PulseLogo"
 import { Button } from "@/components/ui/button"
 import { Loader2, Activity, TrendingUp, Bell, Flame } from "lucide-react"
 
 const FEATURES = [
-  {
-    icon: Activity,
-    label: "Track Anything",
-    desc: "Weight, habits, water, workouts, sleep, reading — you name it",
-    color: "#6366f1",
-  },
-  {
-    icon: TrendingUp,
-    label: "See Your Trends",
-    desc: "Beautiful charts, GitHub-style heatmaps, and detailed analytics",
-    color: "#22c55e",
-  },
-  {
-    icon: Bell,
-    label: "Smart Reminders",
-    desc: "Multiple daily alerts per tracker — never miss a log",
-    color: "#3b82f6",
-  },
-  {
-    icon: Flame,
-    label: "Build Streaks",
-    desc: "Stay consistent with streak tracking and celebrations",
-    color: "#f59e0b",
-  },
+  { icon: Activity, label: "Track Anything", desc: "Weight, habits, water, workouts, sleep, reading", color: "#16A34A" },
+  { icon: TrendingUp, label: "See Your Trends", desc: "Charts, heatmaps, streaks, and detailed analytics", color: "#0284C7" },
+  { icon: Bell, label: "Smart Reminders", desc: "Multiple daily alerts per pulse — never miss a log", color: "#D97706" },
+  { icon: Flame, label: "Build Streaks", desc: "Stay consistent. Track habits. Achieve monk mode.", color: "#EA580C" },
 ]
 
 export function LoginPage() {
@@ -39,16 +20,14 @@ export function LoginPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-indigo-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/30">
+      <div className="flex min-h-screen items-center justify-center bg-[#0F1F17]">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           className="flex flex-col items-center gap-4"
         >
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-lg animate-pulse shadow-xl shadow-indigo-500/30">
-            {BRAND.logo}
-          </div>
-          <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />
+          <PulseLogo size={64} className="animate-pulse" />
+          <Loader2 className="h-5 w-5 animate-spin text-[#22C55E]" />
         </motion.div>
       </div>
     )
@@ -66,32 +45,31 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/30">
-      {/* Left side — Brand hero (desktop only) */}
+    <div className="flex min-h-screen bg-[#0F1F17]">
+      {/* Left: Brand */}
       <div className="hidden lg:flex lg:flex-1 items-center justify-center p-12">
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-lg"
+          className="max-w-md"
         >
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
-            className="mb-8 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-2xl shadow-2xl shadow-indigo-500/40"
           >
-            {BRAND.logo}
+            <PulseLogo size={72} />
           </motion.div>
 
-          <h1 className="text-5xl font-bold tracking-tight mb-3">
+          <h1 className="mt-8 text-5xl font-extrabold tracking-tight text-white">
             {BRAND.name}
           </h1>
-          <p className="text-xl text-muted-foreground mb-10">
+          <p className="mt-2 text-lg text-white/40">
             {BRAND.description}
           </p>
 
-          <div className="space-y-5">
+          <div className="mt-12 space-y-5">
             {FEATURES.map((f, i) => (
               <motion.div
                 key={f.label}
@@ -102,13 +80,13 @@ export function LoginPage() {
               >
                 <div
                   className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-                  style={{ backgroundColor: `${f.color}15` }}
+                  style={{ backgroundColor: `${f.color}20` }}
                 >
                   <f.icon className="h-5 w-5" style={{ color: f.color }} />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">{f.label}</p>
-                  <p className="text-sm text-muted-foreground">{f.desc}</p>
+                  <p className="font-bold text-sm text-white">{f.label}</p>
+                  <p className="text-sm text-white/40">{f.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -116,7 +94,7 @@ export function LoginPage() {
         </motion.div>
       </div>
 
-      {/* Right side — Login card */}
+      {/* Right: Login */}
       <div className="flex flex-1 items-center justify-center p-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -130,26 +108,27 @@ export function LoginPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-2xl shadow-2xl shadow-indigo-500/40"
+              className="mx-auto"
             >
-              {BRAND.logo}
+              <PulseLogo size={72} className="mx-auto" />
             </motion.div>
-            <h1 className="text-3xl font-bold tracking-tight">{BRAND.name}</h1>
-            <p className="text-muted-foreground mt-1">{BRAND.description}</p>
+            <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-white">
+              {BRAND.name}
+            </h1>
+            <p className="mt-1 text-white/40">{BRAND.description}</p>
           </div>
 
           {/* Login card */}
-          <div className="rounded-3xl border bg-card/80 backdrop-blur-sm p-8 shadow-xl shadow-black/5 dark:shadow-black/20">
-            <h2 className="text-xl font-bold text-center mb-1">Welcome</h2>
-            <p className="text-sm text-muted-foreground text-center mb-8">
+          <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-8">
+            <h2 className="text-xl font-bold text-center text-white mb-1">Welcome</h2>
+            <p className="text-sm text-white/40 text-center mb-8">
               Sign in to start tracking your life
             </p>
 
             <Button
               onClick={handleSignIn}
               disabled={signingIn}
-              className="w-full gap-3 h-12 text-base rounded-xl shadow-sm"
-              variant="outline"
+              className="w-full gap-3 h-12 text-base rounded-xl bg-white text-[#0F1F17] hover:bg-white/90 font-bold"
             >
               {signingIn ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -172,15 +151,15 @@ export function LoginPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 + i * 0.08 }}
-                  className="rounded-xl bg-accent/40 p-3 text-center"
+                  className="rounded-xl bg-white/5 p-3 text-center"
                 >
                   <f.icon className="mx-auto mb-1 h-4 w-4" style={{ color: f.color }} />
-                  <p className="text-[11px] font-semibold">{f.label}</p>
+                  <p className="text-[11px] font-bold text-white/80">{f.label}</p>
                 </motion.div>
               ))}
             </div>
 
-            <p className="text-center text-[11px] text-muted-foreground mt-6 leading-relaxed">
+            <p className="text-center text-[11px] text-white/25 mt-6 leading-relaxed">
               Free forever. No subscriptions. No ads.
               <br />
               Your data stays private and secure.

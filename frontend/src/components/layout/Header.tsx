@@ -7,8 +7,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { LogOut, Moon, Sun } from "lucide-react"
+import { LogOut, Moon, Sun, Bell } from "lucide-react"
 import { useTheme } from "@/hooks/useTheme"
+import { PulseLogo } from "@/components/common/PulseLogo"
+import { BRAND } from "@/lib/brand"
 
 export function Header() {
   const { user, signOut } = useAuth()
@@ -25,10 +27,8 @@ export function Header() {
     <header className="flex h-14 items-center justify-between border-b border-border bg-background px-4 lg:px-6">
       {/* Mobile: logo */}
       <div className="flex items-center gap-2 lg:hidden">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
-          LP
-        </div>
-        <span className="font-bold">LifePulse</span>
+        <PulseLogo size={32} />
+        <span className="font-extrabold text-sm">{BRAND.name}</span>
       </div>
 
       {/* Desktop: empty left space */}
@@ -36,9 +36,14 @@ export function Header() {
 
       {/* Right: user menu */}
       <div className="flex items-center gap-2">
+        <button className="relative rounded-[10px] border border-border bg-card p-2 text-muted-foreground hover:text-foreground transition-colors">
+          <Bell className="h-4 w-4" />
+          <div className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
+        </button>
+
         <button
           onClick={toggleTheme}
-          className="rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+          className="rounded-[10px] border border-border bg-card p-2 text-muted-foreground hover:text-foreground transition-colors"
         >
           {theme === "dark" ? (
             <Sun className="h-4 w-4" />
@@ -49,9 +54,11 @@ export function Header() {
 
         <DropdownMenu>
           <DropdownMenuTrigger className="outline-none">
-            <Avatar className="h-8 w-8 cursor-pointer">
+            <Avatar className="h-8 w-8 cursor-pointer rounded-[10px]">
               <AvatarImage src={user?.photo_url || ""} />
-              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+              <AvatarFallback className="rounded-[10px] bg-gradient-to-br from-[#1A3526] to-[#16A34A] text-white text-xs">
+                {initials}
+              </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
