@@ -66,6 +66,8 @@ export function TrackersPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<Tracker | null>(null)
   const [editPulse, setEditPulse] = useState<Tracker | null>(null)
   const [editName, setEditName] = useState("")
+  const [editIcon, setEditIcon] = useState("")
+  const [editColor, setEditColor] = useState("")
   const [editUnit, setEditUnit] = useState("")
   const [editTarget, setEditTarget] = useState("")
   const [editDefault, setEditDefault] = useState("")
@@ -74,6 +76,8 @@ export function TrackersPage() {
   const openEdit = (t: Tracker) => {
     setEditPulse(t)
     setEditName(t.name)
+    setEditIcon(t.icon || "📊")
+    setEditColor(t.color || "#16A34A")
     setEditUnit(t.unit || "")
     setEditTarget(t.target_value ? String(t.target_value) : "")
     setEditDefault(t.default_behavior)
@@ -85,6 +89,8 @@ export function TrackersPage() {
     try {
       await updateTracker(editPulse.id, {
         name: editName,
+        icon: editIcon,
+        color: editColor,
         unit: editUnit || null,
         target_value: editTarget ? parseFloat(editTarget) : null,
         default_behavior: editDefault as "CARRY_FORWARD" | "ZERO" | "NULL",
@@ -228,27 +234,66 @@ export function TrackersPage() {
       {/* Edit drawer */}
       <ConfigDrawer open={!!editPulse} onClose={() => setEditPulse(null)} title="Edit Pulse" description="Update pulse settings">
         {editPulse && (
-          <div className="space-y-4">
+          <div className="space-y-5">
+            {/* Icon + Color */}
+            <div className="flex gap-5">
+              <div className="flex-1">
+                <Label className="text-[12px]">Icon</Label>
+                <div className="grid grid-cols-8 gap-1 mt-1.5">
+                  {["⚖️","❤️","💧","😴","🌅","👣","🔥","💓","🏋️","🏃","⏱️","📝","🧘","🧠","📖","✍️","📱","🥗","🚫","🙏","😊","💰","🪥","🌙","☕","🎯","💪","✨","🎵","🌿","🍎","📊"].map((i) => (
+                    <button key={i} onClick={() => setEditIcon(i)}
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg text-[15px] transition-all ${editIcon === i ? "ring-2 ring-primary bg-accent scale-110" : "hover:bg-accent/50"}`}>
+                      {i}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label className="text-[12px]">Color</Label>
+                <div className="grid grid-cols-4 gap-1 mt-1.5">
+                  {["#16A34A","#0284C7","#8B5CF6","#D97706","#EC4899","#EF4444","#F59E0B","#14B8A6","#6366F1","#22C55E","#06B6D4","#64748B"].map((c) => (
+                    <button key={c} onClick={() => setEditColor(c)}
+                      className={`h-7 w-7 rounded-lg transition-all ${editColor === c ? "ring-2 ring-foreground scale-110" : ""}`}
+                      style={{ backgroundColor: c }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Name */}
             <div>
               <Label className="text-[12px]">Name</Label>
               <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="mt-1" />
             </div>
+
+            {/* Type — read-only (changing type would break existing data) */}
+            <div>
+              <Label className="text-[12px]">Type</Label>
+              <div className="mt-1 rounded-lg border border-border bg-secondary px-3 py-2 text-[13px] font-semibold text-muted-foreground">
+                {TYPE_LABELS[editPulse.type] || editPulse.type}
+                <span className="text-[10px] ml-2 opacity-50">(cannot change — would break existing data)</span>
+              </div>
+            </div>
+
+            {/* Unit */}
             <div>
               <Label className="text-[12px]">Unit</Label>
               <Input value={editUnit} onChange={(e) => setEditUnit(e.target.value)} placeholder="e.g. kg, pages, glasses" className="mt-1" />
             </div>
+
+            {/* Target */}
             {editPulse.type !== "BOOLEAN" && editPulse.type !== "TEXT" && (
               <div>
                 <Label className="text-[12px]">Daily Target</Label>
                 <Input type="number" value={editTarget} onChange={(e) => setEditTarget(e.target.value)} placeholder="Optional" className="mt-1" />
               </div>
             )}
+
+            {/* Default */}
             <div>
               <Label className="text-[12px]">When Not Logged</Label>
               <Select value={editDefault} onValueChange={(v) => v && setEditDefault(v)}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="NULL">Leave empty</SelectItem>
                   <SelectItem value="ZERO">Default to 0</SelectItem>
@@ -257,18 +302,7 @@ export function TrackersPage() {
               </Select>
             </div>
 
-            <div className="border-t border-border pt-4 mt-2">
-              <div className="flex items-center justify-between text-[12px] text-muted-foreground mb-2">
-                <span>Type</span>
-                <span className="font-bold">{TYPE_LABELS[editPulse.type] || editPulse.type}</span>
-              </div>
-              <div className="flex items-center justify-between text-[12px] text-muted-foreground">
-                <span>Icon</span>
-                <span className="text-[18px]">{editPulse.icon || "📊"}</span>
-              </div>
-            </div>
-
-            <Button onClick={saveEdit} disabled={!editName.trim() || saving} className="w-full">
+            <Button onClick={saveEdit} disabled={!editName.trim() || saving} className="w-full mt-2">
               {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
               Save Changes
             </Button>
