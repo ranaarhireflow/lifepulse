@@ -12,6 +12,7 @@ import {
   Bell,
   Settings2,
   Trash2,
+  Pencil,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ConfigDrawer } from "@/components/common/ConfigDrawer"
@@ -79,6 +80,34 @@ export function TrackerDetailPage() {
   const [newAlertTime, setNewAlertTime] = useState("08:00")
   const [newAlertLabel, setNewAlertLabel] = useState("")
   const [newAlertDays, setNewAlertDays] = useState([1, 2, 3, 4, 5, 6, 7])
+  const [editingAlertId, setEditingAlertId] = useState<string | null>(null)
+  const [editTime, setEditTime] = useState("")
+  const [editLabel, setEditLabel] = useState("")
+  const [editDays, setEditDays] = useState<number[]>([])
+
+  const startEdit = (alert: { id: string; alert_time: string; label: string | null; alert_days: number[] }) => {
+    setEditingAlertId(alert.id)
+    setEditTime(alert.alert_time)
+    setEditLabel(alert.label || "")
+    setEditDays(alert.alert_days || [1,2,3,4,5,6,7])
+  }
+
+  const saveEdit = async () => {
+    if (!editingAlertId || !tracker) return
+    try {
+      // Delete old + create new (no PATCH endpoint)
+      await api.delete(`/trackers/${tracker.id}/alerts/${editingAlertId}`)
+      await api.post(`/trackers/${tracker.id}/alerts`, {
+        alert_time: editTime,
+        alert_days: editDays,
+        label: editLabel || null,
+        enabled: true,
+      })
+      setEditingAlertId(null)
+      const t = await fetchTracker(tracker.id)
+      setTracker(t)
+    } catch { /* */ }
+  }
 
   useEffect(() => {
     if (!id) return
@@ -252,44 +281,82 @@ export function TrackerDetailPage() {
               <div className="space-y-2">
                 {tracker.alerts.map((alert) => (
                   <div key={alert.id} className="rounded-xl border border-border bg-card p-3.5">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-[20px] font-extrabold tracking-tight">{alert.alert_time}</div>
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={alert.enabled}
-                          onCheckedChange={async (checked) => {
-                            try {
-                              // Toggle enabled via a delete + recreate (API doesn't have PATCH for alerts)
-                              // For now just visual — full edit needs backend PATCH endpoint
-                            } catch { /* */ }
-                          }}
-                        />
-                        <button
-                          onClick={async () => {
-                            try {
-                              await api.delete(`/trackers/${tracker.id}/alerts/${alert.id}`)
-                              const t = await fetchTracker(tracker.id)
-                              setTracker(t)
-                            } catch { /* */ }
-                          }}
-                          className="rounded-lg p-1 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all"
-                          title="Delete reminder"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
+                    {editingAlertId === alert.id ? (
+                      /* Edit mode */
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[12px] font-bold">Edit Reminder</span>
+                          <button onClick={() => setEditingAlertId(null)} className="text-[10px] text-muted-foreground hover:text-foreground">Cancel</button>
+                        </div>
+                        <div>
+                          <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Time</label>
+                          <Input type="time" value={editTime} onChange={(e) => setEditTime(e.target.value)} className="w-full" />
+                        </div>
+                        <div>
+                          <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Label</label>
+                          <Input value={editLabel} onChange={(e) => setEditLabel(e.target.value)} placeholder="e.g. Morning reminder" className="w-full" />
+                        </div>
+                        <div>
+                          <label className="text-[11px] font-semibold text-muted-foreground block mb-1.5">Repeat on</label>
+                          <div className="flex gap-1.5">
+                            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d, i) => {
+                              const dayNum = i + 1
+                              const active = editDays.includes(dayNum)
+                              return (
+                                <button key={d} type="button"
+                                  onClick={() => setEditDays(prev => active ? prev.filter(x => x !== dayNum) : [...prev, dayNum])}
+                                  className={`flex-1 rounded-lg py-1.5 text-[10px] font-bold transition-all ${
+                                    active ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground border border-border"
+                                  }`}>
+                                  {d}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                        <Button size="sm" className="w-full" onClick={saveEdit}>Save Changes</Button>
                       </div>
-                    </div>
-                    <div className="flex gap-1.5 mb-1.5">
-                      {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => {
-                        const active = (alert.alert_days || [1,2,3,4,5,6,7]).includes(i + 1)
-                        return (
-                          <div key={i} className={`flex h-6 w-6 items-center justify-center rounded-full text-[9px] font-bold ${
-                            active ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground/50"
-                          }`}>{d}</div>
-                        )
-                      })}
-                    </div>
-                    {alert.label && <p className="text-[11px] text-muted-foreground">{alert.label}</p>}
+                    ) : (
+                      /* View mode */
+                      <>
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="text-[20px] font-extrabold tracking-tight">{alert.alert_time}</div>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              onClick={() => startEdit(alert)}
+                              className="rounded-lg p-1 text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all"
+                              title="Edit reminder"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await api.delete(`/trackers/${tracker.id}/alerts/${alert.id}`)
+                                  const t = await fetchTracker(tracker.id)
+                                  setTracker(t)
+                                } catch { /* */ }
+                              }}
+                              className="rounded-lg p-1 text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all"
+                              title="Delete reminder"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex gap-1.5 mb-1.5">
+                          {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => {
+                            const active = (alert.alert_days || [1,2,3,4,5,6,7]).includes(i + 1)
+                            return (
+                              <div key={i} className={`flex h-6 w-6 items-center justify-center rounded-full text-[9px] font-bold ${
+                                active ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground/50"
+                              }`}>{d}</div>
+                            )
+                          })}
+                        </div>
+                        {alert.label && <p className="text-[11px] text-muted-foreground">{alert.label}</p>}
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
