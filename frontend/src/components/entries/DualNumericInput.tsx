@@ -36,7 +36,7 @@ export function DualNumericInput({ value1, value2, onChange }: DualNumericInputP
         value={local1}
         placeholder="—"
         onChange={(e) => { setLocal1(e.target.value); handleChange(e.target.value, local2) }}
-        className="h-[34px] w-[48px] rounded-[9px] border-[1.5px] border-border bg-[#F4F7F4] dark:bg-muted text-center text-[13px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/10"
+        className="h-[34px] w-[48px] rounded-[9px] border-[1.5px] border-border bg-secondary dark:bg-muted text-center text-[13px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/10"
         style={{ fontFamily: "inherit" }}
       />
       <span className="text-muted-foreground font-bold text-xs">/</span>
@@ -46,7 +46,7 @@ export function DualNumericInput({ value1, value2, onChange }: DualNumericInputP
         value={local2}
         placeholder="—"
         onChange={(e) => { setLocal2(e.target.value); handleChange(local1, e.target.value) }}
-        className="h-[34px] w-[48px] rounded-[9px] border-[1.5px] border-border bg-[#F4F7F4] dark:bg-muted text-center text-[13px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/10"
+        className="h-[34px] w-[48px] rounded-[9px] border-[1.5px] border-border bg-secondary dark:bg-muted text-center text-[13px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/10"
         style={{ fontFamily: "inherit" }}
       />
     </div>

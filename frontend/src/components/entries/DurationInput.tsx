@@ -39,7 +39,7 @@ export function DurationInput({ value, onChange }: DurationInputProps) {
         type="number" inputMode="numeric" min={0}
         value={localH} placeholder="0"
         onChange={(e) => { setLocalH(e.target.value); handleChange(e.target.value, localM) }}
-        className="h-[34px] w-[44px] rounded-[9px] border-[1.5px] border-border bg-[#F4F7F4] dark:bg-muted text-center text-[14px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/10"
+        className="h-[34px] w-[44px] rounded-[9px] border-[1.5px] border-border bg-secondary dark:bg-muted text-center text-[14px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/10"
         style={{ fontFamily: "inherit" }}
       />
       <span className="text-muted-foreground font-bold text-xs">:</span>
@@ -47,7 +47,7 @@ export function DurationInput({ value, onChange }: DurationInputProps) {
         type="number" inputMode="numeric" min={0} max={59}
         value={localM} placeholder="0"
         onChange={(e) => { setLocalM(e.target.value); handleChange(localH, e.target.value) }}
-        className="h-[34px] w-[44px] rounded-[9px] border-[1.5px] border-border bg-[#F4F7F4] dark:bg-muted text-center text-[14px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/10"
+        className="h-[34px] w-[44px] rounded-[9px] border-[1.5px] border-border bg-secondary dark:bg-muted text-center text-[14px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/10"
         style={{ fontFamily: "inherit" }}
       />
       <span className="text-[10px] text-muted-foreground font-semibold">hrs</span>

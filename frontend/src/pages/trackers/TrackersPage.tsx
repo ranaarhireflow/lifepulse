@@ -168,7 +168,7 @@ export function TrackersPage() {
                     <div
                       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xl"
                       style={{
-                        backgroundColor: `${tracker.color || "#6366f1"}12`,
+                        backgroundColor: `${tracker.color || "#16A34A"}12`,
                       }}
                     >
                       {tracker.icon || "📊"}

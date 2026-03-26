@@ -128,7 +128,7 @@ export function AnalyticsPage() {
                     styles={buildStyles({
                       textSize: "24px",
                       textColor: "var(--foreground)",
-                      pathColor: "oklch(0.488 0.243 264.376)",
+                      pathColor: "#16A34A",
                       trailColor: "var(--border)",
                     })}
                   />
@@ -159,12 +159,12 @@ export function AnalyticsPage() {
           {/* Per-tracker summary */}
           <div className="space-y-3">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Per Tracker
+              Per Pulse
             </h2>
             {trackers.map((tracker) => {
               const a = analyticsMap[tracker.id]
               if (!a) return null
-              const color = tracker.color || "#6366f1"
+              const color = tracker.color || "#16A34A"
 
               return (
                 <Card

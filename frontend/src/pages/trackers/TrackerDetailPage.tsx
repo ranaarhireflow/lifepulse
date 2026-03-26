@@ -87,7 +87,7 @@ export function TrackerDetailPage() {
       .finally(() => setLoading(false))
   }, [id, range])
 
-  const color = tracker?.color || "#6366f1"
+  const color = tracker?.color || "#16A34A"
 
   // Transform heatmap data for react-activity-calendar
   const heatmapActivities = useMemo(() => {

@@ -48,7 +48,7 @@ export function NumericInput({ value, defaultValue, unit, color, onChange }: Num
         value={localValue}
         placeholder={isDefault ? String(defaultValue) : "0"}
         onChange={(e) => handleChange(e.target.value)}
-        className={`h-[34px] w-[58px] rounded-[9px] border-[1.5px] border-border bg-[#F4F7F4] dark:bg-muted text-center text-[14px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/10 ${
+        className={`h-[34px] w-[58px] rounded-[9px] border-[1.5px] border-border bg-secondary dark:bg-muted text-center text-[14px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/10 ${
           isDefault ? "text-muted-foreground italic" : ""
         }`}
         style={{ fontFamily: "inherit" }}

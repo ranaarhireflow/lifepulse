@@ -36,7 +36,7 @@ const DEFAULT_BEHAVIORS = [
 ]
 
 const PRESET_COLORS = [
-  "#6366f1", "#8b5cf6", "#a855f7", "#d946ef",
+  "#16A34A", "#8b5cf6", "#a855f7", "#d946ef",
   "#ec4899", "#ef4444", "#f97316", "#f59e0b",
   "#eab308", "#84cc16", "#22c55e", "#10b981",
   "#14b8a6", "#06b6d4", "#3b82f6", "#64748b",
@@ -58,7 +58,7 @@ export function TrackerCreatePage() {
   // Custom form state
   const [name, setName] = useState("")
   const [icon, setIcon] = useState("🎯")
-  const [color, setColor] = useState("#6366f1")
+  const [color, setColor] = useState("#16A34A")
   const [type, setType] = useState("NUMERIC")
   const [unit, setUnit] = useState("")
   const [unitSecondary, setUnitSecondary] = useState("")
@@ -338,7 +338,7 @@ export function TrackerCreatePage() {
                 <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
                   <div
                     className="flex h-12 w-12 items-center justify-center rounded-xl text-2xl"
-                    style={{ backgroundColor: `${t.color || "#6366f1"}12` }}
+                    style={{ backgroundColor: `${t.color || "#16A34A"}12` }}
                   >
                     {t.icon || "📊"}
                   </div>

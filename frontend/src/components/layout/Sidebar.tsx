@@ -59,7 +59,7 @@ export function Sidebar({ className }: { className?: string }) {
       </nav>
 
       {/* Bottom section */}
-      <div className="mt-auto space-y-3">
+      <div className="mt-auto space-y-4">
         <NavLink to="/trackers/new">
           <button className="flex w-full items-center justify-center gap-2 rounded-[10px] border border-dashed border-white/20 bg-white/[0.08] px-4 py-2.5 text-[13px] font-bold text-white transition-all hover:bg-white/[0.14]">
             <Plus className="h-4 w-4" />
