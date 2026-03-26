@@ -43,15 +43,15 @@ export function TrackerCard({ data, onUpdate }: TrackerCardProps) {
         <div className={`absolute inset-0 bg-gradient-to-br ${gradient}`} />
 
         {/* Content */}
-        <div className="relative p-5">
+        <div className="relative px-4 py-3.5">
           {/* Top row: icon + name + streak */}
-          <div className="flex items-start justify-between mb-4">
+          <div className="flex items-start justify-between mb-2.5">
             <div className="flex items-center gap-3">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-black/30 text-[28px] backdrop-blur-sm shadow-lg">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-black/25 text-[22px] backdrop-blur-sm shadow-lg">
                 {tracker.icon || "📊"}
               </div>
               <div>
-                <h3 className="text-[18px] font-extrabold text-white tracking-tight">{tracker.name}</h3>
+                <h3 className="text-[15px] font-bold text-white tracking-tight">{tracker.name}</h3>
                 <p className="text-[12px] text-white/40 mt-0.5">
                   {tracker.target_value ? `${metaText} · target ${tracker.target_value}` : metaText}
                 </p>
@@ -64,7 +64,7 @@ export function TrackerCard({ data, onUpdate }: TrackerCardProps) {
           </div>
 
           {/* Difficulty stars */}
-          <div className="flex gap-1 mb-4">
+          <div className="flex gap-1 mb-2.5">
             {[1, 2, 3, 4, 5].map((s) => (
               <Star key={s} className={`h-3 w-3 ${s <= 1 ? "text-amber-400 fill-amber-400" : "text-white/10"}`} />
             ))}
