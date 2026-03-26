@@ -4,22 +4,34 @@ interface PulseLogoProps {
 }
 
 export function PulseLogo({ size = 40, className }: PulseLogoProps) {
+  const id = `plg-${size}`
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 42 42"
+      viewBox="0 0 48 48"
       fill="none"
       className={className}
     >
-      <rect x="1" y="1" width="40" height="40" rx="12" fill="#16A34A" />
-      <path
-        d="M8 22H14L17 14L21 30L25 18L28 22H34"
-        stroke="white"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="48" y2="48">
+          <stop offset="0%" stopColor="#0D6B3B" />
+          <stop offset="100%" stopColor="#16A34A" />
+        </linearGradient>
+      </defs>
+      {/* Gradient rounded square */}
+      <rect width="48" height="48" rx="13" fill={`url(#${id})`} />
+      {/* Progress ring track */}
+      <circle cx="24" cy="22" r="16" stroke="white" strokeWidth="2" opacity="0.2" fill="none" strokeDasharray="80 20" />
+      {/* Progress ring fill — partial arc */}
+      <circle cx="24" cy="22" r="16" stroke="white" strokeWidth="2.5" opacity="0.6" fill="none" strokeDasharray="67 100.5" strokeLinecap="round" transform="rotate(-90 24 22)" />
+      {/* Meditation figure */}
+      <g transform="translate(8,7) scale(1.35)">
+        <path
+          fill="white"
+          d="M12 4c1.11 0 2 .89 2 2s-.89 2-2 2s-2-.89-2-2s.9-2 2-2m9 12v-2c-2.24 0-4.16-.96-5.6-2.68l-1.34-1.6A1.98 1.98 0 0 0 12.53 9H11.5c-.61 0-1.17.26-1.55.72l-1.34 1.6C7.16 13.04 5.24 14 3 14v2c2.77 0 5.19-1.17 7-3.25V15l-3.88 1.55c-.67.27-1.12.95-1.12 1.66C5 19.2 5.8 20 6.79 20H9v-.5a2.5 2.5 0 0 1 2.5-2.5h3c.28 0 .5.22.5.5s-.22.5-.5.5h-3c-.83 0-1.5.67-1.5 1.5v.5h7.21c.99 0 1.79-.8 1.79-1.79c0-.71-.45-1.39-1.12-1.66L14 15v-2.25c1.81 2.08 4.23 3.25 7 3.25"
+        />
+      </g>
     </svg>
   )
 }
