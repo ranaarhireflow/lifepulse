@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react"
-import { Input } from "@/components/ui/input"
 
 interface DualNumericInputProps {
   value1: number | null
@@ -10,14 +9,7 @@ interface DualNumericInputProps {
   onChange: (v1: number | null, v2: number | null) => void
 }
 
-export function DualNumericInput({
-  value1,
-  value2,
-  unit1,
-  unit2,
-  color,
-  onChange,
-}: DualNumericInputProps) {
+export function DualNumericInput({ value1, value2, onChange }: DualNumericInputProps) {
   const [local1, setLocal1] = useState(value1 !== null ? String(value1) : "")
   const [local2, setLocal2] = useState(value2 !== null ? String(value2) : "")
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
@@ -37,36 +29,26 @@ export function DualNumericInput({
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <div className="relative flex-1 max-w-[90px]">
-        <Input
-          type="number"
-          inputMode="decimal"
-          value={local1}
-          placeholder={unit1 || "—"}
-          onChange={(e) => {
-            setLocal1(e.target.value)
-            handleChange(e.target.value, local2)
-          }}
-          className="h-9 text-center"
-          style={color ? { borderColor: `${color}40` } : undefined}
-        />
-      </div>
-      <span className="text-muted-foreground font-medium">/</span>
-      <div className="relative flex-1 max-w-[90px]">
-        <Input
-          type="number"
-          inputMode="decimal"
-          value={local2}
-          placeholder={unit2 || "—"}
-          onChange={(e) => {
-            setLocal2(e.target.value)
-            handleChange(local1, e.target.value)
-          }}
-          className="h-9 text-center"
-          style={color ? { borderColor: `${color}40` } : undefined}
-        />
-      </div>
+    <div className="flex items-center gap-[3px]">
+      <input
+        type="number"
+        inputMode="decimal"
+        value={local1}
+        placeholder="—"
+        onChange={(e) => { setLocal1(e.target.value); handleChange(e.target.value, local2) }}
+        className="h-[34px] w-[48px] rounded-[9px] border-[1.5px] border-border bg-[#F4F7F4] dark:bg-muted text-center text-[13px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/10"
+        style={{ fontFamily: "inherit" }}
+      />
+      <span className="text-muted-foreground font-bold text-xs">/</span>
+      <input
+        type="number"
+        inputMode="decimal"
+        value={local2}
+        placeholder="—"
+        onChange={(e) => { setLocal2(e.target.value); handleChange(local1, e.target.value) }}
+        className="h-[34px] w-[48px] rounded-[9px] border-[1.5px] border-border bg-[#F4F7F4] dark:bg-muted text-center text-[13px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/10"
+        style={{ fontFamily: "inherit" }}
+      />
     </div>
   )
 }

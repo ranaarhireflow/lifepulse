@@ -1,19 +1,17 @@
-import { Input } from "@/components/ui/input"
-
 interface TimeInputProps {
-  value: string | null // "HH:MM"
+  value: string | null
   color: string | null
   onChange: (value: string | null) => void
 }
 
-export function TimeInput({ value, color, onChange }: TimeInputProps) {
+export function TimeInput({ value, onChange }: TimeInputProps) {
   return (
-    <Input
+    <input
       type="time"
       value={value || ""}
       onChange={(e) => onChange(e.target.value || null)}
-      className="h-9 w-[130px]"
-      style={color ? { borderColor: `${color}40` } : undefined}
+      className="h-[34px] w-[68px] rounded-[9px] border-[1.5px] border-border bg-[#F4F7F4] dark:bg-muted text-center text-[13px] font-bold text-foreground transition-all focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/10"
+      style={{ fontFamily: "inherit" }}
     />
   )
 }
