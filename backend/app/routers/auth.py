@@ -1,20 +1,41 @@
+import os
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.middleware.auth import get_current_user
+from app.middleware.auth import get_current_user, DEV_FIREBASE_UID, DEV_MODE
 from app.models.user import User
 from app.schemas.auth import LoginRequest, UserResponse, UserUpdate
-from app.services.firebase import verify_firebase_token
 
 router = APIRouter()
+
+
+@router.post("/dev-login", response_model=UserResponse)
+def dev_login(db: Session = Depends(get_db)):
+    """Dev mode: create/return dev user without Firebase."""
+    if not DEV_MODE:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Dev mode not enabled")
+
+    user = db.query(User).filter(User.firebase_uid == DEV_FIREBASE_UID).first()
+    if not user:
+        user = User(
+            firebase_uid=DEV_FIREBASE_UID,
+            email="dev@mypersonaltracker.app",
+            display_name="Dev User",
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    return user
 
 
 @router.post("/login", response_model=UserResponse)
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     """Verify Firebase token and create/update user record."""
+    from app.services.firebase import verify_firebase_token
+
     try:
         decoded = verify_firebase_token(request.id_token)
     except Exception:

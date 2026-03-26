@@ -1,26 +1,52 @@
-import uuid
+import os
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.user import User
-from app.services.firebase import verify_firebase_token
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
+
+DEV_FIREBASE_UID = "dev-user-001"
+DEV_MODE = not os.environ.get("FIREBASE_PROJECT_ID")
 
 
 async def get_current_user(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
+    request: Request,
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security)],
     db: Session = Depends(get_db),
 ) -> User:
-    """Verify Firebase ID token and return the corresponding user."""
-    token = credentials.credentials
+    """Verify auth and return the corresponding user."""
+
+    # Dev mode: use X-Dev-Mode header
+    if DEV_MODE and request.headers.get("X-Dev-Mode") == "true":
+        user = db.query(User).filter(User.firebase_uid == DEV_FIREBASE_UID).first()
+        if not user:
+            user = User(
+                firebase_uid=DEV_FIREBASE_UID,
+                email="dev@mypersonaltracker.app",
+                display_name="Dev User",
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+        return user
+
+    # Production: verify Firebase token
+    if not credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    from app.services.firebase import verify_firebase_token
 
     try:
-        decoded = verify_firebase_token(token)
+        decoded = verify_firebase_token(credentials.credentials)
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
