@@ -98,7 +98,7 @@ export function DailyPage() {
   )
 
   return (
-    <div className="h-full flex flex-col overflow-hidden relative max-w-md mx-auto w-full">
+    <div className="h-full flex flex-col overflow-hidden relative w-full">
       {/* TOP BAR — logo left, badges right */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2 shrink-0">
         {/* Left — Logo */}

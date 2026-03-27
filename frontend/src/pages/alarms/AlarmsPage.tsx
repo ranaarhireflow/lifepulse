@@ -82,7 +82,7 @@ export function AlarmsPage() {
   )
 
   return (
-    <div className="max-w-md mx-auto px-5 pt-6 pb-6">
+    <div className="px-5 pt-6 pb-6">
       <div className="space-y-6">
         {/* Header */}
         <motion.div

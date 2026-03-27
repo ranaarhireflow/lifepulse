@@ -40,7 +40,7 @@ export function AchievementsPage() {
   const unlocked = achievements.filter((a) => a.unlocked).length
 
   return (
-    <div className="max-w-md mx-auto px-5 pt-4 pb-6 space-y-6">
+    <div className="px-5 pt-4 pb-6 space-y-6">
       <div className="flex items-center">
         <button
           onClick={() => navigate("/score")}

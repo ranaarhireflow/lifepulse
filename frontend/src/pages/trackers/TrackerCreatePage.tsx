@@ -135,7 +135,7 @@ export function TrackerCreatePage() {
   /* ───────── CUSTOM FORM ───────── */
   if (showCustomForm) {
     return (
-      <div className="max-w-md mx-auto px-5 pt-6 pb-10 space-y-6">
+      <div className="px-5 pt-6 pb-10 space-y-6">
         {/* Back + header */}
         <div className="flex items-center gap-3">
           <button
@@ -393,7 +393,7 @@ export function TrackerCreatePage() {
 
   /* ───────── TEMPLATE SELECTION ───────── */
   return (
-    <div className="max-w-md mx-auto px-5 pt-6 pb-10 space-y-8">
+    <div className="px-5 pt-6 pb-10 space-y-8">
       {/* Header */}
       <div className="flex items-center gap-3">
         <button

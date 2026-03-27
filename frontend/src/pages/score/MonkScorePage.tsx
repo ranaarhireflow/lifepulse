@@ -383,7 +383,7 @@ export function MonkScorePage() {
   const hasMore = visibleSuggestions.length > INITIAL_SHOW_COUNT
 
   return (
-    <div className="max-w-md mx-auto px-5 pt-6 pb-6 relative">
+    <div className="px-5 pt-6 pb-6 relative">
       {/* Decorative side art — gradient silhouette on right */}
       <div className="absolute top-0 right-0 w-1/3 h-full pointer-events-none z-0 overflow-hidden opacity-20 dark:opacity-15">
         <div className="absolute inset-0" style={{

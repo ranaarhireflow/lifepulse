@@ -12,8 +12,8 @@ const TABS = [
 
 export function BottomNav() {
   return (
-    <nav className="shrink-0 px-4 pb-4 pt-1">
-      <div className="flex items-center justify-around rounded-2xl bg-card border border-border py-2 px-2">
+    <nav className="shrink-0 px-3 pt-1" style={{ paddingBottom: "max(12px, env(safe-area-inset-bottom, 12px))" }}>
+      <div className="flex items-center justify-around rounded-2xl bg-card border border-border py-2 px-1">
         {TABS.map((tab) => (
           <NavLink key={tab.to} to={tab.to} end={tab.to === "/"}
             className={({ isActive }) => cn(
