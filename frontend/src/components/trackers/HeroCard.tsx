@@ -1,6 +1,6 @@
 import { Flame, Zap, Star, Pencil } from "lucide-react"
 import { motion } from "framer-motion"
-import type { Tracker, TrackerAnalytics } from "@/services/trackers"
+import { updateTracker, type Tracker, type TrackerAnalytics } from "@/services/trackers"
 
 /** Type label map for display */
 const TYPE_LABELS: Record<string, string> = {
@@ -17,13 +17,23 @@ interface HeroCardProps {
   analytics: TrackerAnalytics
   scene: { bg: string; narrative: string }
   onEdit: () => void
+  onTrackerUpdate?: (t: Tracker) => void
 }
 
 /**
  * Pokemon-card-style hero section with gradient background, emoji, name,
  * streak/level badges, type badge, and star rating.
  */
-export function HeroCard({ tracker, analytics, scene, onEdit }: HeroCardProps) {
+export function HeroCard({ tracker, analytics, scene, onEdit, onTrackerUpdate }: HeroCardProps) {
+  const handleStarClick = async (rating: number) => {
+    // Toggle: if clicking same star, reset to 0
+    const newDifficulty = tracker.difficulty === rating ? 0 : rating
+    try {
+      const updated = await updateTracker(tracker.id, { difficulty: newDifficulty })
+      onTrackerUpdate?.(updated)
+    } catch { /* ignore */ }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -103,17 +113,23 @@ export function HeroCard({ tracker, analytics, scene, onEdit }: HeroCardProps) {
           )}
         </div>
 
-        {/* Stars row — 1 star per 3 streak days, max 5 */}
-        <div className="flex gap-1 mt-3">
-          {[1, 2, 3, 4, 5].map((s) => {
-            const filled = s <= Math.min(Math.floor(analytics.current_streak / 3) + 1, 5)
-            return (
+        {/* Interactive star rating — tap to set difficulty */}
+        <div className="flex gap-1.5 mt-3">
+          {[1, 2, 3, 4, 5].map((s) => (
+            <button
+              key={s}
+              onClick={() => handleStarClick(s)}
+              className="p-0.5 transition-transform active:scale-125"
+            >
               <Star
-                key={s}
-                className={`h-4 w-4 ${filled ? "text-amber-400 fill-amber-400" : "text-white/15"}`}
+                className={`h-5 w-5 transition-colors ${
+                  s <= (tracker.difficulty || 0)
+                    ? "text-amber-400 fill-amber-400 drop-shadow-[0_0_4px_rgba(251,191,36,0.5)]"
+                    : "text-white/20"
+                }`}
               />
-            )
-          })}
+            </button>
+          ))}
         </div>
       </div>
     </motion.div>

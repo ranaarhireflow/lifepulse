@@ -74,10 +74,12 @@ export function HabitCard({
         {/* Top — streak + edit + status */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 rounded-full bg-black/30 backdrop-blur px-3 py-1.5">
-              <span className="text-[14px]">🔥</span>
-              <span className="text-[12px] font-bold text-amber-400">12 day streak</span>
-            </div>
+            {entry && (
+              <div className="flex items-center gap-1.5 rounded-full bg-black/30 backdrop-blur px-3 py-1.5">
+                <span className="text-[14px]">✓</span>
+                <span className="text-[12px] font-bold text-emerald-400">Logged</span>
+              </div>
+            )}
             {tracker.times_per_day > 1 && (
               <div className="flex items-center gap-1 rounded-full bg-black/30 backdrop-blur px-2.5 py-1.5">
                 <span className="text-[12px] font-bold text-sky-400">{tracker.times_per_day}x daily</span>

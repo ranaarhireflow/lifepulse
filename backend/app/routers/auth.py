@@ -14,24 +14,17 @@ router = APIRouter()
 
 @router.post("/dev-login", response_model=UserResponse)
 def dev_login(db: Session = Depends(get_db)):
-    """Dev mode: create/return dev user without Firebase."""
-    if not DEV_MODE:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Dev mode not enabled")
-
+    """Dev mode: create/return dev user without Firebase. Always available for local testing."""
     user = db.query(User).filter(User.firebase_uid == DEV_FIREBASE_UID).first()
-    is_new = user is None
     if not user:
         user = User(
             firebase_uid=DEV_FIREBASE_UID,
             email="dev@mypersonaltracker.app",
-            display_name="Dev User",
+            display_name="Rajat",
         )
         db.add(user)
         db.commit()
         db.refresh(user)
-
-    if is_new:
-        create_default_trackers(user.id, db)
 
     return user
 

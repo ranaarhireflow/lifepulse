@@ -7,7 +7,9 @@ import {
 } from "react"
 import api from "@/services/api"
 
-const IS_DEV = !import.meta.env.VITE_FIREBASE_API_KEY
+// Dev mode: no Firebase key OR accessing from a non-localhost IP (mobile testing)
+const IS_DEV = !import.meta.env.VITE_FIREBASE_API_KEY ||
+  (typeof window !== "undefined" && !window.location.hostname.includes("localhost") && !window.location.hostname.includes("lifepulse"))
 
 interface AppUser {
   id: string

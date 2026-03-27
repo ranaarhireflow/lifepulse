@@ -27,14 +27,14 @@ async def get_current_user(
 ) -> User:
     """Verify auth and return the corresponding user."""
 
-    # Dev mode: use X-Dev-Mode header
-    if DEV_MODE and request.headers.get("X-Dev-Mode") == "true":
+    # Dev mode: use X-Dev-Mode header (always allowed for local testing)
+    if request.headers.get("X-Dev-Mode") == "true":
         user = db.query(User).filter(User.firebase_uid == DEV_FIREBASE_UID).first()
         if not user:
             user = User(
                 firebase_uid=DEV_FIREBASE_UID,
                 email="dev@mypersonaltracker.app",
-                display_name="Dev User",
+                display_name="Rajat",
             )
             db.add(user)
             db.commit()

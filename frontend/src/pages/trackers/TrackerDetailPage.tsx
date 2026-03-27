@@ -271,6 +271,7 @@ export function TrackerDetailPage() {
         analytics={analytics}
         scene={scene}
         onEdit={openEditDrawer}
+        onTrackerUpdate={setTracker}
       />
 
       {/* Stats Grid — 2x2 */}
