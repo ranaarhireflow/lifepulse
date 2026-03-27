@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react"
 import { useNavigate, NavLink } from "react-router-dom"
-import { Loader2, ChevronUp, ChevronDown, Sparkles, Trophy } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { Loader2, Trophy, Compass, Info } from "lucide-react"
+import { motion } from "framer-motion"
 import api from "@/services/api"
 import { PulseLogo } from "@/components/common/PulseLogo"
 import { fetchTrackers, type Tracker } from "@/services/trackers"
-import { SUGGESTED_HABITS } from "@/data/suggested-habits"
 import { LevelCard } from "@/components/score/LevelCard"
 import { StatRow } from "@/components/score/StatRow"
-import { SuggestedHabitRow } from "@/components/score/SuggestedHabitRow"
 
 interface MonkScore {
   level: number
@@ -31,16 +29,12 @@ const STATS = [
   { key: "focus", label: "Focus", emoji: "\u{1F3AF}", color: "#3B82F6", bgColor: "rgba(59, 130, 246, 0.15)" },
 ]
 
-const INITIAL_SHOW_COUNT = 5
 
 export function MonkScorePage() {
   const navigate = useNavigate()
   const [score, setScore] = useState<MonkScore | null>(null)
   const [loading, setLoading] = useState(true)
   const [trackers, setTrackers] = useState<Tracker[]>([])
-  const [dismissedSuggestions, setDismissedSuggestions] = useState<string[]>([])
-  const [expandedHabit, setExpandedHabit] = useState<string | null>(null)
-  const [showAll, setShowAll] = useState(false)
 
   // Maps tracker emoji -> stat dimension for "contributing trackers" display
   const DIMENSION_MAP: Record<string, string> = {
@@ -72,11 +66,6 @@ export function MonkScorePage() {
     return () => clearTimeout(timer)
   }, [])
 
-  const handleDismiss = (id: string) => {
-    setDismissedSuggestions(prev => [...prev, id])
-    setExpandedHabit(null)
-  }
-
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-7 w-7 animate-spin text-[#22C55E]" /></div>
   if (!score) return <div className="text-center py-20 text-muted-foreground">Could not load your rating</div>
 
@@ -85,10 +74,6 @@ export function MonkScorePage() {
   const xpIntoLevel = score.xp_total - (score.level ** 2 * 100)
   const xpNeededForLevel = xpForLevel - (score.level ** 2 * 100)
   const xpProgress = xpNeededForLevel > 0 ? Math.min(Math.round((xpIntoLevel / xpNeededForLevel) * 100), 100) : 100
-
-  const visibleSuggestions = SUGGESTED_HABITS.filter(h => !dismissedSuggestions.includes(h.id))
-  const displayedSuggestions = showAll ? visibleSuggestions : visibleSuggestions.slice(0, INITIAL_SHOW_COUNT)
-  const hasMore = visibleSuggestions.length > INITIAL_SHOW_COUNT
 
   return (
     <div className="px-5 pt-6 pb-6 relative">
@@ -141,81 +126,47 @@ export function MonkScorePage() {
           })}
         </div>
 
-        {/* Achievements Button */}
+        {/* Action buttons */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="flex gap-3"
+          className="space-y-3"
         >
           <button
             onClick={() => navigate("/achievements")}
-            className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-[#22C55E] py-4 text-[15px] font-extrabold text-black shadow-[0_0_30px_rgba(34,197,94,0.3)] hover:shadow-[0_0_40px_rgba(34,197,94,0.45)] transition-shadow"
+            className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#22C55E] py-4 text-[15px] font-extrabold text-black shadow-[0_0_30px_rgba(34,197,94,0.3)] hover:shadow-[0_0_40px_rgba(34,197,94,0.45)] transition-shadow"
           >
             <Trophy className="h-5 w-5" />
             Achievements
           </button>
+          <button
+            onClick={() => navigate("/trackers/new")}
+            className="w-full flex items-center justify-center gap-2 rounded-2xl border border-border bg-card py-3.5 text-[14px] font-bold text-foreground hover:bg-accent transition-colors"
+          >
+            <Compass className="h-4 w-4 text-primary" />
+            Discover New Habits
+          </button>
         </motion.div>
 
-        {/* Suggested Habits Section */}
-        {visibleSuggestions.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="h-4 w-4 text-[#22C55E]" />
-              <h2 className="text-[11px] font-extrabold uppercase tracking-[2px] text-muted-foreground">
-                Suggested Habits
-              </h2>
-              <span className="text-[10px] font-bold text-muted-foreground/70 ml-auto">
-                {visibleSuggestions.length} suggestions
-              </span>
-            </div>
-
-            <div className="rounded-2xl border border-border bg-card overflow-hidden">
-              <AnimatePresence mode="popLayout">
-                {displayedSuggestions.map((habit, i) => (
-                  <div key={habit.id} className={i < displayedSuggestions.length - 1 ? "border-b border-border" : ""}>
-                    <SuggestedHabitRow
-                      habit={habit}
-                      index={i}
-                      isExpanded={expandedHabit === habit.id}
-                      onToggleExpand={() => setExpandedHabit(expandedHabit === habit.id ? null : habit.id)}
-                      onDismiss={() => handleDismiss(habit.id)}
-                      onAccept={() => navigate("/trackers/new")}
-                      initialShowCount={INITIAL_SHOW_COUNT}
-                    />
-                  </div>
-                ))}
-              </AnimatePresence>
-            </div>
-
-            {/* Show more / Show less button */}
-            {hasMore && (
-              <motion.button
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.9 }}
-                onClick={() => setShowAll(prev => !prev)}
-                className="w-full mt-3 flex items-center justify-center gap-2 rounded-xl border border-border bg-card py-3 text-[13px] font-bold text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors"
-              >
-                {showAll ? (
-                  <>
-                    <ChevronUp className="h-4 w-4" />
-                    Show less
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="h-4 w-4" />
-                    Show {visibleSuggestions.length - INITIAL_SHOW_COUNT} more suggestions
-                  </>
-                )}
-              </motion.button>
-            )}
-          </motion.div>
-        )}
+        {/* How scoring works */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="rounded-2xl border border-border bg-card p-4"
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Info className="h-4 w-4 text-muted-foreground" />
+            <h3 className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider">How scoring works</h3>
+          </div>
+          <div className="space-y-2 text-[12px] text-muted-foreground">
+            <p>Each habit you track contributes to one of 5 personality dimensions.</p>
+            <p>Logging daily earns <span className="text-primary font-bold">XP</span> and boosts your dimension scores.</p>
+            <p>Hitting targets gives <span className="text-primary font-bold">bonus XP</span>. Streaks multiply your gains.</p>
+            <p className="text-[11px] text-muted-foreground/60 italic">No level cap. Keep rising.</p>
+          </div>
+        </motion.div>
       </div>
     </div>
   )
