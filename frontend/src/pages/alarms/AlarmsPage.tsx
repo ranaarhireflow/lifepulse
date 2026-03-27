@@ -150,6 +150,10 @@ export function AlarmsPage() {
                     <p className="text-[11px] text-muted-foreground">
                       {tracker.alerts.length} reminder
                       {tracker.alerts.length !== 1 ? "s" : ""}
+                      {tracker.tracking_days && tracker.tracking_days.length > 0 && tracker.tracking_days.length < 7
+                        ? ` · ${[...tracker.tracking_days].sort((a, b) => a - b).map(d => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][d - 1]).join(", ")}`
+                        : ""}
+                      {tracker.times_per_day > 1 ? ` · ${tracker.times_per_day}x daily` : ""}
                     </p>
                   </div>
                   <button

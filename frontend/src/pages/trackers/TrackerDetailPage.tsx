@@ -125,6 +125,8 @@ export function TrackerDetailPage() {
   const [trackerName, setTrackerName] = useState("")
   const [trackerTarget, setTrackerTarget] = useState("")
   const [trackerUnit, setTrackerUnit] = useState("")
+  const [editTrackingDays, setEditTrackingDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 7])
+  const [editTimesPerDay, setEditTimesPerDay] = useState(1)
   const [deleting, setDeleting] = useState(false)
 
   const openEditDrawer = () => {
@@ -132,6 +134,8 @@ export function TrackerDetailPage() {
     setTrackerName(tracker.name)
     setTrackerTarget(tracker.target_value?.toString() || "")
     setTrackerUnit(tracker.unit || "")
+    setEditTrackingDays(tracker.tracking_days || [1, 2, 3, 4, 5, 6, 7])
+    setEditTimesPerDay(tracker.times_per_day || 1)
     setConfigOpen(true)
   }
 
@@ -141,6 +145,8 @@ export function TrackerDetailPage() {
       name: trackerName,
       target_value: trackerTarget ? parseFloat(trackerTarget) : null,
       unit: trackerUnit || null,
+      tracking_days: editTrackingDays,
+      times_per_day: editTimesPerDay,
     })
     const t = await fetchTracker(tracker.id)
     setTracker(t)
@@ -409,6 +415,33 @@ export function TrackerDetailPage() {
             <div>
               <label className="text-[11px] font-semibold text-muted-foreground block mb-1">Unit</label>
               <Input value={trackerUnit} onChange={(e) => setTrackerUnit(e.target.value)} placeholder="e.g. kg, glasses" className="w-full" />
+            </div>
+            <div>
+              <label className="text-[13px] font-bold text-foreground">Track on these days</label>
+              <p className="text-[11px] text-muted-foreground mb-2">Leave all selected for daily tracking</p>
+              <div className="flex gap-1.5">
+                {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d, i) => {
+                  const dayNum = i + 1
+                  const active = editTrackingDays.includes(dayNum)
+                  return (
+                    <button key={d} type="button" onClick={() => setEditTrackingDays(prev =>
+                      active ? prev.filter(x => x !== dayNum) : [...prev, dayNum]
+                    )}
+                    className={`flex-1 py-2 rounded-lg text-[10px] font-bold transition-all ${
+                      active ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground border border-border"
+                    }`}>{d}</button>
+                  )
+                })}
+              </div>
+            </div>
+            <div>
+              <label className="text-[13px] font-bold text-foreground">Times per day</label>
+              <p className="text-[11px] text-muted-foreground mb-2">How many times to track daily</p>
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={() => setEditTimesPerDay(Math.max(1, editTimesPerDay - 1))} className="h-10 w-10 rounded-xl bg-card border border-border text-foreground font-bold">&minus;</button>
+                <span className="text-[24px] font-black w-12 text-center">{editTimesPerDay}</span>
+                <button type="button" onClick={() => setEditTimesPerDay(Math.min(10, editTimesPerDay + 1))} className="h-10 w-10 rounded-xl bg-card border border-border text-foreground font-bold">+</button>
+              </div>
             </div>
             <Button onClick={saveTrackerEdit} className="w-full rounded-xl h-10 text-[13px] font-bold">
               Save Changes

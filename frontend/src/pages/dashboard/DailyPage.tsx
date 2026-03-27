@@ -59,9 +59,18 @@ export function DailyPage() {
     }, 800)
   }
 
-  const total = data.length
-  const done = data.filter(d => d.entry !== null).length
-  const item = data[currentIndex]
+  // Filter by tracking_days — only show cards scheduled for today
+  const todayDow = selectedDate.getDay() // 0=Sun, 1=Mon..6=Sat
+  const todayIso = todayDow === 0 ? 7 : todayDow // Convert to ISO: 1=Mon..7=Sun
+  const filteredData = data.filter(d => {
+    const days = d.tracker.tracking_days
+    if (!days || days.length === 0) return true // no schedule = show every day
+    return days.includes(todayIso)
+  })
+
+  const total = filteredData.length
+  const done = filteredData.filter(d => d.entry !== null).length
+  const item = filteredData[currentIndex]
   const scene = item ? (SCENES[item.tracker.icon || ""] || DEF) : DEF
   const logged = item?.entry !== null
   const isConfirmed = item ? confirmedCards.has(item.tracker.id) : false
@@ -137,7 +146,7 @@ export function DailyPage() {
 
       {/* PROGRESS DOTS */}
       <div className="flex items-center justify-center gap-1.5 py-2 shrink-0">
-        {data.map((d, i) => (
+        {filteredData.map((d, i) => (
           <button key={d.tracker.id} onClick={() => setCurrentIndex(i)}
             className={`h-2 rounded-full transition-all ${i === currentIndex ? "w-6 bg-primary" : (d.entry || confirmedCards.has(d.tracker.id)) ? "w-2 bg-primary/40" : "w-2 bg-foreground/15"}`} />
         ))}
@@ -149,7 +158,7 @@ export function DailyPage() {
         <div className="relative h-full flex items-stretch">
           {/* Previous card — peeks from left */}
           {currentIndex > 0 && (() => {
-            const prev = data[currentIndex - 1]
+            const prev = filteredData[currentIndex - 1]
             const ps = SCENES[prev.tracker.icon || ""] || DEF
             return (
               <div
@@ -167,7 +176,7 @@ export function DailyPage() {
 
           {/* Next card — peeks from right */}
           {currentIndex < total - 1 && (() => {
-            const next = data[currentIndex + 1]
+            const next = filteredData[currentIndex + 1]
             const ns = SCENES[next.tracker.icon || ""] || DEF
             return (
               <div
@@ -239,9 +248,16 @@ export function DailyPage() {
             <div className="relative h-full flex flex-col justify-between p-6 z-10">
               {/* Top — streak + edit + status */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 rounded-full bg-black/30 backdrop-blur px-3 py-1.5">
-                  <span className="text-[14px]">🔥</span>
-                  <span className="text-[12px] font-bold text-amber-400">12 day streak</span>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 rounded-full bg-black/30 backdrop-blur px-3 py-1.5">
+                    <span className="text-[14px]">🔥</span>
+                    <span className="text-[12px] font-bold text-amber-400">12 day streak</span>
+                  </div>
+                  {item && item.tracker.times_per_day > 1 && (
+                    <div className="flex items-center gap-1 rounded-full bg-black/30 backdrop-blur px-2.5 py-1.5">
+                      <span className="text-[12px] font-bold text-sky-400">{item.tracker.times_per_day}x daily</span>
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={() => item && navigate(`/trackers/${item.tracker.id}`)} className="flex h-8 w-8 items-center justify-center rounded-full bg-black/30 backdrop-blur text-white/50 hover:text-white transition-colors">

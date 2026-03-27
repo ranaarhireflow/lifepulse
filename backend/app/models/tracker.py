@@ -42,6 +42,8 @@ class Tracker(Base):
     max_value: Mapped[float | None] = mapped_column(Float)
     streak_goal: Mapped[int | None] = mapped_column(Integer)
     target_value: Mapped[float | None] = mapped_column(Float)
+    tracking_days: Mapped[list[int] | None] = mapped_column(ARRAY(Integer), default=[1, 2, 3, 4, 5, 6, 7])  # ISO weekdays 1=Mon..7=Sun, default all
+    times_per_day: Mapped[int] = mapped_column(Integer, default=1)  # how many times per day to track (e.g. water=4, BP=2)
     difficulty: Mapped[int] = mapped_column(Integer, default=1)  # 1-5 stars
     dimension: Mapped[str | None] = mapped_column(String(32))  # wisdom, strength, focus, discipline, confidence
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)

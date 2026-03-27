@@ -24,6 +24,8 @@ export interface Tracker {
   max_value: number | null
   streak_goal: number | null
   target_value: number | null
+  tracking_days: number[] | null  // 1=Mon..7=Sun
+  times_per_day: number
   alerts: TrackerAlert[]
 }
 
@@ -64,6 +66,8 @@ export interface DailyTrackerEntry {
     default_behavior: string
     target_value: number | null
     reminder_enabled: boolean
+    tracking_days: number[] | null
+    times_per_day: number
   }
   entry: Entry | null
   default_value: number | null

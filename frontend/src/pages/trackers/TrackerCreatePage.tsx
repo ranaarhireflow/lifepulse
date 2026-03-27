@@ -77,6 +77,8 @@ export function TrackerCreatePage() {
   const [defaultBehavior, setDefaultBehavior] = useState("NULL")
   const [targetValue, setTargetValue] = useState("")
   const [reminderEnabled, setReminderEnabled] = useState(false)
+  const [trackingDays, setTrackingDays] = useState([1, 2, 3, 4, 5, 6, 7])
+  const [timesPerDay, setTimesPerDay] = useState(1)
 
   useEffect(() => {
     fetchTemplates().then(setTemplates).catch(() => {})
@@ -108,6 +110,8 @@ export function TrackerCreatePage() {
         default_behavior: defaultBehavior as "CARRY_FORWARD" | "ZERO" | "NULL",
         target_value: targetValue ? parseFloat(targetValue) : null,
         reminder_enabled: reminderEnabled,
+        tracking_days: trackingDays,
+        times_per_day: timesPerDay,
       })
       navigate("/")
     } catch {
@@ -301,6 +305,37 @@ export function TrackerCreatePage() {
               />
             </div>
           )}
+
+          {/* Track on these days */}
+          <div>
+            <label className="text-[13px] font-bold text-foreground">Track on these days</label>
+            <p className="text-[11px] text-muted-foreground mb-2">Leave all selected for daily tracking</p>
+            <div className="flex gap-1.5">
+              {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d, i) => {
+                const dayNum = i + 1
+                const active = trackingDays.includes(dayNum)
+                return (
+                  <button key={d} type="button" onClick={() => setTrackingDays(prev =>
+                    active ? prev.filter(x => x !== dayNum) : [...prev, dayNum]
+                  )}
+                  className={`flex-1 py-2 rounded-lg text-[11px] font-bold transition-all ${
+                    active ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground"
+                  }`}>{d}</button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Times per day */}
+          <div>
+            <label className="text-[13px] font-bold text-foreground">Times per day</label>
+            <p className="text-[11px] text-muted-foreground mb-2">How many times to track daily (e.g. water 4x, BP 2x)</p>
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={() => setTimesPerDay(Math.max(1, timesPerDay - 1))} className="h-10 w-10 rounded-xl bg-card border border-border text-foreground font-bold">&minus;</button>
+              <span className="text-[24px] font-black w-12 text-center">{timesPerDay}</span>
+              <button type="button" onClick={() => setTimesPerDay(Math.min(10, timesPerDay + 1))} className="h-10 w-10 rounded-xl bg-card border border-border text-foreground font-bold">+</button>
+            </div>
+          </div>
 
           {/* Reminder */}
           <div className="space-y-3">
