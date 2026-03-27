@@ -2,6 +2,43 @@ import { Check, ArrowRight, Settings2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import type { DailyTrackerEntry, Entry } from "@/services/trackers"
 
+/**
+ * Smart range defaults based on unit/habit type.
+ * Used when tracker doesn't have explicit min/max set.
+ */
+function getSmartRange(tracker: DailyTrackerEntry["tracker"]): { min: number; max: number; step: number } {
+  const unit = (tracker.unit || "").toLowerCase()
+  const target = tracker.target_value
+
+  // Use explicit min/max if set
+  if (tracker.min_value != null && tracker.max_value != null) {
+    const step = unit === "kg" || unit === "lbs" ? 0.1 : 1
+    return { min: tracker.min_value, max: tracker.max_value, step }
+  }
+
+  // Smart defaults by unit
+  switch (unit) {
+    case "kg": return { min: 30, max: 200, step: 0.1 }
+    case "lbs": return { min: 60, max: 440, step: 0.1 }
+    case "glasses": return { min: 0, max: 15, step: 1 }
+    case "l": case "liters": case "litres": return { min: 0, max: 6, step: 0.1 }
+    case "ml": return { min: 0, max: 5000, step: 100 }
+    case "pages": return { min: 0, max: 200, step: 1 }
+    case "steps": return { min: 0, max: 30000, step: 500 }
+    case "km": return { min: 0, max: 50, step: 0.5 }
+    case "miles": return { min: 0, max: 30, step: 0.5 }
+    case "cal": case "kcal": case "calories": return { min: 0, max: 5000, step: 50 }
+    case "mg": return { min: 0, max: 1000, step: 10 }
+    case "hrs": case "hours": return { min: 0, max: 24, step: 0.5 }
+    case "reps": return { min: 0, max: 200, step: 1 }
+    case "sets": return { min: 0, max: 20, step: 1 }
+    default:
+      // Fallback: use target * 2 or 100
+      const max = target ? Math.ceil(target * 2) : 100
+      return { min: 0, max, step: max > 50 ? 1 : 0.5 }
+  }
+}
+
 interface HabitCardProps {
   data: DailyTrackerEntry
   scene: { bg: string; sub: string }
@@ -109,21 +146,46 @@ export function HabitCard({
 
         {/* Bottom — input control + confirm button */}
         <div className="space-y-4">
-          {/* Slider for NUMERIC */}
-          {tracker.type === "NUMERIC" && (
+          {/* Slider for NUMERIC — with smart range + tick marks */}
+          {tracker.type === "NUMERIC" && (() => {
+            const range = getSmartRange(tracker)
+            const val = entry?.value_numeric ?? 0
+            const pct = ((val - range.min) / (range.max - range.min)) * 100
+            // Generate ~5 tick labels
+            const ticks = Array.from({ length: 6 }, (_, i) => {
+              const v = range.min + (range.max - range.min) * (i / 5)
+              return range.step < 1 ? Math.round(v * 10) / 10 : Math.round(v)
+            })
+            return (
             <div className="space-y-2">
               <div className="text-center text-[36px] font-extrabold text-white" style={{ textShadow: "0 0 20px rgba(255,255,255,0.2)" }}>
-                {entry?.value_numeric ?? 0}
+                {range.step < 1 ? val.toFixed(1) : val}
                 <span className="text-[16px] text-white/40 ml-1">{tracker.unit}</span>
               </div>
-              <input type="range" min={tracker.min_value || 0} max={tracker.max_value || (tracker.target_value ? tracker.target_value * 2 : 100)}
-                step={tracker.unit === "kg" ? 0.1 : 1}
-                value={entry?.value_numeric ?? 0}
+              {/* Slider */}
+              <input type="range" min={range.min} max={range.max} step={range.step}
+                value={val}
                 onChange={(e) => onUpdate(tracker.id, { value_numeric: parseFloat(e.target.value) })}
                 className="w-full h-2 rounded-full appearance-none bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-[0_0_12px_rgba(34,197,94,0.5)] [&::-webkit-slider-thumb]:cursor-grab"
               />
+              {/* Tick marks */}
+              <div className="flex justify-between px-1">
+                {ticks.map((t, i) => (
+                  <span key={i} className="text-[9px] text-white/25 font-bold">{t}</span>
+                ))}
+              </div>
+              {/* Target indicator */}
+              {tracker.target_value && (
+                <div className="relative h-0">
+                  <div className="absolute text-[9px] text-primary font-bold -top-1"
+                    style={{ left: `${((tracker.target_value - range.min) / (range.max - range.min)) * 100}%`, transform: "translateX(-50%)" }}>
+                    ▲ {tracker.target_value}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+            )
+          })()}
 
           {/* Toggle for BOOLEAN */}
           {tracker.type === "BOOLEAN" && (
