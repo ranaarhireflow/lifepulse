@@ -1,12 +1,12 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "app.mypersonaltracker.tracker",
+  appId: "app.lifepulse.tracker",
   appName: "LifePulse",
   webDir: "dist",
   server: {
-    // For development: point to Vite dev server
-    // url: 'http://192.168.x.x:5173',
+    // For development: uncomment and set your local IP
+    // url: "http://192.168.1.9:5173",
     // cleartext: true,
   },
   plugins: {
@@ -15,11 +15,11 @@ const config: CapacitorConfig = {
     },
     LocalNotifications: {
       smallIcon: "ic_stat_icon",
-      iconColor: "#6366f1",
+      iconColor: "#22C55E",
     },
     SplashScreen: {
       launchAutoHide: true,
-      backgroundColor: "#6366f1",
+      backgroundColor: "#000000",
       showSpinner: false,
       androidScaleType: "CENTER_CROP",
       splashFullScreen: true,
@@ -27,13 +27,13 @@ const config: CapacitorConfig = {
     },
     StatusBar: {
       style: "DARK",
-      backgroundColor: "#6366f1",
+      backgroundColor: "#000000",
     },
   },
   ios: {
     contentInset: "automatic",
     preferredContentMode: "mobile",
-    scheme: "myTracker",
+    scheme: "LifePulse",
   },
   android: {
     allowMixedContent: false,

@@ -65,6 +65,8 @@ export interface DailyTrackerEntry {
     unit_secondary: string | null
     default_behavior: string
     target_value: number | null
+    min_value: number | null
+    max_value: number | null
     reminder_enabled: boolean
     tracking_days: number[] | null
     times_per_day: number

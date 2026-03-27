@@ -8,7 +8,7 @@ interface NumericInputProps {
   onChange: (value: number | null) => void
 }
 
-export function NumericInput({ value, defaultValue, unit, onChange }: NumericInputProps) {
+export function NumericInput({ value, defaultValue, unit: _unit, onChange }: NumericInputProps) {
   const [localValue, setLocalValue] = useState(value !== null ? String(value) : "")
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 

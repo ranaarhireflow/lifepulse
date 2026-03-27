@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, ArrowRight, Check, Flame, Sparkles, Brain, Dumbbell, Eye, Shield, Crown } from "lucide-react"
+import { ArrowLeft, ArrowRight, Check, Flame } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PulseLogo } from "@/components/common/PulseLogo"
 import { createFromTemplate, fetchTemplates, type TrackerTemplate } from "@/services/trackers"
@@ -80,7 +80,7 @@ const QUESTIONS = [
 export function QuizFlow() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
-  const [answers, setAnswers] = useState<Record<string, string | string[]>>({})
+  const [_answers, setAnswers] = useState<Record<string, string | string[]>>({})
   const [selectedMulti, setSelectedMulti] = useState<string[]>([])
   const [showResults, setShowResults] = useState(false)
   const [suggestedTemplates, setSuggestedTemplates] = useState<TrackerTemplate[]>([])

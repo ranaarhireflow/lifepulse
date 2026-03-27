@@ -63,7 +63,7 @@ export function AnalyticsPage() {
   const bestDayNum = Object.entries(dayCount).sort(([, a], [, b]) => b - a)[0]
   const bestDay = bestDayNum ? DAY_NAMES[parseInt(bestDayNum[0])] : null
 
-  const findTracker = (id: string) => trackers.find((t) => t.tracker_id === id || t.id === id)
+  const findTracker = (id: string) => trackers.find((t) => t.id === id)
 
   return (
     <div className="space-y-5">
