@@ -33,6 +33,7 @@ import {
   Smartphone,
   Globe,
   Check,
+  ChevronRight,
 } from "lucide-react"
 
 export function SettingsPage() {
@@ -77,6 +78,15 @@ export function SettingsPage() {
           Manage your account and preferences
         </p>
       </div>
+
+      {/* Alarms shortcut */}
+      <NavLink to="/alarms" className="flex items-center justify-between rounded-xl bg-card border border-border px-4 py-3">
+        <div className="flex items-center gap-3">
+          <Bell className="h-5 w-5 text-primary" />
+          <span className="text-[14px] font-bold">Alarms & Reminders</span>
+        </div>
+        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+      </NavLink>
 
       {/* Profile */}
       <Card>

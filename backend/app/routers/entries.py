@@ -92,6 +92,7 @@ def bulk_daily(
                 default_behavior=tracker.default_behavior.value,
                 target_value=tracker.target_value,
                 reminder_enabled=tracker.reminder_enabled or (len(tracker.alerts) > 0 if tracker.alerts else False),
+                dimension=tracker.dimension,
             ),
             entry=entry,
             default_value=default_value,

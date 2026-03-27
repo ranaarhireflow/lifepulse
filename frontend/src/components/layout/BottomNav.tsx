@@ -1,12 +1,12 @@
 import { NavLink } from "react-router-dom"
-import { LayoutGrid, TrendingUp, Zap, Bell, Settings } from "lucide-react"
+import { LayoutGrid, TrendingUp, Zap, Compass, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const TABS = [
   { to: "/", icon: LayoutGrid, label: "Today" },
   { to: "/progress", icon: TrendingUp, label: "Progress" },
+  { to: "/trackers/new", icon: Compass, label: "Discover" },
   { to: "/score", icon: Zap, label: "Score" },
-  { to: "/alarms", icon: Bell, label: "Alarms" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ]
 

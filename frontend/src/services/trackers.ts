@@ -26,6 +26,7 @@ export interface Tracker {
   target_value: number | null
   tracking_days: number[] | null  // 1=Mon..7=Sun
   times_per_day: number
+  dimension: string | null
   alerts: TrackerAlert[]
 }
 
@@ -70,6 +71,7 @@ export interface DailyTrackerEntry {
     reminder_enabled: boolean
     tracking_days: number[] | null
     times_per_day: number
+    dimension: string | null
   }
   entry: Entry | null
   default_value: number | null

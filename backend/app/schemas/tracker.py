@@ -67,6 +67,7 @@ class TrackerResponse(BaseModel):
     max_value: float | None
     streak_goal: int | None
     target_value: float | None
+    dimension: str | None = None
     alerts: list[TrackerAlertResponse] = []
 
     model_config = {"from_attributes": True}

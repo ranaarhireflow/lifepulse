@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { format } from "date-fns"
-import { Loader2, Sparkles, Plus, Flame, Zap } from "lucide-react"
+import { Loader2, Sparkles, Plus, Flame, Zap, Trophy } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 type PanInfo = { offset: { x: number; y: number }; velocity: { x: number; y: number } }
 import { Button } from "@/components/ui/button"
@@ -107,6 +107,7 @@ export function DailyPage() {
         <PulseLogo size={40} />
         <div className="flex items-center gap-2">
           <NavLink to="/score" className="flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1 text-[10px] font-bold text-primary"><Zap className="h-3 w-3" />Lvl 1</NavLink>
+          <NavLink to="/achievements" className="flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold text-amber-400"><Trophy className="h-3 w-3" />🏆</NavLink>
           <div className="flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold text-amber-400"><Flame className="h-3 w-3" />{done}/{total}</div>
         </div>
       </div>

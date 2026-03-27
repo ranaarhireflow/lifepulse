@@ -2,6 +2,10 @@ import { Check, ArrowRight, Settings2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import type { DailyTrackerEntry, Entry } from "@/services/trackers"
 
+const DIMENSION_EMOJI: Record<string, string> = {
+  wisdom: "🧠", strength: "💪", focus: "🎯", discipline: "📚", confidence: "👤"
+}
+
 /**
  * Smart range defaults based on unit/habit type.
  * Used when tracker doesn't have explicit min/max set.
@@ -141,6 +145,13 @@ export function HabitCard({
           </p>
           {tracker.target_value && (
             <p className="text-[12px] text-white/30 mt-2">Target: {tracker.target_value} {tracker.unit}</p>
+          )}
+          {/* Dimension badge */}
+          {tracker.dimension && (
+            <div className="flex items-center gap-1 mt-1">
+              <span className="text-[10px]">{DIMENSION_EMOJI[tracker.dimension]}</span>
+              <span className="text-[10px] text-white/40 font-semibold capitalize">+{tracker.dimension}</span>
+            </div>
           )}
         </div>
 
