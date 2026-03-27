@@ -1,30 +1,19 @@
-import { useState, useEffect, useMemo, useCallback } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useParams, useNavigate, NavLink } from "react-router-dom"
 import { format, subDays, startOfYear, subYears } from "date-fns"
 import {
   ChevronLeft,
-  Flame,
-  Target,
-  TrendingUp,
   Calendar,
-  Hash,
   Loader2,
   Bell,
   Settings2,
   Trash2,
   Pencil,
-  Zap,
-  Star,
 } from "lucide-react"
-import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { ConfigDrawer } from "@/components/common/ConfigDrawer"
-import { Switch } from "@/components/ui/switch"
 import { Input } from "@/components/ui/input"
 import api from "@/services/api"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ActivityCalendar } from "react-activity-calendar"
 import {
   LineChart,
@@ -48,8 +37,10 @@ import {
   type TrackerAnalytics,
   type HeatmapData,
 } from "@/services/trackers"
+import { HeroCard } from "@/components/trackers/HeroCard"
+import { StatsGrid } from "@/components/trackers/StatsGrid"
 
-// CSS artwork scenes (same as TrackerCard)
+// Gradient scenes per tracker emoji
 const SCENES: Record<string, { bg: string; narrative: string }> = {
   "\u{1F4A7}": { bg: "radial-gradient(ellipse at 30% 80%, #0c4a6e 0%, #0e7490 35%, #155e75 60%, #164e63 100%)", narrative: "Stay hydrated, stay sharp" },
   "\u{1F3CB}\u{FE0F}": { bg: "radial-gradient(ellipse at 70% 20%, #ea580c 0%, #c2410c 30%, #9a3412 55%, #7c2d12 100%)", narrative: "Build strength, build character" },
@@ -69,6 +60,7 @@ const DEFAULT_SCENE = {
   narrative: "Track it. Master it.",
 }
 
+// Trend chart date range presets
 const RANGES = [
   { key: "7d", label: "Week", days: 7 },
   { key: "30d", label: "Month", days: 30 },
@@ -79,6 +71,7 @@ const RANGES = [
   { key: "all", label: "All", days: 9999 },
 ]
 
+/** Convert a range key like "30d" or "ytd" into from/to date strings */
 function getDateRange(rangeKey: string) {
   const to = new Date()
   let from: Date
@@ -93,7 +86,7 @@ function getDateRange(rangeKey: string) {
   return { from: format(from, "yyyy-MM-dd"), to: format(to, "yyyy-MM-dd") }
 }
 
-// Type label map
+// Type label map for the config drawer
 const TYPE_LABELS: Record<string, string> = {
   NUMERIC: "Number",
   DUAL_NUMERIC: "Dual",
@@ -197,7 +190,7 @@ export function TrackerDetailPage() {
       .finally(() => setLoading(false))
   }, [id])
 
-  // Heatmap
+  // Heatmap data — refetch when range changes
   useEffect(() => {
     if (!id) return
     const now = new Date()
@@ -207,7 +200,7 @@ export function TrackerDetailPage() {
       .catch(() => {})
   }, [id, heatmapRange])
 
-  // Trend data
+  // Trend chart data — refetch when range changes
   useEffect(() => {
     if (!id) return
     const { from, to } = getDateRange(range)
@@ -219,7 +212,7 @@ export function TrackerDetailPage() {
   const color = tracker?.color || "#22C55E"
   const scene = SCENES[tracker?.icon || ""] || DEFAULT_SCENE
 
-  // Heatmap data
+  // Transform heatmap API data into the format react-activity-calendar expects
   const heatmapActivities = useMemo(() => {
     if (!heatmap) return []
     return heatmap.days.map((d) => ({
@@ -233,7 +226,7 @@ export function TrackerDetailPage() {
     }))
   }, [heatmap, analytics])
 
-  // Chart data
+  // Transform analytics data points into recharts format
   const chartData = useMemo(() => {
     if (!analytics) return []
     return analytics.data_points.map((dp) => ({
@@ -273,130 +266,17 @@ export function TrackerDetailPage() {
       </div>
 
       {/* Pokemon Card — Hero Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl"
-        style={{ minHeight: 220 }}
-      >
-        {/* Gradient background */}
-        <div className="absolute inset-0" style={{ background: scene.bg }} />
-
-        {/* Noise texture overlay */}
-        <div className="absolute inset-0 opacity-15" style={{
-          backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")"
-        }} />
-
-        {/* Bottom gradient for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
-        {/* Holographic border effect */}
-        <div className="absolute inset-0 rounded-3xl border border-white/10" />
-
-        {/* Content */}
-        <div className="relative flex flex-col items-center justify-center py-8 px-6">
-          {/* Edit button — top right */}
-          <button
-            onClick={openEditDrawer}
-            className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-full bg-black/30 backdrop-blur text-white/60 hover:text-white hover:bg-black/50 transition-colors"
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
-
-          {/* Big emoji */}
-          <motion.div
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200 }}
-            className="text-[64px] mb-3 drop-shadow-2xl"
-          >
-            {tracker.icon || "\u{1F4CA}"}
-          </motion.div>
-
-          {/* Name */}
-          <h1
-            className="text-[26px] font-black text-white text-center tracking-tight"
-            style={{ textShadow: "0 2px 16px rgba(0,0,0,0.5)" }}
-          >
-            {tracker.name}
-          </h1>
-
-          {/* Streak badge */}
-          <div className="flex items-center gap-4 mt-3">
-            <div className="flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur-md px-3.5 py-1.5">
-              <Flame className="h-4 w-4 text-amber-400" />
-              <span className="text-[13px] font-bold text-amber-400">
-                {analytics.current_streak} day streak
-              </span>
-            </div>
-
-            {/* Level badge */}
-            <div className="flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur-md px-3.5 py-1.5">
-              <Zap className="h-3.5 w-3.5 text-[#22C55E]" />
-              <span className="text-[13px] font-bold text-[#22C55E]">
-                Level {Math.min(Math.floor(analytics.current_streak / 7) + 1, 10)}
-              </span>
-            </div>
-          </div>
-
-          {/* Type badge */}
-          <div className="flex items-center gap-2 mt-2">
-            <span className="rounded-full bg-white/15 backdrop-blur-md px-3 py-1 text-[10px] font-bold text-white/70 uppercase tracking-wider">
-              {TYPE_LABELS[tracker.type] || tracker.type}
-            </span>
-            {tracker.unit && (
-              <span className="rounded-full bg-white/15 backdrop-blur-md px-3 py-1 text-[10px] font-bold text-white/70 uppercase tracking-wider">
-                {tracker.unit}
-              </span>
-            )}
-          </div>
-
-          {/* Stars row */}
-          <div className="flex gap-1 mt-3">
-            {[1, 2, 3, 4, 5].map((s) => {
-              const filled = s <= Math.min(Math.floor(analytics.current_streak / 3) + 1, 5)
-              return (
-                <Star
-                  key={s}
-                  className={`h-4 w-4 ${filled ? "text-amber-400 fill-amber-400" : "text-white/15"}`}
-                />
-              )
-            })}
-          </div>
-        </div>
-      </motion.div>
+      <HeroCard
+        tracker={tracker}
+        analytics={analytics}
+        scene={scene}
+        onEdit={openEditDrawer}
+      />
 
       {/* Stats Grid — 2x2 */}
-      <div className="grid grid-cols-2 gap-3">
-        {[
-          { icon: Flame, label: "Current Streak", value: String(analytics.current_streak), sub: `Best: ${analytics.longest_streak}`, iconColor: "#F59E0B" },
-          { icon: Target, label: "Completion", value: `${analytics.completion_rate}%`, sub: `${analytics.total_entries} entries`, iconColor: "#22C55E" },
-          { icon: TrendingUp, label: "Average", value: analytics.average !== null ? String(analytics.average) : "\u{2014}", sub: analytics.min_value !== null ? `${analytics.min_value} \u{2013} ${analytics.max_value}` : "", iconColor: "#3B82F6" },
-          { icon: Hash, label: "Total Entries", value: String(analytics.total_entries), sub: "", iconColor: "#8B5CF6" },
-        ].map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 + i * 0.05 }}
-            className="rounded-2xl border border-border bg-card p-4"
-          >
-            <div className="flex items-center gap-2 mb-2.5">
-              <div
-                className="flex h-7 w-7 items-center justify-center rounded-lg"
-                style={{ backgroundColor: `${s.iconColor}20` }}
-              >
-                <s.icon className="h-3.5 w-3.5" style={{ color: s.iconColor }} />
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{s.label}</span>
-            </div>
-            <p className="text-[28px] font-black text-foreground leading-none">{s.value}</p>
-            {s.sub && <p className="text-[11px] text-muted-foreground/70 mt-1 font-semibold">{s.sub}</p>}
-          </motion.div>
-        ))}
-      </div>
+      <StatsGrid analytics={analytics} />
 
-      {/* Config drawer (kept from original) */}
+      {/* Config drawer (edit tracker + alerts) */}
       <ConfigDrawer open={configOpen} onClose={() => { setConfigOpen(false); setShowAddAlert(false) }} title={tracker.name} description="Edit tracker and manage alerts">
         <div className="space-y-5">
           {/* Tracker edit fields */}
