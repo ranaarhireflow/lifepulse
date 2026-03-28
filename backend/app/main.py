@@ -26,10 +26,15 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
 )
 
-# Security: CORS
+# Security: CORS — allow configured origins + Capacitor native app origins
+cors_origins = settings.CORS_ORIGINS.split(",") + [
+    "https://localhost",       # Capacitor Android (androidScheme: https)
+    "capacitor://localhost",   # Capacitor iOS
+    "http://localhost",        # Capacitor fallback
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS.split(","),
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["Authorization", "Content-Type", "X-Dev-Mode"],
