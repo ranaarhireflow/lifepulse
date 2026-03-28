@@ -27,6 +27,7 @@ export interface Tracker {
   tracking_days: number[] | null  // 1=Mon..7=Sun
   times_per_day: number
   dimension: string | null
+  difficulty: number
   alerts: TrackerAlert[]
 }
 

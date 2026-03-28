@@ -161,7 +161,6 @@ export function HabitCard({
           {tracker.type === "NUMERIC" && (() => {
             const range = getSmartRange(tracker)
             const val = entry?.value_numeric ?? 0
-            const pct = ((val - range.min) / (range.max - range.min)) * 100
             // Generate ~5 tick labels
             const ticks = Array.from({ length: 6 }, (_, i) => {
               const v = range.min + (range.max - range.min) * (i / 5)
