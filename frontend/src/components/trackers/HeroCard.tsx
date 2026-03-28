@@ -2,6 +2,39 @@ import { Flame, Zap, Star, Pencil } from "lucide-react"
 import { motion } from "framer-motion"
 import { updateTracker, type Tracker, type TrackerAnalytics } from "@/services/trackers"
 
+/** Dimension bars config for RPG stat display */
+const DIMENSION_BARS = [
+  { key: "wisdom", emoji: "🧠", color: "#8B5CF6", label: "WIS" },
+  { key: "strength", emoji: "💪", color: "#EF4444", label: "STR" },
+  { key: "focus", emoji: "🎯", color: "#F59E0B", label: "FOC" },
+  { key: "discipline", emoji: "📚", color: "#3B82F6", label: "DIS" },
+  { key: "confidence", emoji: "👤", color: "#EC4899", label: "CON" },
+] as const
+
+/** Default dimension weights per habit icon (matches create page templates) */
+const HABIT_WEIGHTS: Record<string, Record<string, number>> = {
+  "🧘": { wisdom: 60, strength: 0, focus: 90, discipline: 70, confidence: 40 },
+  "📖": { wisdom: 95, strength: 0, focus: 60, discipline: 40, confidence: 30 },
+  "💪": { wisdom: 0, strength: 95, focus: 30, discipline: 70, confidence: 60 },
+  "🏃": { wisdom: 10, strength: 80, focus: 40, discipline: 70, confidence: 50 },
+  "💧": { wisdom: 0, strength: 20, focus: 10, discipline: 80, confidence: 10 },
+  "🚿": { wisdom: 10, strength: 40, focus: 70, discipline: 95, confidence: 80 },
+  "📝": { wisdom: 80, strength: 0, focus: 50, discipline: 60, confidence: 70 },
+  "🧠": { wisdom: 90, strength: 0, focus: 100, discipline: 80, confidence: 30 },
+  "🚶": { wisdom: 10, strength: 50, focus: 20, discipline: 60, confidence: 30 },
+  "🌙": { wisdom: 20, strength: 30, focus: 60, discipline: 80, confidence: 20 },
+  "🌅": { wisdom: 30, strength: 10, focus: 50, discipline: 90, confidence: 40 },
+  "🪥": { wisdom: 5, strength: 0, focus: 10, discipline: 70, confidence: 50 },
+  "❤️": { wisdom: 20, strength: 10, focus: 10, discipline: 60, confidence: 40 },
+  "⚖️": { wisdom: 10, strength: 30, focus: 20, discipline: 60, confidence: 50 },
+  "🫸": { wisdom: 0, strength: 100, focus: 20, discipline: 70, confidence: 60 },
+  "🧘‍♀️": { wisdom: 40, strength: 50, focus: 60, discipline: 50, confidence: 70 },
+  "🙏": { wisdom: 60, strength: 0, focus: 30, discipline: 40, confidence: 90 },
+  "📵": { wisdom: 30, strength: 0, focus: 95, discipline: 80, confidence: 20 },
+  "🍳": { wisdom: 20, strength: 10, focus: 10, discipline: 70, confidence: 50 },
+  "🏋️": { wisdom: 0, strength: 95, focus: 30, discipline: 70, confidence: 60 },
+}
+
 /** Type label map for display */
 const TYPE_LABELS: Record<string, string> = {
   NUMERIC: "Number",
@@ -130,6 +163,29 @@ export function HeroCard({ tracker, analytics, scene, onEdit, onTrackerUpdate }:
               />
             </button>
           ))}
+        </div>
+
+        {/* RPG Dimension Bars — Pokemon card style */}
+        <div className="mt-4 w-full max-w-[240px] mx-auto space-y-1.5">
+          {DIMENSION_BARS.map((dim) => {
+            const weight = HABIT_WEIGHTS[tracker.icon || ""]?.[dim.key] ?? (tracker.dimension === dim.key ? 80 : 20)
+            return (
+              <div key={dim.key} className="flex items-center gap-2">
+                <span className="text-[10px] w-4 text-center">{dim.emoji}</span>
+                <span className="text-[8px] font-bold text-white/50 w-12 truncate">{dim.label}</span>
+                <div className="flex-1 h-2 rounded-full bg-white/10 overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${weight}%` }}
+                    transition={{ duration: 0.8, delay: 0.3 }}
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: dim.color, boxShadow: `0 0 6px ${dim.color}40` }}
+                  />
+                </div>
+                <span className="text-[9px] font-black text-white/60 w-6 text-right tabular-nums">{weight}</span>
+              </div>
+            )
+          })}
         </div>
       </div>
     </motion.div>
