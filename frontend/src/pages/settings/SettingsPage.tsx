@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch"
 import { NavLink, useNavigate } from "react-router-dom"
 import {
   LogOut, Bell, Trash2, Moon, Sun, ChevronRight,
-  Palette, Shield, Smartphone, HelpCircle,
+  Palette, Shield, Smartphone, HelpCircle, Sparkles,
 } from "lucide-react"
 import { BRAND } from "@/lib/brand"
 
@@ -37,6 +37,7 @@ export function SettingsPage() {
       {/* Quick links */}
       <div className="rounded-2xl bg-card border border-border overflow-hidden">
         <SettingsRow icon={<Bell className="h-5 w-5 text-primary" />} label="Alarms & Reminders" to="/alarms" />
+        <SettingsRow icon={<Sparkles className="h-5 w-5 text-primary" />} label="Retake Quiz" to="/quiz" />
         <SettingsRow icon={<Palette className="h-5 w-5 text-purple-500" />} label="My Pulses" to="/trackers" last />
       </div>
 

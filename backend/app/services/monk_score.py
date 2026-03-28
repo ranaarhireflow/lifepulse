@@ -1,7 +1,7 @@
 """Monk Score calculation — XP, levels, and 5 dimensions."""
 import math
 import uuid
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 
 from sqlalchemy import func as sqlfunc
 from sqlalchemy.orm import Session
@@ -9,6 +9,10 @@ from sqlalchemy.orm import Session
 from app.models.monk_score import MonkScore
 from app.models.tracker import Tracker
 from app.models.entry import Entry
+
+# Cache: user_id -> (timestamp, MonkScore)
+_score_cache: dict[uuid.UUID, tuple[float, MonkScore]] = {}
+CACHE_TTL_SECONDS = 300  # 5 minutes
 
 
 def calculate_xp_for_entry(difficulty: int, streak: int) -> int:
@@ -26,88 +30,137 @@ def level_from_xp(xp: int) -> tuple[int, int]:
     return level, max(0, xp_to_next)
 
 
-def recalculate_monk_score(user_id: uuid.UUID, db: Session) -> MonkScore:
-    """Recalculate the full Monk Score for a user."""
-    score = db.query(MonkScore).filter(MonkScore.user_id == user_id).first()
-    if not score:
-        score = MonkScore(user_id=user_id)
-        db.add(score)
-
-    # Get all active trackers with their dimensions
+def calculate_and_update_score(user_id: uuid.UUID, db: Session) -> MonkScore:
+    """Recalculate monk score from actual entry data."""
+    # Get user's active trackers
     trackers = db.query(Tracker).filter(
         Tracker.user_id == user_id,
         Tracker.is_active == True,
     ).all()
+
+    score = db.query(MonkScore).filter(MonkScore.user_id == user_id).first()
+    if not score:
+        score = MonkScore(user_id=user_id)
+        db.add(score)
 
     if not trackers:
         db.commit()
         db.refresh(score)
         return score
 
-    # Calculate total XP from all entries
+    # Get entries from last 30 days
     today = date.today()
-    thirty_days_ago = today - timedelta(days=30)
+    since = today - timedelta(days=30)
+    entries = db.query(Entry).filter(
+        Entry.user_id == user_id,
+        Entry.is_active == True,
+        Entry.date >= since,
+    ).all()
 
+    # Calculate per-dimension scores
+    dimension_scores: dict[str, float] = {
+        "wisdom": 0, "strength": 0, "focus": 0, "discipline": 0, "confidence": 0,
+    }
+    dimension_counts: dict[str, int] = {
+        "wisdom": 0, "strength": 0, "focus": 0, "discipline": 0, "confidence": 0,
+    }
     total_xp = 0
-    dimension_scores = {"wisdom": 0, "strength": 0, "focus": 0, "discipline": 0, "confidence": 0}
-    dimension_counts = {"wisdom": 0, "strength": 0, "focus": 0, "discipline": 0, "confidence": 0}
 
     for tracker in trackers:
-        # Count entries in last 30 days
-        entry_count = db.query(Entry).filter(
-            Entry.tracker_id == tracker.id,
-            Entry.is_active == True,
-            Entry.date >= thirty_days_ago,
-        ).count()
+        dim = tracker.dimension or _auto_dimension(tracker.name)
+        tracker_entries = [e for e in entries if e.tracker_id == tracker.id]
 
-        # Calculate streak
+        # Base XP: 10 per logged entry
+        entry_xp = len(tracker_entries) * 10
+
+        # Bonus XP: 5 per entry that hits target
+        if tracker.target_value:
+            hits = sum(
+                1 for e in tracker_entries
+                if e.value_numeric is not None and e.value_numeric >= tracker.target_value
+            )
+            entry_xp += hits * 5
+
+        # Streak bonus: current streak * 2 XP
         streak = 0
-        check_date = today
-        while True:
-            has_entry = db.query(Entry).filter(
-                Entry.tracker_id == tracker.id,
-                Entry.date == check_date,
-                Entry.is_active == True,
-            ).first()
-            if has_entry:
+        for i in range(30):
+            day = today - timedelta(days=i)
+            if any(e.date == day for e in tracker_entries):
                 streak += 1
-                check_date -= timedelta(days=1)
             else:
                 break
+        entry_xp += streak * 2
 
-        # XP for each entry
-        for _ in range(entry_count):
-            total_xp += calculate_xp_for_entry(tracker.difficulty or 1, streak)
+        # Apply difficulty multiplier
+        difficulty = tracker.difficulty or 1
+        entry_xp = int(entry_xp * (1 + (difficulty - 1) * 0.2))
 
-        # Dimension contribution
-        dim = tracker.dimension or _auto_dimension(tracker.name)
+        total_xp += entry_xp
+
+        # Dimension score: based on completion rate (0-100)
         if dim in dimension_scores:
-            # Score = completion rate × 100
-            total_days = 30
-            completion = min(100, (entry_count / total_days) * 100)
-            dimension_scores[dim] += completion
-            dimension_counts[dim] += 1
+            if len(tracker_entries) > 0:
+                completion = min(len(tracker_entries) / 30 * 100, 100)
+                dimension_scores[dim] += completion
+                dimension_counts[dim] += 1
 
-    # Average dimensions
+    # Average dimensions (where trackers exist)
     for dim in dimension_scores:
         if dimension_counts[dim] > 0:
-            dimension_scores[dim] = round(dimension_scores[dim] / dimension_counts[dim], 1)
+            dimension_scores[dim] = round(
+                dimension_scores[dim] / dimension_counts[dim], 1
+            )
 
+    # Discipline bonus for daily logging consistency
+    unique_days = len(set(e.date for e in entries))
+    dimension_scores["discipline"] = min(
+        dimension_scores["discipline"] + unique_days * 2, 100
+    )
+
+    # Calculate level from XP (quadratic: level^2 * 100)
     level, xp_to_next = level_from_xp(total_xp)
 
-    score.xp_total = total_xp
+    # Overall = average of dimensions
+    overall = round(sum(dimension_scores.values()) / 5, 1)
+
+    # Update score
     score.level = level
+    score.xp_total = total_xp
     score.xp_to_next = xp_to_next
     score.wisdom = dimension_scores["wisdom"]
     score.strength = dimension_scores["strength"]
     score.focus = dimension_scores["focus"]
     score.discipline = dimension_scores["discipline"]
     score.confidence = dimension_scores["confidence"]
-    score.overall = round(sum(dimension_scores.values()) / 5, 1)
+    score.overall = overall
+    score.calculated_at = datetime.now(timezone.utc)
 
     db.commit()
     db.refresh(score)
+
+    # Update cache
+    _score_cache[user_id] = (datetime.now(timezone.utc).timestamp(), score)
+
     return score
+
+
+def recalculate_monk_score(user_id: uuid.UUID, db: Session) -> MonkScore:
+    """Recalculate the full Monk Score for a user (with 5-minute cache)."""
+    now = datetime.now(timezone.utc).timestamp()
+
+    # Check cache
+    if user_id in _score_cache:
+        cached_at, cached_score = _score_cache[user_id]
+        if now - cached_at < CACHE_TTL_SECONDS:
+            # Merge the cached object back into the session if needed
+            try:
+                db.add(cached_score)
+                db.refresh(cached_score)
+                return cached_score
+            except Exception:
+                pass  # Fall through to recalculate
+
+    return calculate_and_update_score(user_id, db)
 
 
 def _auto_dimension(name: str) -> str:

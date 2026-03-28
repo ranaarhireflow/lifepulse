@@ -11,6 +11,7 @@ from app.models.user import User
 from app.models.tracker import Tracker, DefaultBehavior
 from app.models.entry import Entry
 from app.schemas.entry import EntryUpsert, EntryResponse, DailyTrackerEntry, TrackerBrief
+from app.services.monk_score import calculate_and_update_score
 
 router = APIRouter()
 
@@ -142,6 +143,13 @@ def upsert_entry(
 
     db.commit()
     db.refresh(entry)
+
+    # Recalculate monk score in real-time after logging
+    try:
+        calculate_and_update_score(user.id, db)
+    except Exception:
+        pass  # Don't fail the entry upsert if scoring fails
+
     return entry
 
 

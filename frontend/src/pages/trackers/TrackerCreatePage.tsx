@@ -603,7 +603,7 @@ export function TrackerCreatePage() {
         </div>
 
         {/* Build Your Own -- compact row */}
-        <div className="px-4 mb-4">
+        <div className="px-4 mb-4 space-y-2">
           <button
             onClick={() => { resetForm(); setShowCustomForm(true) }}
             className="w-full rounded-xl bg-card border border-border px-4 py-3 text-left transition-all hover:bg-secondary/50 active:scale-[0.99]"
@@ -615,6 +615,20 @@ export function TrackerCreatePage() {
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </div>
+          </button>
+
+          <button
+            onClick={() => navigate("/quiz")}
+            className="w-full flex items-center gap-3 rounded-2xl border border-border bg-card px-4 py-3 text-left hover:bg-accent transition-colors"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10">
+              <Sparkles className="h-5 w-5 text-amber-500" />
+            </div>
+            <div className="flex-1">
+              <p className="text-[14px] font-bold text-foreground">Take the Quiz</p>
+              <p className="text-[11px] text-muted-foreground">Answer questions to get personalized suggestions</p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
 
