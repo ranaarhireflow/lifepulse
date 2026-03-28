@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "@/store/auth-context"
 import { useTheme } from "@/hooks/useTheme"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -9,7 +9,6 @@ import {
   Palette, Shield, Smartphone, HelpCircle, Sparkles,
 } from "lucide-react"
 import { BRAND } from "@/lib/brand"
-import { sendLocalNotification } from "@/services/notifications"
 
 export function SettingsPage() {
   const { user, signOut } = useAuth()
@@ -17,16 +16,30 @@ export function SettingsPage() {
   const navigate = useNavigate()
   const [showDelete, setShowDelete] = useState(false)
   const [showInstallInfo, setShowInstallInfo] = useState(false)
-  const [notifStatus, setNotifStatus] = useState(
-    typeof Notification !== "undefined" ? Notification.permission : "default"
-  )
+  const [notifInfo, setNotifInfo] = useState("")
+  const [notifGranted, setNotifGranted] = useState(false)
+
+  // Check notification status on mount
+  useEffect(() => {
+    import("@/services/alarm-sync").then(({ getNotifStatus }) => {
+      getNotifStatus().then(s => {
+        setNotifGranted(s.granted)
+        setNotifInfo(`${s.pending} scheduled, ${s.channels} channels`)
+      })
+    }).catch(() => {})
+  }, [])
+
   const enableNotifs = async () => {
-    const { requestNotifPermission } = await import("@/services/alarm-sync")
-    const granted = await requestNotifPermission()
-    setNotifStatus(granted ? "granted" : "denied")
-    if (granted) {
-      sendLocalNotification("LifePulse", "Notifications enabled! You'll get reminders for your habits.")
-    }
+    const { initNotifications } = await import("@/services/alarm-sync")
+    const granted = await initNotifications()
+    setNotifGranted(granted)
+    setNotifInfo(granted ? "enabled" : "denied")
+  }
+
+  const testNotif = async () => {
+    const { sendTestNotification } = await import("@/services/alarm-sync")
+    const result = await sendTestNotification()
+    setNotifInfo(result)
   }
 
   const initials = user?.display_name
@@ -64,29 +77,26 @@ export function SettingsPage() {
             </div>
             <Switch checked={theme === "dark"} onCheckedChange={toggleTheme} />
           </div>
-          <div className="flex items-center justify-between px-4 py-3.5 border-b border-border">
-            <div className="flex items-center gap-3">
-              <Bell className="h-5 w-5 text-primary" />
-              <div>
+          <div className="px-4 py-3.5 border-b border-border">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Bell className="h-5 w-5 text-primary" />
                 <span className="text-[14px] font-semibold text-foreground">Notifications</span>
-                <p className="text-[11px] text-muted-foreground">
-                  {notifStatus === "granted" ? "Enabled" : notifStatus === "denied" ? "Blocked" : "Not enabled"}
-                </p>
               </div>
+              {notifGranted ? (
+                <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">ON</span>
+              ) : (
+                <button onClick={enableNotifs} className="text-[11px] font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
+                  Enable
+                </button>
+              )}
             </div>
-            {notifStatus === "granted" ? (
-              <button onClick={async () => {
-                const { sendTestNotification } = await import("@/services/alarm-sync")
-                const ok = await sendTestNotification()
-                if (!ok) alert("Could not send test notification")
-              }} className="text-[11px] font-bold text-primary hover:underline">
-                Test ✓
-              </button>
-            ) : notifStatus === "denied" ? (
-              <span className="text-[11px] font-bold text-destructive">Blocked</span>
-            ) : (
-              <button onClick={enableNotifs} className="text-[11px] font-bold text-primary hover:underline">
-                Enable
+            {/* Status info */}
+            <p className="text-[10px] text-muted-foreground mt-1 ml-8">{notifInfo}</p>
+            {/* Test button */}
+            {notifGranted && (
+              <button onClick={testNotif} className="mt-2 ml-8 text-[11px] font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-lg">
+                Send Test Notification (3 sec)
               </button>
             )}
           </div>

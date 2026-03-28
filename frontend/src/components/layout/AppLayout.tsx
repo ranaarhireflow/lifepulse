@@ -2,16 +2,16 @@ import { useEffect } from "react"
 import { Outlet } from "react-router-dom"
 import { BottomNav } from "./BottomNav"
 import { fetchTrackers } from "@/services/trackers"
-import { syncAlarmsToDevice, requestNotifPermission } from "@/services/alarm-sync"
+import { initNotifications, syncAlarms } from "@/services/alarm-sync"
 
 export function AppLayout() {
   // On app mount: request notification permission + sync alarms
   useEffect(() => {
     async function init() {
       try {
-        await requestNotifPermission()
+        await initNotifications()
         const trackers = await fetchTrackers()
-        await syncAlarmsToDevice(trackers)
+        await syncAlarms(trackers)
       } catch { /* auth might not be ready yet */ }
     }
     // Small delay to let auth settle
