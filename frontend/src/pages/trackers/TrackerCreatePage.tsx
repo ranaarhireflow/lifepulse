@@ -123,17 +123,20 @@ function getPrimaryDimension(weights: DimensionWeights): Dimension {
 function StatBars({ weights }: { weights: DimensionWeights }) {
   return (
     <div className="space-y-1 mt-2 w-full">
-      {DIMENSIONS.map((dim) => (
-        <div key={dim.key} className="flex items-center gap-1.5">
-          <span className="text-[8px] w-3 flex-shrink-0">{dim.emoji}</span>
-          <div className="flex-1 h-1.5 rounded-full bg-border overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all"
-              style={{ width: `${weights[dim.key]}%`, backgroundColor: dim.color }}
-            />
+      {DIMENSIONS.map((dim) => {
+        if (weights[dim.key] === 0) return null
+        return (
+          <div key={dim.key} className="flex items-center gap-1.5">
+            <span className="text-[8px] w-3 flex-shrink-0">{dim.emoji}</span>
+            <div className="flex-1 h-1.5 rounded-full bg-border overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${weights[dim.key]}%`, backgroundColor: dim.color }}
+              />
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

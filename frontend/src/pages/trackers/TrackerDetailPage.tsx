@@ -120,7 +120,17 @@ export function TrackerDetailPage() {
   const [trackerUnit, setTrackerUnit] = useState("")
   const [editTrackingDays, setEditTrackingDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 7])
   const [editTimesPerDay, setEditTimesPerDay] = useState(1)
+  const [editDifficulty, setEditDifficulty] = useState(1)
+  const [editDimension, setEditDimension] = useState<string>("discipline")
   const [deleting, setDeleting] = useState(false)
+
+  const EDIT_DIMENSIONS = [
+    { key: "wisdom", emoji: "🧠", label: "Wisdom", color: "#8B5CF6" },
+    { key: "strength", emoji: "💪", label: "Strength", color: "#EF4444" },
+    { key: "focus", emoji: "🎯", label: "Focus", color: "#F59E0B" },
+    { key: "discipline", emoji: "📚", label: "Discipline", color: "#3B82F6" },
+    { key: "confidence", emoji: "👤", label: "Confidence", color: "#EC4899" },
+  ]
 
   const openEditDrawer = () => {
     if (!tracker) return
@@ -129,6 +139,8 @@ export function TrackerDetailPage() {
     setTrackerUnit(tracker.unit || "")
     setEditTrackingDays(tracker.tracking_days || [1, 2, 3, 4, 5, 6, 7])
     setEditTimesPerDay(tracker.times_per_day || 1)
+    setEditDifficulty(tracker.difficulty || 1)
+    setEditDimension(tracker.dimension || "discipline")
     setConfigOpen(true)
   }
 
@@ -140,6 +152,8 @@ export function TrackerDetailPage() {
       unit: trackerUnit || null,
       tracking_days: editTrackingDays,
       times_per_day: editTimesPerDay,
+      difficulty: editDifficulty,
+      dimension: editDimension,
     })
     const t = await fetchTracker(tracker.id)
     setTracker(t)
@@ -324,6 +338,38 @@ export function TrackerDetailPage() {
                 <button type="button" onClick={() => setEditTimesPerDay(Math.min(10, editTimesPerDay + 1))} className="h-10 w-10 rounded-xl bg-card border border-border text-foreground font-bold">+</button>
               </div>
             </div>
+            {/* Star Rating */}
+            <div>
+              <label className="text-[13px] font-bold text-foreground">Difficulty Rating</label>
+              <div className="flex gap-2 mt-2">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <button key={s} type="button" onClick={() => setEditDifficulty(s)}
+                    className={`text-[24px] transition-transform active:scale-125 ${s <= editDifficulty ? "opacity-100" : "opacity-20"}`}>
+                    ⭐
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Primary Dimension */}
+            <div>
+              <label className="text-[13px] font-bold text-foreground">Primary Dimension</label>
+              <p className="text-[11px] text-muted-foreground mb-2">Which personality stat does this habit mainly boost?</p>
+              <div className="flex flex-wrap gap-2">
+                {EDIT_DIMENSIONS.map((dim) => (
+                  <button key={dim.key} type="button" onClick={() => setEditDimension(dim.key)}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold transition-all ${
+                      editDimension === dim.key
+                        ? "text-white shadow-md"
+                        : "bg-card border border-border text-muted-foreground"
+                    }`}
+                    style={editDimension === dim.key ? { backgroundColor: dim.color } : undefined}>
+                    <span>{dim.emoji}</span> {dim.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <Button onClick={saveTrackerEdit} className="w-full rounded-xl h-10 text-[13px] font-bold">
               Save Changes
             </Button>

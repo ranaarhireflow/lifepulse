@@ -168,7 +168,8 @@ export function HeroCard({ tracker, analytics, scene, onEdit, onTrackerUpdate }:
         {/* RPG Dimension Bars — Pokemon card style */}
         <div className="mt-4 w-full max-w-[240px] mx-auto space-y-1.5">
           {DIMENSION_BARS.map((dim) => {
-            const weight = HABIT_WEIGHTS[tracker.icon || ""]?.[dim.key] ?? (tracker.dimension === dim.key ? 80 : 20)
+            const weight = HABIT_WEIGHTS[tracker.icon || ""]?.[dim.key] ?? (tracker.dimension === dim.key ? 80 : 0)
+            if (weight === 0) return null
             return (
               <div key={dim.key} className="flex items-center gap-2">
                 <span className="text-[10px] w-4 text-center">{dim.emoji}</span>
