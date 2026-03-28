@@ -35,11 +35,15 @@ export function LoginPage() {
 
   if (user) return <Navigate to="/" replace />
 
+  const [error, setError] = useState<string | null>(null)
+
   const handleSignIn = async () => {
     setSigningIn(true)
+    setError(null)
     try {
       await signInWithGoogle()
-    } catch {
+    } catch (e: any) {
+      setError(e?.message || String(e) || "Sign-in failed")
       setSigningIn(false)
     }
   }
@@ -160,6 +164,9 @@ export function LoginPage() {
             </div>
 
             <p className="text-center text-[11px] text-muted-foreground/60 mt-6 leading-relaxed">
+              {error && (
+                <span className="block text-destructive text-[11px] font-bold mb-2 bg-destructive/10 rounded-lg p-2">{error}</span>
+              )}
               Free forever. No subscriptions. No ads.
               <br />
               Your data stays private and secure.
