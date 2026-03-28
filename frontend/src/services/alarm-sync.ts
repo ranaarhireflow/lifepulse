@@ -101,9 +101,10 @@ export async function syncAlarms(trackers: Tracker[]): Promise<string> {
       await LocalNotifications.cancel({ notifications: toCancel })
     }
 
-    // Build notifications from tracker alerts
+    // Build notifications using schedule.at + repeats (more reliable than schedule.on)
     const notifs: any[] = []
     let id = 1000
+    const now = new Date()
 
     for (const tracker of trackers) {
       if (!tracker.alerts?.length) continue
@@ -111,12 +112,20 @@ export async function syncAlarms(trackers: Tracker[]): Promise<string> {
         if (!alert.enabled) continue
         const [hour, minute] = alert.alert_time.split(":").map(Number)
 
+        // Calculate next occurrence of this time
+        const nextFire = new Date()
+        nextFire.setHours(hour, minute, 0, 0)
+        if (nextFire <= now) {
+          nextFire.setDate(nextFire.getDate() + 1) // Tomorrow
+        }
+
         notifs.push({
           id: id++,
           title: `${tracker.icon || "📊"} ${tracker.name}`,
           body: alert.label || getNotificationMessage(tracker.icon),
           schedule: {
-            on: { hour, minute },
+            at: nextFire,
+            repeats: true,
             allowWhileIdle: true,
           },
           channelId: CHANNEL_ID,
