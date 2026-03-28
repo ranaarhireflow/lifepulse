@@ -82,9 +82,17 @@ All under `/api/v1`:
 | `frontend/src/components/common/PulseLogo.tsx` | SVG logo — monk + progress ring |
 | `frontend/src/components/layout/AppLayout.tsx` | Phone frame wrapper with cream bg |
 | `frontend/src/components/layout/BottomNav.tsx` | 5-tab bottom navigation |
+| `frontend/src/components/today/RulerInput.tsx` | Tactile drag ruler input |
+| `frontend/src/components/today/HabitCard.tsx` | Today card with ruler + inputs |
+| `frontend/src/services/alarm-sync.ts` | Notification scheduling (Capacitor) |
+| `frontend/src/services/widget-sync.ts` | Widget data sync (SharedPreferences) |
+| `frontend/src/services/notifications.ts` | Web notification helpers |
+| `frontend/src/data/notification-messages.ts` | 40+ creative per-habit messages |
+| `frontend/src/data/suggested-habits.ts` | 25 habit suggestions with metadata |
 | `frontend/src/index.css` | Theme (dark + light) with Plus Jakarta Sans |
 | `backend/app/models/` | All SQLAlchemy models |
 | `backend/app/routers/` | All API route handlers |
+| `backend/app/services/monk_score.py` | XP/level scoring engine |
 
 ## Commands
 
@@ -135,51 +143,76 @@ npx cap open ios
 npx cap open android
 ```
 
+### Android APK
+```bash
+cd frontend
+npm run build
+npx cap sync android
+JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" \
+  cd android && ./gradlew assembleDebug
+# APK at: android/app/build/outputs/apk/debug/app-debug.apk
+```
+
 ### Push Notifications
+- Android: `@capacitor/local-notifications` with `schedule.at` + `repeats: true`
+- **Important:** `schedule.on` (cron-style) does NOT work on Pixel/modern Android
+- Use `schedule.at` with calculated next-occurrence Date + `repeats: true`
+- Static imports only (dynamic imports silently fail on native)
 - Web: Service Worker (sw.js) handles push events
-- iOS: APNs via @capacitor/push-notifications
-- Android: FCM via @capacitor/push-notifications
-- Local notifications: @capacitor/local-notifications
+- iOS: APNs via @capacitor/push-notifications (when iOS app built)
+- Apple Watch: notifications auto-forward when paired
 
-### Widgets (planned)
-- iOS: WidgetKit extension (requires native Swift code)
-- Android: App Widget (requires native Kotlin code)
-- Both need native project setup beyond Capacitor
+### Widgets (Android)
+- 3 widget types: Overview (4x2), Habit Card (2x2 with picker), Streak (2x1)
+- Habit Card shows config picker to select which habit
+- Data synced via SharedPreferences (`CapacitorStorage`)
+- Widget provider + layouts in `android/app/src/main/`
 
-## v4.1.0 — Life Reset Redesign
+### Firebase Auth (Android)
+- Uses `@capacitor-firebase/authentication` for native Google Sign-In
+- `signInWithPopup` doesn't work in Capacitor WebView
+- Native plugin shows bottom-sheet account picker
+- Requires `google-services.json` with SHA-1 fingerprint
+- `providers: ["google.com"]` in capacitor.config.ts
 
-Major UI overhaul inspired by Life Reset app + Tinder swipe UX + RPG gamification.
+## v4.2 — Current Version
 
-### New Features
-- **Swipe card carousel** — Tinder-style daily tracking, adjacent cards peek from sides
-- **Date dial** — Full week (Sun-Sat) with selectable past dates, future disabled
-- **RPG Score page** — 5 dimensions (Wisdom, Confidence, Strength, Discipline, Focus) with 64px numbers, XP/Level system, "No level cap. Keep rising."
-- **25 suggested habits** — Expandable row list with stat boosts and Accept/Decline
-- **Progress page** — Clean row list of all habits
-- **Centralized Alarms page** — Manage all reminders with toggles
-- **Achievements page** — Streak, entry, consistency, milestone badges
-- **Pokemon card detail** — Gradient hero, heatmap, trend charts, inline edit
-- **Phone frame on desktop** — Cream background with rounded phone container
-- **Plus Jakarta Sans** font
-- **Bottom sheet drawers** — Constrained to phone frame, not full viewport
-- **Logo on all pages** — Clicking navigates home
+### RPG Gamification
+- **Multi-dimension weights** — each habit affects 5 stats (Wisdom/Strength/Focus/Discipline/Confidence)
+- **RPG stat bars** on Pokemon card detail page (animated, colored per dimension)
+- **5 dimension sliders** in create + edit forms (0-100 per stat)
+- **Scoring engine** — real XP from entries, streak multipliers, target bonuses
+- **Quadratic leveling** — level² × 100 XP, no cap
+- **Awards tab** — XP progress ring, unlockable achievements
 
-### Design System
-- Dark mode: true black (#000) + card (#1C1C1E) + green (#22C55E)
-- Light mode: cream frame (#F5F0EB) + white cards + green accents
-- All pages mobile-width (max-w-md) centered
-- 5-tab bottom nav: Today, Progress, Score, Alarms, Settings
+### Ruler Input
+- Tactile drag ruler for NUMERIC + DURATION habits (like Life Reset)
+- Touch-native, no Framer Motion drag (WebView-friendly)
+- `stopPropagation` prevents card swipe conflicts
 
-### Previous (v1.0.0)
-- [x] Firebase Google auth + dev mode bypass
-- [x] 6 pulse types with all input variants
-- [x] Daily tracking with auto-save
-- [x] GitHub-style activity heatmap (3Mo/6Mo/Year)
-- [x] Trend charts (7 range options)
-- [x] Alert management (add/edit/delete)
-- [x] Create pulse from templates or custom
-- [x] Edit pulse (name, icon, color, unit, target, default)
-- [x] Archive/unarchive/soft-delete
-- [x] Dark mode + light mode
-- [x] PWA + Capacitor
-- [x] Soft-delete + 7-day grace period
+### Navigation
+- Bottom nav: Progress | Score | **TODAY** (center) | Awards | Settings
+- Logo only on Today + Login pages
+- Sub-pages have back buttons
+
+### Add a Pulse (Discover)
+- 6 category pills: Popular, Body, Mind, Life, Focus, Quit
+- 30+ pre-built habits with dimension metadata
+- Search across all habits
+- "Build Your Own" at top, quiz accessible anytime
+
+### Notifications
+- Creative Zomato-style messages per habit (40+ messages)
+- Permission request on app launch
+- Alarms auto-sync from tracker alerts
+- Test button in Settings
+
+### Mobile-First
+- iPhone 14 Pro phone frame on desktop (393×852)
+- Safe area insets (Dynamic Island, home indicator)
+- `100dvh` for mobile browser
+- PWA: manifest, service worker, installable
+
+### Git Remotes
+- `origin` — git@github.com:rajatsaxena2504/lifepulse.git (default push)
+- `upstream` — github.com/ranaarhireflow/lifepulse.git (push when asked)
