@@ -67,7 +67,8 @@ export function HabitCard({
   showConfirmAnim,
 }: HabitCardProps) {
   const { tracker, entry } = data
-  const logged = entry !== null
+  // Only show as "logged" when the entry was actually persisted (not a temp local entry)
+  const logged = entry !== null && entry.id !== "t"
 
   return (
     <div
