@@ -102,12 +102,15 @@ export function DailyPage() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden relative w-full">
-      {/* TOP BAR — logo left, badges right */}
+      {/* TOP BAR — brand left, badges right */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2 shrink-0">
-        <PulseLogo size={40} />
         <div className="flex items-center gap-2">
-          <NavLink to="/score" className="flex items-center gap-1 rounded-full bg-card border border-border px-2.5 py-1 text-[10px] font-bold text-primary"><Zap className="h-3 w-3" />Lvl 1</NavLink>
-          <div className="flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold text-amber-400"><Flame className="h-3 w-3" />{done}/{total}</div>
+          <PulseLogo size={28} />
+          <span className="text-[17px] font-black tracking-tight text-foreground">LifePulse</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <NavLink to="/score" className="flex items-center gap-1 rounded-full bg-card border border-border px-2 py-1 text-[9px] font-bold text-primary"><Zap className="h-3 w-3" />Lvl 1</NavLink>
+          <div className="flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-1 text-[9px] font-bold text-amber-400"><Flame className="h-3 w-3" />{done}/{total}</div>
         </div>
       </div>
 
