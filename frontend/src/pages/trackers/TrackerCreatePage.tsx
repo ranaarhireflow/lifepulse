@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -7,6 +7,9 @@ import {
   ArrowLeft,
   Loader2,
   Plus,
+  Search,
+  Sparkles,
+  ChevronRight,
 } from "lucide-react"
 import {
   createTracker,
@@ -29,121 +32,95 @@ interface HabitTemplate {
   max_value: number | null
 }
 
-interface CategoryDef {
-  key: string
-  icon: string
-  label: string
-  subtitle: string
-  habits: HabitTemplate[]
+const DIMENSION_META: Record<Dimension, { icon: string; label: string; color: string; bgColor: string; borderColor: string; description: string }> = {
+  wisdom:     { icon: "\uD83E\uDDE0", label: "Wisdom",     color: "text-purple-600 dark:text-purple-400", bgColor: "bg-purple-100 dark:bg-purple-900/30",   borderColor: "border-l-purple-500", description: "Habits that make you smarter" },
+  strength:   { icon: "\uD83D\uDCAA", label: "Strength",   color: "text-red-600 dark:text-red-400",       bgColor: "bg-red-100 dark:bg-red-900/30",         borderColor: "border-l-red-500",    description: "Habits that make you physically stronger" },
+  focus:      { icon: "\uD83C\uDFAF", label: "Focus",      color: "text-amber-600 dark:text-amber-400",   bgColor: "bg-amber-100 dark:bg-amber-900/30",     borderColor: "border-l-amber-500",  description: "Habits that sharpen your mind" },
+  discipline: { icon: "\uD83D\uDCDA", label: "Discipline", color: "text-blue-600 dark:text-blue-400",     bgColor: "bg-blue-100 dark:bg-blue-900/30",       borderColor: "border-l-blue-500",   description: "Habits that build consistency" },
+  confidence: { icon: "\uD83D\uDC64", label: "Confidence", color: "text-emerald-600 dark:text-emerald-400", bgColor: "bg-emerald-100 dark:bg-emerald-900/30", borderColor: "border-l-emerald-500", description: "Habits that boost self-image" },
 }
 
-const DIMENSION_META: Record<Dimension, { icon: string; label: string }> = {
-  wisdom:     { icon: "📖", label: "Wisdom" },
-  confidence: { icon: "😎", label: "Confidence" },
-  strength:   { icon: "💪", label: "Strength" },
-  discipline: { icon: "🔥", label: "Discipline" },
-  focus:      { icon: "🎯", label: "Focus" },
-}
+const DIMENSION_ORDER: Dimension[] = ["wisdom", "strength", "focus", "discipline", "confidence"]
 
-const CATEGORIES: CategoryDef[] = [
-  {
-    key: "popular", icon: "🔥", label: "Popular", subtitle: "Most popular habits",
-    habits: [
-      { name: "Walk", icon: "🚶", dimension: "strength", type: "NUMERIC", unit: "steps", target_value: 10000, min_value: 0, max_value: 50000 },
-      { name: "Sleep", icon: "😴", dimension: "discipline", type: "DURATION", unit: "hours", target_value: 8, min_value: 0, max_value: 24 },
-      { name: "Drink Water", icon: "💧", dimension: "discipline", type: "NUMERIC", unit: "glasses", target_value: 8, min_value: 0, max_value: 20 },
-      { name: "Meditation", icon: "🧘", dimension: "wisdom", type: "DURATION", unit: "minutes", target_value: 15, min_value: 0, max_value: 120 },
-      { name: "Run", icon: "🏃", dimension: "strength", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 180 },
-      { name: "Workout", icon: "🏋️", dimension: "strength", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-      { name: "Read", icon: "📖", dimension: "wisdom", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 300 },
-      { name: "Journal", icon: "✍️", dimension: "wisdom", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-      { name: "Deep Work", icon: "🎯", dimension: "focus", type: "DURATION", unit: "hours", target_value: 4, min_value: 0, max_value: 16 },
-      { name: "Cold Shower", icon: "🥶", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    ],
-  },
-  {
-    key: "health", icon: "❤️", label: "Health", subtitle: "Track your body vitals",
-    habits: [
-      { name: "Blood Pressure", icon: "🩺", dimension: "discipline", type: "NUMERIC", unit: "mmHg", target_value: 120, min_value: 60, max_value: 200 },
-      { name: "Weight", icon: "⚖️", dimension: "discipline", type: "NUMERIC", unit: "kg", target_value: null, min_value: 30, max_value: 300 },
-      { name: "Calories", icon: "🔥", dimension: "discipline", type: "NUMERIC", unit: "kcal", target_value: 2000, min_value: 0, max_value: 5000 },
-      { name: "Vitamins", icon: "💊", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-      { name: "Hydration", icon: "💧", dimension: "discipline", type: "NUMERIC", unit: "liters", target_value: 3, min_value: 0, max_value: 10 },
-      { name: "Heart Rate", icon: "💓", dimension: "strength", type: "NUMERIC", unit: "bpm", target_value: null, min_value: 40, max_value: 200 },
-      { name: "Steps", icon: "👣", dimension: "strength", type: "NUMERIC", unit: "steps", target_value: 10000, min_value: 0, max_value: 50000 },
-      { name: "Sleep Quality", icon: "🌙", dimension: "wisdom", type: "NUMERIC", unit: "rating", target_value: 8, min_value: 1, max_value: 10 },
-    ],
-  },
-  {
-    key: "fitness", icon: "🏃", label: "Fitness", subtitle: "Build your body",
-    habits: [
-      { name: "Push-ups", icon: "💪", dimension: "strength", type: "NUMERIC", unit: "reps", target_value: 50, min_value: 0, max_value: 500 },
-      { name: "Squats", icon: "🦵", dimension: "strength", type: "NUMERIC", unit: "reps", target_value: 50, min_value: 0, max_value: 500 },
-      { name: "Plank", icon: "🧱", dimension: "strength", type: "DURATION", unit: "seconds", target_value: 60, min_value: 0, max_value: 600 },
-      { name: "Yoga", icon: "🧘‍♀️", dimension: "confidence", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 120 },
-      { name: "Stretching", icon: "🤸", dimension: "confidence", type: "DURATION", unit: "minutes", target_value: 15, min_value: 0, max_value: 60 },
-      { name: "Cycling", icon: "🚴", dimension: "strength", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 300 },
-      { name: "Swimming", icon: "🏊", dimension: "strength", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 180 },
-      { name: "Gym", icon: "🏋️", dimension: "strength", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-      { name: "Running", icon: "🏃‍♂️", dimension: "strength", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 180 },
-    ],
-  },
-  {
-    key: "lifestyle", icon: "🏠", label: "Lifestyle", subtitle: "Daily routines that matter",
-    habits: [
-      { name: "Eat Fruits", icon: "🍎", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-      { name: "No Sugar", icon: "🚫", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-      { name: "Cook Meals", icon: "🍳", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-      { name: "Clean Space", icon: "🧹", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-      { name: "Budget", icon: "💰", dimension: "wisdom", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-      { name: "Wake Early", icon: "🌅", dimension: "discipline", type: "TIME", unit: "", target_value: null, min_value: null, max_value: null },
-      { name: "No Phone", icon: "📵", dimension: "focus", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-      { name: "Gratitude", icon: "🙏", dimension: "wisdom", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    ],
-  },
-  {
-    key: "mind", icon: "🧠", label: "Mind", subtitle: "Sharpen your mental edge",
-    habits: [
-      { name: "Meditate", icon: "🧘", dimension: "wisdom", type: "DURATION", unit: "minutes", target_value: 15, min_value: 0, max_value: 120 },
-      { name: "Read Books", icon: "📚", dimension: "wisdom", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 300 },
-      { name: "Learn Skill", icon: "🎓", dimension: "wisdom", type: "DURATION", unit: "minutes", target_value: 60, min_value: 0, max_value: 300 },
-      { name: "Deep Work", icon: "🎯", dimension: "focus", type: "DURATION", unit: "hours", target_value: 4, min_value: 0, max_value: 16 },
-      { name: "Journal", icon: "📝", dimension: "wisdom", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-      { name: "No Social Media", icon: "📵", dimension: "focus", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-      { name: "Breathe", icon: "🌬️", dimension: "confidence", type: "DURATION", unit: "minutes", target_value: 5, min_value: 0, max_value: 30 },
-      { name: "Study", icon: "📖", dimension: "wisdom", type: "DURATION", unit: "minutes", target_value: 60, min_value: 0, max_value: 480 },
-    ],
-  },
-  {
-    key: "quit", icon: "🚫", label: "Quit", subtitle: "Break bad habits",
-    habits: [
-      { name: "Less Alcohol", icon: "🍷", dimension: "discipline", type: "NUMERIC", unit: "drinks", target_value: 0, min_value: 0, max_value: 20 },
-      { name: "Less Sugar", icon: "🍬", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-      { name: "Less Screen", icon: "📱", dimension: "focus", type: "DURATION", unit: "hours", target_value: 2, min_value: 0, max_value: 16 },
-      { name: "Less Caffeine", icon: "☕", dimension: "discipline", type: "NUMERIC", unit: "cups", target_value: 1, min_value: 0, max_value: 10 },
-      { name: "No Smoking", icon: "🚭", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-      { name: "Less Junk Food", icon: "🍔", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-      { name: "Less Complaining", icon: "🤐", dimension: "confidence", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-      { name: "Less Sitting", icon: "🪑", dimension: "strength", type: "DURATION", unit: "hours", target_value: 1, min_value: 0, max_value: 16 },
-    ],
-  },
-]
+/** All habits grouped by dimension */
+const HABITS_BY_DIMENSION: Record<Dimension, HabitTemplate[]> = {
+  wisdom: [
+    { name: "Read 30 Min", icon: "\uD83D\uDCD6", dimension: "wisdom", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 300 },
+    { name: "Deep Work", icon: "\uD83C\uDFAF", dimension: "wisdom", type: "DURATION", unit: "hours", target_value: 4, min_value: 0, max_value: 16 },
+    { name: "Learn Skill", icon: "\uD83C\uDF93", dimension: "wisdom", type: "DURATION", unit: "minutes", target_value: 60, min_value: 0, max_value: 300 },
+    { name: "Write", icon: "\u270D\uFE0F", dimension: "wisdom", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Study", icon: "\uD83D\uDCD6", dimension: "wisdom", type: "DURATION", unit: "minutes", target_value: 60, min_value: 0, max_value: 480 },
+    { name: "No Phone Morning", icon: "\uD83D\uDCF5", dimension: "wisdom", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Meditate", icon: "\uD83E\uDDD8", dimension: "wisdom", type: "DURATION", unit: "minutes", target_value: 15, min_value: 0, max_value: 120 },
+    { name: "Read Books", icon: "\uD83D\uDCDA", dimension: "wisdom", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 300 },
+    { name: "Journal", icon: "\uD83D\uDCDD", dimension: "wisdom", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Sleep Quality", icon: "\uD83C\uDF19", dimension: "wisdom", type: "NUMERIC", unit: "rating", target_value: 8, min_value: 1, max_value: 10 },
+    { name: "Budget", icon: "\uD83D\uDCB0", dimension: "wisdom", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Gratitude", icon: "\uD83D\uDE4F", dimension: "wisdom", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+  ],
+  strength: [
+    { name: "Push-ups", icon: "\uD83D\uDCAA", dimension: "strength", type: "NUMERIC", unit: "reps", target_value: 50, min_value: 0, max_value: 500 },
+    { name: "Workout", icon: "\uD83C\uDFCB\uFE0F", dimension: "strength", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Run", icon: "\uD83C\uDFC3", dimension: "strength", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 180 },
+    { name: "Walk 10K Steps", icon: "\uD83D\uDEB6", dimension: "strength", type: "NUMERIC", unit: "steps", target_value: 10000, min_value: 0, max_value: 50000 },
+    { name: "Stretching", icon: "\uD83E\uDD38", dimension: "strength", type: "DURATION", unit: "minutes", target_value: 15, min_value: 0, max_value: 60 },
+    { name: "Cycling", icon: "\uD83D\uDEB4", dimension: "strength", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 300 },
+    { name: "Squats", icon: "\uD83E\uDDB5", dimension: "strength", type: "NUMERIC", unit: "reps", target_value: 50, min_value: 0, max_value: 500 },
+    { name: "Plank", icon: "\uD83E\uDDF1", dimension: "strength", type: "DURATION", unit: "seconds", target_value: 60, min_value: 0, max_value: 600 },
+    { name: "Swimming", icon: "\uD83C\uDFCA", dimension: "strength", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 180 },
+    { name: "Gym", icon: "\uD83C\uDFCB\uFE0F", dimension: "strength", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Heart Rate", icon: "\uD83D\uDC93", dimension: "strength", type: "NUMERIC", unit: "bpm", target_value: null, min_value: 40, max_value: 200 },
+    { name: "Steps", icon: "\uD83D\uDC63", dimension: "strength", type: "NUMERIC", unit: "steps", target_value: 10000, min_value: 0, max_value: 50000 },
+    { name: "Less Sitting", icon: "\uD83E\uDE91", dimension: "strength", type: "DURATION", unit: "hours", target_value: 1, min_value: 0, max_value: 16 },
+  ],
+  focus: [
+    { name: "Cold Shower", icon: "\uD83E\uDD76", dimension: "focus", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Breathe", icon: "\uD83C\uDF2C\uFE0F", dimension: "focus", type: "DURATION", unit: "minutes", target_value: 5, min_value: 0, max_value: 30 },
+    { name: "No Social Media", icon: "\uD83D\uDCF5", dimension: "focus", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Limit Screen Time", icon: "\uD83D\uDCF1", dimension: "focus", type: "DURATION", unit: "hours", target_value: 2, min_value: 0, max_value: 16 },
+    { name: "No Phone", icon: "\uD83D\uDCF5", dimension: "focus", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+  ],
+  discipline: [
+    { name: "Drink Water", icon: "\uD83D\uDCA7", dimension: "discipline", type: "NUMERIC", unit: "glasses", target_value: 8, min_value: 0, max_value: 20 },
+    { name: "Sleep by 10PM", icon: "\uD83D\uDE34", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Wake Early", icon: "\uD83C\uDF05", dimension: "discipline", type: "TIME", unit: "", target_value: null, min_value: null, max_value: null },
+    { name: "Cook Meals", icon: "\uD83C\uDF73", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Clean Space", icon: "\uD83E\uDDF9", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Calories", icon: "\uD83D\uDD25", dimension: "discipline", type: "NUMERIC", unit: "kcal", target_value: 2000, min_value: 0, max_value: 5000 },
+    { name: "Vitamins", icon: "\uD83D\uDC8A", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Hydration", icon: "\uD83D\uDCA7", dimension: "discipline", type: "NUMERIC", unit: "liters", target_value: 3, min_value: 0, max_value: 10 },
+    { name: "Blood Pressure", icon: "\uD83E\uDE7A", dimension: "discipline", type: "NUMERIC", unit: "mmHg", target_value: 120, min_value: 60, max_value: 200 },
+    { name: "Weight", icon: "\u2696\uFE0F", dimension: "discipline", type: "NUMERIC", unit: "kg", target_value: null, min_value: 30, max_value: 300 },
+    { name: "Sleep", icon: "\uD83D\uDE34", dimension: "discipline", type: "DURATION", unit: "hours", target_value: 8, min_value: 0, max_value: 24 },
+    { name: "Eat Fruits", icon: "\uD83C\uDF4E", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "No Sugar", icon: "\uD83D\uDEAB", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Less Alcohol", icon: "\uD83C\uDF77", dimension: "discipline", type: "NUMERIC", unit: "drinks", target_value: 0, min_value: 0, max_value: 20 },
+    { name: "Less Caffeine", icon: "\u2615", dimension: "discipline", type: "NUMERIC", unit: "cups", target_value: 1, min_value: 0, max_value: 10 },
+    { name: "No Smoking", icon: "\uD83D\uDEAD", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Less Junk Food", icon: "\uD83C\uDF54", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+  ],
+  confidence: [
+    { name: "Yoga", icon: "\uD83E\uDDD8\u200D\u2640\uFE0F", dimension: "confidence", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 120 },
+    { name: "Call a Friend", icon: "\uD83D\uDCDE", dimension: "confidence", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Eat Healthy", icon: "\uD83E\uDD57", dimension: "confidence", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Grooming", icon: "\uD83E\uDDF4", dimension: "confidence", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+    { name: "Less Complaining", icon: "\uD83E\uDD10", dimension: "confidence", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
+  ],
+}
 
 const PRESET_ICONS = [
-  "⚖️", "❤️", "💧", "😴", "🌅", "👣", "🔥", "💓",
-  "🏋️", "🏃", "⏱️", "📝", "🧘", "🧠", "📖", "🧘‍♂️",
-  "✍️", "📱", "🥗", "🚫", "🙏", "😊", "💰", "🪥",
-  "🌙", "☕", "🎯", "💪", "🎵", "🌿", "🍎", "✨",
-  "🩺", "💊", "🦵", "🧱", "🤸", "🚴", "🏊", "📚",
-  "🎓", "📵", "🌬️", "🍷", "🍬", "🚭", "🍔", "🤐",
+  "\u2696\uFE0F", "\u2764\uFE0F", "\uD83D\uDCA7", "\uD83D\uDE34", "\uD83C\uDF05", "\uD83D\uDC63", "\uD83D\uDD25", "\uD83D\uDC93",
+  "\uD83C\uDFCB\uFE0F", "\uD83C\uDFC3", "\u23F1\uFE0F", "\uD83D\uDCDD", "\uD83E\uDDD8", "\uD83E\uDDE0", "\uD83D\uDCD6", "\uD83E\uDDD8\u200D\u2642\uFE0F",
+  "\u270D\uFE0F", "\uD83D\uDCF1", "\uD83E\uDD57", "\uD83D\uDEAB", "\uD83D\uDE4F", "\uD83D\uDE0A", "\uD83D\uDCB0", "\uD83E\uDEB9",
+  "\uD83C\uDF19", "\u2615", "\uD83C\uDFAF", "\uD83D\uDCAA", "\uD83C\uDFB5", "\uD83C\uDF3F", "\uD83C\uDF4E", "\u2728",
+  "\uD83E\uDE7A", "\uD83D\uDC8A", "\uD83E\uDDB5", "\uD83E\uDDF1", "\uD83E\uDD38", "\uD83D\uDEB4", "\uD83C\uDFCA", "\uD83D\uDCDA",
+  "\uD83C\uDF93", "\uD83D\uDCF5", "\uD83C\uDF2C\uFE0F", "\uD83C\uDF77", "\uD83C\uDF6C", "\uD83D\uDEAD", "\uD83C\uDF54", "\uD83E\uDD10",
 ]
 
 const PRESET_COLORS = [
   "#22C55E", "#16A34A", "#10B981", "#14B8A6",
   "#3B82F6", "#8B5CF6", "#EC4899", "#EF4444",
 ]
-
-const GREEN = "#22C55E"
 
 /* ──────────────────── COMPONENT ──────────────────── */
 
@@ -154,13 +131,13 @@ export function TrackerCreatePage() {
   const [showCustomForm, setShowCustomForm] = useState(false)
   const [creating, setCreating] = useState(false)
 
-  // Template selection state
-  const [selectedCategory, setSelectedCategory] = useState(0)
+  // Search
+  const [searchQuery, setSearchQuery] = useState("")
 
   // Custom form state
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
-  const [icon, setIcon] = useState("🎯")
+  const [icon, setIcon] = useState("\uD83C\uDFAF")
   const [color, setColor] = useState("#22C55E")
   const [habitMode, setHabitMode] = useState<"build" | "quit">("build")
   const [type, setType] = useState<HabitType>("BOOLEAN")
@@ -176,7 +153,7 @@ export function TrackerCreatePage() {
   const resetForm = () => {
     setName("")
     setDescription("")
-    setIcon("🎯")
+    setIcon("\uD83C\uDFAF")
     setColor("#22C55E")
     setHabitMode("build")
     setType("BOOLEAN")
@@ -197,7 +174,7 @@ export function TrackerCreatePage() {
     setUnit(h.unit)
     setTargetValue(h.target_value != null ? String(h.target_value) : "")
     setSelectedDimension(h.dimension)
-    setHabitMode(CATEGORIES[selectedCategory].key === "quit" ? "quit" : "build")
+    setHabitMode("build")
     setShowCustomForm(true)
   }
 
@@ -226,7 +203,16 @@ export function TrackerCreatePage() {
     }
   }
 
-  const activeCat = CATEGORIES[selectedCategory]
+  /** Filtered habits per dimension based on search */
+  const filteredDimensions = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim()
+    return DIMENSION_ORDER.map((dim) => {
+      const habits = HABITS_BY_DIMENSION[dim].filter((h) =>
+        !q || h.name.toLowerCase().includes(q)
+      )
+      return { dim, habits }
+    }).filter((d) => d.habits.length > 0)
+  }, [searchQuery])
 
   /* ───────────── CUSTOM FORM ───────────── */
   if (showCustomForm) {
@@ -244,11 +230,11 @@ export function TrackerCreatePage() {
             <h1 className="flex-1 text-center text-lg font-bold text-foreground pr-10">Custom Habit</h1>
           </div>
 
-          {/* Section 1 — Identity */}
+          {/* Section 1 -- Identity */}
           <div className="rounded-2xl bg-white dark:bg-card border border-border/40 p-5 space-y-5">
             <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Identity</h2>
 
-            {/* Icon picker — 6 columns */}
+            {/* Icon picker */}
             <div>
               <Label className="text-sm font-semibold text-foreground mb-2 block">Icon</Label>
               <div className="grid grid-cols-8 gap-1.5">
@@ -290,7 +276,7 @@ export function TrackerCreatePage() {
               />
             </div>
 
-            {/* Color picker — row of circles */}
+            {/* Color picker */}
             <div>
               <Label className="text-sm font-semibold text-foreground mb-2 block">Color</Label>
               <div className="flex gap-3">
@@ -310,7 +296,7 @@ export function TrackerCreatePage() {
             </div>
           </div>
 
-          {/* Section 2 — Goal */}
+          {/* Section 2 -- Goal */}
           <div className="rounded-2xl bg-white dark:bg-card border border-border/40 p-5 space-y-5">
             <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Goal</h2>
 
@@ -346,10 +332,10 @@ export function TrackerCreatePage() {
               <Label className="text-sm font-semibold text-foreground mb-2 block">Tracking Type</Label>
               <div className="grid grid-cols-4 gap-2">
                 {([
-                  { value: "BOOLEAN" as const, label: "Yes/No", icon: "✓" },
+                  { value: "BOOLEAN" as const, label: "Yes/No", icon: "\u2713" },
                   { value: "NUMERIC" as const, label: "Number", icon: "#" },
-                  { value: "DURATION" as const, label: "Duration", icon: "⏱" },
-                  { value: "TIME" as const, label: "Time", icon: "🕐" },
+                  { value: "DURATION" as const, label: "Duration", icon: "\u23F1" },
+                  { value: "TIME" as const, label: "Time", icon: "\uD83D\uDD50" },
                 ]).map((t) => (
                   <button
                     key={t.value}
@@ -440,7 +426,7 @@ export function TrackerCreatePage() {
             </div>
           </div>
 
-          {/* Section 3 — Schedule */}
+          {/* Section 3 -- Schedule */}
           <div className="rounded-2xl bg-white dark:bg-card border border-border/40 p-5 space-y-5">
             <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Schedule</h2>
 
@@ -488,12 +474,12 @@ export function TrackerCreatePage() {
             )}
           </div>
 
-          {/* Section 4 — Personality */}
+          {/* Section 4 -- Personality */}
           <div className="rounded-2xl bg-white dark:bg-card border border-border/40 p-5 space-y-4">
             <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Personality</h2>
             <p className="text-sm text-muted-foreground">This habit boosts:</p>
             <div className="flex flex-wrap gap-2">
-              {(Object.entries(DIMENSION_META) as [Dimension, { icon: string; label: string }][]).map(([key, meta]) => (
+              {(Object.entries(DIMENSION_META) as [Dimension, typeof DIMENSION_META[Dimension]][]).map(([key, meta]) => (
                 <button
                   key={key}
                   onClick={() => setSelectedDimension(key)}
@@ -534,7 +520,7 @@ export function TrackerCreatePage() {
   /* ───────────── TEMPLATE SELECTION ───────────── */
   return (
     <div className="min-h-screen bg-[#f0fdf4] dark:bg-background">
-      <div className="max-w-lg mx-auto pb-28">
+      <div className="max-w-lg mx-auto pb-10">
         {/* Header */}
         <div className="flex items-center px-5 pt-6 pb-4">
           <button
@@ -543,89 +529,101 @@ export function TrackerCreatePage() {
           >
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </button>
-          <h1 className="flex-1 text-center text-lg font-bold text-foreground pr-10">New Habit</h1>
+          <h1 className="flex-1 text-center text-lg font-bold text-foreground pr-10">Add a Pulse</h1>
         </div>
 
-        {/* Category tabs — horizontal scrollable */}
-        <div className="px-4 pb-2">
-          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-            {CATEGORIES.map((cat, idx) => (
-              <button
-                key={cat.key}
-                onClick={() => setSelectedCategory(idx)}
-                className="flex flex-col items-center gap-1.5 flex-shrink-0"
-              >
-                <div
-                  className={`flex h-[44px] w-[44px] items-center justify-center rounded-full text-xl transition-all ${
-                    selectedCategory === idx
-                      ? "bg-[#22C55E] shadow-[0_0_12px_rgba(34,197,94,0.4)]"
-                      : "bg-white dark:bg-card border border-border/50"
-                  }`}
-                >
-                  {cat.icon}
+        {/* Build Your Own -- prominent top card */}
+        <div className="px-4 mb-5">
+          <button
+            onClick={() => { resetForm(); setShowCustomForm(true) }}
+            className="w-full rounded-2xl bg-gradient-to-br from-[#22C55E] to-[#16A34A] p-5 text-left transition-all hover:shadow-lg hover:shadow-green-500/20 active:scale-[0.98]"
+          >
+            <div className="flex items-center justify-between">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-white/90" />
+                  <span className="text-lg font-bold text-white">Build Your Own Pulse</span>
                 </div>
-                <span
-                  className={`text-[11px] font-semibold transition-colors ${
-                    selectedCategory === idx ? "text-[#22C55E]" : "text-muted-foreground"
-                  }`}
-                >
-                  {cat.label}
-                </span>
-              </button>
-            ))}
+                <p className="text-sm text-white/80">Create a custom habit with your own goals</p>
+              </div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                <ChevronRight className="h-5 w-5 text-white" />
+              </div>
+            </div>
+          </button>
+        </div>
+
+        {/* Search bar */}
+        <div className="px-4 mb-6">
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search habits..."
+              className="h-11 pl-10 rounded-xl bg-white dark:bg-card border-border/50 text-foreground placeholder:text-muted-foreground focus-visible:ring-[#22C55E] focus-visible:ring-2"
+            />
           </div>
         </div>
 
-        {/* Category description */}
-        <div className="px-5 pt-3 pb-4">
-          <h2 className="text-xl font-bold text-foreground">{activeCat.label}</h2>
-          <p className="text-sm text-muted-foreground">{activeCat.subtitle}</p>
-        </div>
-
-        {/* Habit list */}
-        <div className="px-4 space-y-2">
-          {activeCat.habits.map((habit) => {
-            const dimMeta = DIMENSION_META[habit.dimension]
+        {/* Dimensions + habit cards */}
+        <div className="px-4 space-y-8">
+          {filteredDimensions.map(({ dim, habits }) => {
+            const meta = DIMENSION_META[dim]
             return (
-              <div
-                key={habit.name}
-                className="flex items-center gap-3 rounded-2xl bg-white dark:bg-card border border-border/30 px-4 py-3.5 transition-all hover:shadow-sm"
-              >
-                {/* Emoji */}
-                <span className="text-2xl flex-shrink-0 w-9 text-center">{habit.icon}</span>
+              <section key={dim}>
+                {/* Dimension header */}
+                <div className="mb-3">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-xl">{meta.icon}</span>
+                    <h2 className={`text-base font-bold ${meta.color}`}>{meta.label}</h2>
+                  </div>
+                  <p className="text-xs text-muted-foreground pl-8">{meta.description}</p>
+                </div>
 
-                {/* Name */}
-                <span className="flex-1 text-[15px] font-semibold text-foreground">{habit.name}</span>
+                {/* 2-column card grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  {habits.map((habit) => (
+                    <div
+                      key={`${dim}-${habit.name}`}
+                      className={`relative rounded-xl bg-white dark:bg-card border border-border/30 border-l-[3px] ${meta.borderColor} p-4 flex flex-col items-center text-center transition-all hover:shadow-md`}
+                    >
+                      {/* Icon */}
+                      <span className="text-3xl mb-2">{habit.icon}</span>
 
-                {/* Dimension badge */}
-                <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-100 dark:bg-secondary text-[11px] font-semibold text-muted-foreground flex-shrink-0">
-                  <span>{dimMeta.icon}</span>
-                  {dimMeta.label}
-                </span>
+                      {/* Name */}
+                      <span className="text-sm font-bold text-foreground leading-tight mb-2">{habit.name}</span>
 
-                {/* Add button */}
-                <button
-                  onClick={() => prefillFromTemplate(habit)}
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-[#22C55E] text-white flex-shrink-0 transition-all hover:bg-[#16A34A] hover:scale-110 active:scale-95"
-                  style={{ boxShadow: `0 0 8px ${GREEN}40` }}
-                >
-                  <Plus className="h-4 w-4" strokeWidth={3} />
-                </button>
-              </div>
+                      {/* Dimension pill */}
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${meta.bgColor} ${meta.color} mb-3`}>
+                        <span className="text-xs">{meta.icon}</span>
+                        {meta.label}
+                      </span>
+
+                      {/* Add button */}
+                      <button
+                        onClick={() => prefillFromTemplate(habit)}
+                        className="flex h-8 w-8 items-center justify-center rounded-full bg-[#22C55E] text-white transition-all hover:bg-[#16A34A] hover:scale-110 active:scale-95"
+                        style={{ boxShadow: "0 0 8px rgba(34,197,94,0.25)" }}
+                      >
+                        <Plus className="h-4 w-4" strokeWidth={3} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </section>
             )
           })}
-        </div>
-      </div>
 
-      {/* Floating Custom Habit button */}
-      <div className="fixed bottom-6 left-0 right-0 flex justify-center z-40 pointer-events-none">
-        <button
-          onClick={() => { resetForm(); setShowCustomForm(true) }}
-          className="pointer-events-auto flex items-center gap-2 px-6 py-3.5 rounded-full bg-[#22C55E] text-white font-bold text-sm shadow-[0_4px_24px_rgba(34,197,94,0.5)] transition-all hover:bg-[#16A34A] hover:shadow-[0_4px_32px_rgba(34,197,94,0.65)] active:scale-95"
-        >
-          <span className="text-base">✨</span>
-          Custom Habit
-        </button>
+          {/* Empty search state */}
+          {filteredDimensions.length === 0 && (
+            <div className="text-center py-12">
+              <span className="text-4xl mb-3 block">{"\uD83D\uDD0D"}</span>
+              <p className="text-sm font-semibold text-foreground">No habits found</p>
+              <p className="text-xs text-muted-foreground mt-1">Try a different search or build your own</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Creating overlay */}
