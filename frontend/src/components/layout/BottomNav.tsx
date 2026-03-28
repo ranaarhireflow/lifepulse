@@ -1,12 +1,12 @@
 import { NavLink } from "react-router-dom"
-import { LayoutGrid, TrendingUp, Zap, Compass, Settings } from "lucide-react"
+import { TrendingUp, Zap, LayoutGrid, Trophy, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const TABS = [
-  { to: "/", icon: LayoutGrid, label: "Today" },
   { to: "/progress", icon: TrendingUp, label: "Progress" },
-  { to: "/trackers/new", icon: Compass, label: "Discover" },
   { to: "/score", icon: Zap, label: "Score" },
+  { to: "/", icon: LayoutGrid, label: "Today", center: true },
+  { to: "/achievements", icon: Trophy, label: "Trophies" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ]
 
@@ -17,11 +17,16 @@ export function BottomNav() {
         {TABS.map((tab) => (
           <NavLink key={tab.to} to={tab.to} end={tab.to === "/"}
             className={({ isActive }) => cn(
-              "flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl transition-all",
-              isActive ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
+              "flex flex-col items-center gap-0.5 rounded-xl transition-all",
+              tab.center ? "py-1 px-4" : "py-2 px-3",
+              isActive
+                ? tab.center
+                  ? "bg-primary text-primary-foreground shadow-[0_0_12px_rgba(34,197,94,0.3)]"
+                  : "bg-primary/15 text-primary"
+                : "text-muted-foreground hover:text-foreground"
             )}>
-            <tab.icon className="h-5 w-5" />
-            <span className="text-[10px] font-semibold">{tab.label}</span>
+            <tab.icon className={tab.center ? "h-6 w-6" : "h-5 w-5"} />
+            <span className={cn("font-semibold", tab.center ? "text-[9px]" : "text-[10px]")}>{tab.label}</span>
           </NavLink>
         ))}
       </div>
