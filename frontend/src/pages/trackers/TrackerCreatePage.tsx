@@ -11,102 +11,86 @@ import {
   Sparkles,
   ChevronRight,
 } from "lucide-react"
-import {
-  createTracker,
-} from "@/services/trackers"
+import { createTracker } from "@/services/trackers"
 
-/* ──────────────────── CONSTANTS ──────────────────── */
+/* ──────────────────── TYPES ──────────────────── */
 
-type Dimension = "wisdom" | "confidence" | "strength" | "discipline" | "focus"
-type HabitType = "BOOLEAN" | "NUMERIC" | "DURATION" | "TIME"
+type Dimension = "wisdom" | "strength" | "focus" | "discipline" | "confidence"
+type HabitType = "BOOLEAN" | "NUMERIC" | "DURATION" | "TIME" | "DUAL_NUMERIC"
 type TimeRange = "anytime" | "morning" | "afternoon" | "evening"
+
+interface DimensionWeights {
+  wisdom: number
+  strength: number
+  focus: number
+  discipline: number
+  confidence: number
+}
 
 interface HabitTemplate {
   name: string
   icon: string
-  dimension: Dimension
   type: HabitType
-  unit: string
-  target_value: number | null
-  min_value: number | null
-  max_value: number | null
+  unit?: string
+  target_value?: number
+  min_value?: number
+  max_value?: number
+  weights: DimensionWeights
 }
 
-const DIMENSION_META: Record<Dimension, { icon: string; label: string; color: string; bgColor: string; borderColor: string; description: string }> = {
-  wisdom:     { icon: "\uD83E\uDDE0", label: "Wisdom",     color: "text-purple-600 dark:text-purple-400", bgColor: "bg-purple-100 dark:bg-purple-900/30",   borderColor: "border-l-purple-500", description: "Habits that make you smarter" },
-  strength:   { icon: "\uD83D\uDCAA", label: "Strength",   color: "text-red-600 dark:text-red-400",       bgColor: "bg-red-100 dark:bg-red-900/30",         borderColor: "border-l-red-500",    description: "Habits that make you physically stronger" },
-  focus:      { icon: "\uD83C\uDFAF", label: "Focus",      color: "text-amber-600 dark:text-amber-400",   bgColor: "bg-amber-100 dark:bg-amber-900/30",     borderColor: "border-l-amber-500",  description: "Habits that sharpen your mind" },
-  discipline: { icon: "\uD83D\uDCDA", label: "Discipline", color: "text-blue-600 dark:text-blue-400",     bgColor: "bg-blue-100 dark:bg-blue-900/30",       borderColor: "border-l-blue-500",   description: "Habits that build consistency" },
-  confidence: { icon: "\uD83D\uDC64", label: "Confidence", color: "text-emerald-600 dark:text-emerald-400", bgColor: "bg-emerald-100 dark:bg-emerald-900/30", borderColor: "border-l-emerald-500", description: "Habits that boost self-image" },
-}
+/* ──────────────────── DIMENSIONS ──────────────────── */
 
-const DIMENSION_ORDER: Dimension[] = ["wisdom", "strength", "focus", "discipline", "confidence"]
+const DIMENSIONS: { key: Dimension; emoji: string; color: string; label: string }[] = [
+  { key: "wisdom", emoji: "\uD83E\uDDE0", color: "#8B5CF6", label: "Wisdom" },
+  { key: "strength", emoji: "\uD83D\uDCAA", color: "#EF4444", label: "Strength" },
+  { key: "focus", emoji: "\uD83C\uDFAF", color: "#F59E0B", label: "Focus" },
+  { key: "discipline", emoji: "\uD83D\uDCDA", color: "#3B82F6", label: "Discipline" },
+  { key: "confidence", emoji: "\uD83D\uDC64", color: "#EC4899", label: "Confidence" },
+]
 
-/** All habits grouped by dimension */
-const HABITS_BY_DIMENSION: Record<Dimension, HabitTemplate[]> = {
-  wisdom: [
-    { name: "Read 30 Min", icon: "\uD83D\uDCD6", dimension: "wisdom", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 300 },
-    { name: "Deep Work", icon: "\uD83C\uDFAF", dimension: "wisdom", type: "DURATION", unit: "hours", target_value: 4, min_value: 0, max_value: 16 },
-    { name: "Learn Skill", icon: "\uD83C\uDF93", dimension: "wisdom", type: "DURATION", unit: "minutes", target_value: 60, min_value: 0, max_value: 300 },
-    { name: "Write", icon: "\u270D\uFE0F", dimension: "wisdom", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Study", icon: "\uD83D\uDCD6", dimension: "wisdom", type: "DURATION", unit: "minutes", target_value: 60, min_value: 0, max_value: 480 },
-    { name: "No Phone Morning", icon: "\uD83D\uDCF5", dimension: "wisdom", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Meditate", icon: "\uD83E\uDDD8", dimension: "wisdom", type: "DURATION", unit: "minutes", target_value: 15, min_value: 0, max_value: 120 },
-    { name: "Read Books", icon: "\uD83D\uDCDA", dimension: "wisdom", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 300 },
-    { name: "Journal", icon: "\uD83D\uDCDD", dimension: "wisdom", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Sleep Quality", icon: "\uD83C\uDF19", dimension: "wisdom", type: "NUMERIC", unit: "rating", target_value: 8, min_value: 1, max_value: 10 },
-    { name: "Budget", icon: "\uD83D\uDCB0", dimension: "wisdom", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Gratitude", icon: "\uD83D\uDE4F", dimension: "wisdom", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-  ],
-  strength: [
-    { name: "Push-ups", icon: "\uD83D\uDCAA", dimension: "strength", type: "NUMERIC", unit: "reps", target_value: 50, min_value: 0, max_value: 500 },
-    { name: "Workout", icon: "\uD83C\uDFCB\uFE0F", dimension: "strength", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Run", icon: "\uD83C\uDFC3", dimension: "strength", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 180 },
-    { name: "Walk 10K Steps", icon: "\uD83D\uDEB6", dimension: "strength", type: "NUMERIC", unit: "steps", target_value: 10000, min_value: 0, max_value: 50000 },
-    { name: "Stretching", icon: "\uD83E\uDD38", dimension: "strength", type: "DURATION", unit: "minutes", target_value: 15, min_value: 0, max_value: 60 },
-    { name: "Cycling", icon: "\uD83D\uDEB4", dimension: "strength", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 300 },
-    { name: "Squats", icon: "\uD83E\uDDB5", dimension: "strength", type: "NUMERIC", unit: "reps", target_value: 50, min_value: 0, max_value: 500 },
-    { name: "Plank", icon: "\uD83E\uDDF1", dimension: "strength", type: "DURATION", unit: "seconds", target_value: 60, min_value: 0, max_value: 600 },
-    { name: "Swimming", icon: "\uD83C\uDFCA", dimension: "strength", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 180 },
-    { name: "Gym", icon: "\uD83C\uDFCB\uFE0F", dimension: "strength", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Heart Rate", icon: "\uD83D\uDC93", dimension: "strength", type: "NUMERIC", unit: "bpm", target_value: null, min_value: 40, max_value: 200 },
-    { name: "Steps", icon: "\uD83D\uDC63", dimension: "strength", type: "NUMERIC", unit: "steps", target_value: 10000, min_value: 0, max_value: 50000 },
-    { name: "Less Sitting", icon: "\uD83E\uDE91", dimension: "strength", type: "DURATION", unit: "hours", target_value: 1, min_value: 0, max_value: 16 },
-  ],
-  focus: [
-    { name: "Cold Shower", icon: "\uD83E\uDD76", dimension: "focus", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Breathe", icon: "\uD83C\uDF2C\uFE0F", dimension: "focus", type: "DURATION", unit: "minutes", target_value: 5, min_value: 0, max_value: 30 },
-    { name: "No Social Media", icon: "\uD83D\uDCF5", dimension: "focus", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Limit Screen Time", icon: "\uD83D\uDCF1", dimension: "focus", type: "DURATION", unit: "hours", target_value: 2, min_value: 0, max_value: 16 },
-    { name: "No Phone", icon: "\uD83D\uDCF5", dimension: "focus", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-  ],
-  discipline: [
-    { name: "Drink Water", icon: "\uD83D\uDCA7", dimension: "discipline", type: "NUMERIC", unit: "glasses", target_value: 8, min_value: 0, max_value: 20 },
-    { name: "Sleep by 10PM", icon: "\uD83D\uDE34", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Wake Early", icon: "\uD83C\uDF05", dimension: "discipline", type: "TIME", unit: "", target_value: null, min_value: null, max_value: null },
-    { name: "Cook Meals", icon: "\uD83C\uDF73", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Clean Space", icon: "\uD83E\uDDF9", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Calories", icon: "\uD83D\uDD25", dimension: "discipline", type: "NUMERIC", unit: "kcal", target_value: 2000, min_value: 0, max_value: 5000 },
-    { name: "Vitamins", icon: "\uD83D\uDC8A", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Hydration", icon: "\uD83D\uDCA7", dimension: "discipline", type: "NUMERIC", unit: "liters", target_value: 3, min_value: 0, max_value: 10 },
-    { name: "Blood Pressure", icon: "\uD83E\uDE7A", dimension: "discipline", type: "NUMERIC", unit: "mmHg", target_value: 120, min_value: 60, max_value: 200 },
-    { name: "Weight", icon: "\u2696\uFE0F", dimension: "discipline", type: "NUMERIC", unit: "kg", target_value: null, min_value: 30, max_value: 300 },
-    { name: "Sleep", icon: "\uD83D\uDE34", dimension: "discipline", type: "DURATION", unit: "hours", target_value: 8, min_value: 0, max_value: 24 },
-    { name: "Eat Fruits", icon: "\uD83C\uDF4E", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "No Sugar", icon: "\uD83D\uDEAB", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Less Alcohol", icon: "\uD83C\uDF77", dimension: "discipline", type: "NUMERIC", unit: "drinks", target_value: 0, min_value: 0, max_value: 20 },
-    { name: "Less Caffeine", icon: "\u2615", dimension: "discipline", type: "NUMERIC", unit: "cups", target_value: 1, min_value: 0, max_value: 10 },
-    { name: "No Smoking", icon: "\uD83D\uDEAD", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Less Junk Food", icon: "\uD83C\uDF54", dimension: "discipline", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-  ],
-  confidence: [
-    { name: "Yoga", icon: "\uD83E\uDDD8\u200D\u2640\uFE0F", dimension: "confidence", type: "DURATION", unit: "minutes", target_value: 30, min_value: 0, max_value: 120 },
-    { name: "Call a Friend", icon: "\uD83D\uDCDE", dimension: "confidence", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Eat Healthy", icon: "\uD83E\uDD57", dimension: "confidence", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Grooming", icon: "\uD83E\uDDF4", dimension: "confidence", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-    { name: "Less Complaining", icon: "\uD83E\uDD10", dimension: "confidence", type: "BOOLEAN", unit: "", target_value: 1, min_value: null, max_value: null },
-  ],
-}
+/* ──────────────────── HABITS ──────────────────── */
+
+const HABITS: HabitTemplate[] = [
+  { name: "Meditate", icon: "\uD83E\uDDD8", type: "DURATION", unit: "min", target_value: 15, weights: { wisdom: 60, strength: 0, focus: 90, discipline: 70, confidence: 40 } },
+  { name: "Read", icon: "\uD83D\uDCD6", type: "NUMERIC", unit: "pages", target_value: 20, min_value: 0, max_value: 200, weights: { wisdom: 95, strength: 0, focus: 60, discipline: 40, confidence: 30 } },
+  { name: "Workout", icon: "\uD83D\uDCAA", type: "DURATION", unit: "min", target_value: 45, weights: { wisdom: 0, strength: 95, focus: 30, discipline: 70, confidence: 60 } },
+  { name: "Run", icon: "\uD83C\uDFC3", type: "NUMERIC", unit: "km", target_value: 5, min_value: 0, max_value: 50, weights: { wisdom: 10, strength: 80, focus: 40, discipline: 70, confidence: 50 } },
+  { name: "Drink Water", icon: "\uD83D\uDCA7", type: "NUMERIC", unit: "glasses", target_value: 8, min_value: 0, max_value: 15, weights: { wisdom: 0, strength: 20, focus: 10, discipline: 80, confidence: 10 } },
+  { name: "Cold Shower", icon: "\uD83D\uDEBF", type: "BOOLEAN", weights: { wisdom: 10, strength: 40, focus: 70, discipline: 95, confidence: 80 } },
+  { name: "Journal", icon: "\uD83D\uDCDD", type: "BOOLEAN", weights: { wisdom: 80, strength: 0, focus: 50, discipline: 60, confidence: 70 } },
+  { name: "Deep Work", icon: "\uD83E\uDDE0", type: "DURATION", unit: "min", target_value: 120, weights: { wisdom: 90, strength: 0, focus: 100, discipline: 80, confidence: 30 } },
+  { name: "Walk 10K Steps", icon: "\uD83D\uDEB6", type: "NUMERIC", unit: "steps", target_value: 10000, min_value: 0, max_value: 30000, weights: { wisdom: 10, strength: 50, focus: 20, discipline: 60, confidence: 30 } },
+  { name: "No Sugar", icon: "\uD83C\uDF6C", type: "BOOLEAN", weights: { wisdom: 10, strength: 30, focus: 20, discipline: 90, confidence: 40 } },
+  { name: "Sleep by 10PM", icon: "\uD83C\uDF19", type: "TIME", weights: { wisdom: 20, strength: 30, focus: 60, discipline: 80, confidence: 20 } },
+  { name: "Wake Early", icon: "\uD83C\uDF05", type: "TIME", weights: { wisdom: 30, strength: 10, focus: 50, discipline: 90, confidence: 40 } },
+  { name: "Push-ups", icon: "\uD83E\uDEF8", type: "NUMERIC", unit: "reps", target_value: 50, min_value: 0, max_value: 200, weights: { wisdom: 0, strength: 100, focus: 20, discipline: 70, confidence: 60 } },
+  { name: "Yoga", icon: "\uD83E\uDDD8\u200D\u2640\uFE0F", type: "DURATION", unit: "min", target_value: 30, weights: { wisdom: 40, strength: 50, focus: 60, discipline: 50, confidence: 70 } },
+  { name: "Gratitude", icon: "\uD83D\uDE4F", type: "BOOLEAN", weights: { wisdom: 60, strength: 0, focus: 30, discipline: 40, confidence: 90 } },
+  { name: "No Phone Morning", icon: "\uD83D\uDCF5", type: "BOOLEAN", weights: { wisdom: 30, strength: 0, focus: 95, discipline: 80, confidence: 20 } },
+  { name: "Cook Meals", icon: "\uD83C\uDF73", type: "BOOLEAN", weights: { wisdom: 20, strength: 10, focus: 10, discipline: 70, confidence: 50 } },
+  { name: "Stretch", icon: "\uD83E\uDD38", type: "DURATION", unit: "min", target_value: 15, weights: { wisdom: 10, strength: 60, focus: 30, discipline: 40, confidence: 30 } },
+  { name: "Learn Language", icon: "\uD83D\uDDE3\uFE0F", type: "DURATION", unit: "min", target_value: 20, weights: { wisdom: 90, strength: 0, focus: 70, discipline: 60, confidence: 50 } },
+  { name: "Budget", icon: "\uD83D\uDCB0", type: "BOOLEAN", weights: { wisdom: 50, strength: 0, focus: 30, discipline: 80, confidence: 40 } },
+  { name: "Call a Friend", icon: "\uD83D\uDCDE", type: "BOOLEAN", weights: { wisdom: 20, strength: 0, focus: 10, discipline: 30, confidence: 90 } },
+  { name: "Clean Space", icon: "\uD83E\uDDF9", type: "BOOLEAN", weights: { wisdom: 10, strength: 10, focus: 40, discipline: 70, confidence: 50 } },
+  { name: "Blood Pressure", icon: "\u2764\uFE0F", type: "DUAL_NUMERIC", unit: "systolic", weights: { wisdom: 20, strength: 10, focus: 10, discipline: 60, confidence: 40 } },
+  { name: "Weight", icon: "\u2696\uFE0F", type: "NUMERIC", unit: "kg", target_value: 72, min_value: 30, max_value: 200, weights: { wisdom: 10, strength: 30, focus: 20, discipline: 60, confidence: 50 } },
+  { name: "Limit Screen", icon: "\uD83D\uDCF1", type: "NUMERIC", unit: "hrs", target_value: 2, min_value: 0, max_value: 12, weights: { wisdom: 20, strength: 0, focus: 80, discipline: 70, confidence: 30 } },
+  { name: "Eat Vegetables", icon: "\uD83E\uDD57", type: "BOOLEAN", weights: { wisdom: 10, strength: 30, focus: 10, discipline: 60, confidence: 40 } },
+  { name: "Breathe", icon: "\uD83C\uDF2C\uFE0F", type: "DURATION", unit: "min", target_value: 10, weights: { wisdom: 40, strength: 0, focus: 80, discipline: 50, confidence: 30 } },
+  { name: "Write 500 Words", icon: "\u270D\uFE0F", type: "NUMERIC", unit: "words", target_value: 500, min_value: 0, max_value: 5000, weights: { wisdom: 80, strength: 0, focus: 70, discipline: 60, confidence: 40 } },
+  { name: "No Alcohol", icon: "\uD83D\uDEAB", type: "BOOLEAN", weights: { wisdom: 20, strength: 20, focus: 40, discipline: 90, confidence: 50 } },
+  { name: "Cycling", icon: "\uD83D\uDEB4", type: "NUMERIC", unit: "km", target_value: 10, min_value: 0, max_value: 100, weights: { wisdom: 10, strength: 80, focus: 30, discipline: 60, confidence: 40 } },
+]
+
+/** Sort habits by total impact (sum of all weights) descending */
+const SORTED_HABITS = [...HABITS].sort((a, b) => {
+  const sumA = Object.values(a.weights).reduce((s, v) => s + v, 0)
+  const sumB = Object.values(b.weights).reduce((s, v) => s + v, 0)
+  return sumB - sumA
+})
+
+/* ──────────────────── HELPERS ──────────────────── */
 
 const PRESET_ICONS = [
   "\u2696\uFE0F", "\u2764\uFE0F", "\uD83D\uDCA7", "\uD83D\uDE34", "\uD83C\uDF05", "\uD83D\uDC63", "\uD83D\uDD25", "\uD83D\uDC93",
@@ -121,6 +105,38 @@ const PRESET_COLORS = [
   "#22C55E", "#16A34A", "#10B981", "#14B8A6",
   "#3B82F6", "#8B5CF6", "#EC4899", "#EF4444",
 ]
+
+function getPrimaryDimension(weights: DimensionWeights): Dimension {
+  let max = 0
+  let primary: Dimension = "discipline"
+  for (const dim of DIMENSIONS) {
+    if (weights[dim.key] > max) {
+      max = weights[dim.key]
+      primary = dim.key
+    }
+  }
+  return primary
+}
+
+/* ──────────────────── STAT BARS COMPONENT ──────────────────── */
+
+function StatBars({ weights }: { weights: DimensionWeights }) {
+  return (
+    <div className="space-y-1 mt-2 w-full">
+      {DIMENSIONS.map((dim) => (
+        <div key={dim.key} className="flex items-center gap-1.5">
+          <span className="text-[8px] w-3 flex-shrink-0">{dim.emoji}</span>
+          <div className="flex-1 h-1.5 rounded-full bg-border overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{ width: `${weights[dim.key]}%`, backgroundColor: dim.color }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 /* ──────────────────── COMPONENT ──────────────────── */
 
@@ -140,7 +156,7 @@ export function TrackerCreatePage() {
   const [icon, setIcon] = useState("\uD83C\uDFAF")
   const [color, setColor] = useState("#22C55E")
   const [habitMode, setHabitMode] = useState<"build" | "quit">("build")
-  const [type, setType] = useState<HabitType>("BOOLEAN")
+  const [type, setType] = useState<"BOOLEAN" | "NUMERIC" | "DURATION" | "TIME">("BOOLEAN")
   const [unit, setUnit] = useState("")
   const [targetValue, setTargetValue] = useState("")
   const [trackingDays, setTrackingDays] = useState([1, 2, 3, 4, 5, 6, 7])
@@ -148,7 +164,13 @@ export function TrackerCreatePage() {
   const [timeRange, setTimeRange] = useState<TimeRange>("anytime")
   const [reminderEnabled, setReminderEnabled] = useState(false)
   const [reminderTime, setReminderTime] = useState("08:00")
-  const [selectedDimension, setSelectedDimension] = useState<Dimension>("discipline")
+  const [weights, setWeights] = useState<DimensionWeights>({
+    wisdom: 50, strength: 50, focus: 50, discipline: 50, confidence: 50,
+  })
+
+  const setWeight = (key: Dimension, value: number) => {
+    setWeights((prev) => ({ ...prev, [key]: value }))
+  }
 
   const resetForm = () => {
     setName("")
@@ -164,16 +186,17 @@ export function TrackerCreatePage() {
     setTimeRange("anytime")
     setReminderEnabled(false)
     setReminderTime("08:00")
-    setSelectedDimension("discipline")
+    setWeights({ wisdom: 50, strength: 50, focus: 50, discipline: 50, confidence: 50 })
   }
 
   const prefillFromTemplate = (h: HabitTemplate) => {
     setName(h.name)
     setIcon(h.icon)
-    setType(h.type)
-    setUnit(h.unit)
+    const formType = h.type === "DUAL_NUMERIC" ? "NUMERIC" : h.type
+    setType(formType as "BOOLEAN" | "NUMERIC" | "DURATION" | "TIME")
+    setUnit(h.unit || "")
     setTargetValue(h.target_value != null ? String(h.target_value) : "")
-    setSelectedDimension(h.dimension)
+    setWeights({ ...h.weights })
     setHabitMode("build")
     setShowCustomForm(true)
   }
@@ -182,6 +205,7 @@ export function TrackerCreatePage() {
     if (!name.trim()) return
     setCreating(true)
     try {
+      const dimension = getPrimaryDimension(weights)
       await createTracker({
         name: name.trim(),
         icon,
@@ -194,6 +218,7 @@ export function TrackerCreatePage() {
         reminder_enabled: reminderEnabled,
         tracking_days: trackingDays,
         times_per_day: timesPerDay,
+        dimension,
       })
       navigate("/")
     } catch {
@@ -203,15 +228,10 @@ export function TrackerCreatePage() {
     }
   }
 
-  /** Filtered habits per dimension based on search */
-  const filteredDimensions = useMemo(() => {
+  /** Filtered and sorted habits based on search */
+  const filteredHabits = useMemo(() => {
     const q = searchQuery.toLowerCase().trim()
-    return DIMENSION_ORDER.map((dim) => {
-      const habits = HABITS_BY_DIMENSION[dim].filter((h) =>
-        !q || h.name.toLowerCase().includes(q)
-      )
-      return { dim, habits }
-    }).filter((d) => d.habits.length > 0)
+    return SORTED_HABITS.filter((h) => !q || h.name.toLowerCase().includes(q))
   }, [searchQuery])
 
   /* ───────────── CUSTOM FORM ───────────── */
@@ -388,8 +408,8 @@ export function TrackerCreatePage() {
                     <button
                       key={d}
                       type="button"
-                      onClick={() => setTrackingDays(prev =>
-                        active ? prev.filter(x => x !== dayNum) : [...prev, dayNum]
+                      onClick={() => setTrackingDays((prev) =>
+                        active ? prev.filter((x) => x !== dayNum) : [...prev, dayNum]
                       )}
                       className={`flex-1 py-2 rounded-lg text-[11px] font-bold transition-all ${
                         active ? "bg-[#22C55E] text-white" : "bg-gray-100 dark:bg-secondary text-muted-foreground"
@@ -474,25 +494,52 @@ export function TrackerCreatePage() {
             )}
           </div>
 
-          {/* Section 4 -- Personality */}
+          {/* Section 4 -- Dimension Weights (sliders) */}
           <div className="rounded-2xl bg-white dark:bg-card border border-border/40 p-5 space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Personality</h2>
-            <p className="text-sm text-muted-foreground">This habit boosts:</p>
-            <div className="flex flex-wrap gap-2">
-              {(Object.entries(DIMENSION_META) as [Dimension, typeof DIMENSION_META[Dimension]][]).map(([key, meta]) => (
-                <button
-                  key={key}
-                  onClick={() => setSelectedDimension(key)}
-                  className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${
-                    selectedDimension === key
-                      ? "bg-[#22C55E] text-white shadow-md"
-                      : "bg-gray-100 dark:bg-secondary text-muted-foreground"
-                  }`}
-                >
-                  <span>{meta.icon}</span>
-                  {meta.label}
-                </button>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Dimension Weights</h2>
+            <p className="text-sm text-muted-foreground">How does this habit affect your personality?</p>
+
+            <div className="space-y-4">
+              {DIMENSIONS.map((dim) => (
+                <div key={dim.key} className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">{dim.emoji}</span>
+                      <span className="text-sm font-semibold text-foreground">{dim.label}</span>
+                    </div>
+                    <span
+                      className="text-sm font-bold tabular-nums min-w-[2ch] text-right"
+                      style={{ color: dim.color }}
+                    >
+                      {weights[dim.key]}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    value={weights[dim.key]}
+                    onChange={(e) => setWeight(dim.key, parseInt(e.target.value, 10))}
+                    className="w-full h-2 rounded-full appearance-none cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, ${dim.color} 0%, ${dim.color} ${weights[dim.key]}%, var(--border) ${weights[dim.key]}%, var(--border) 100%)`,
+                      accentColor: dim.color,
+                    }}
+                  />
+                </div>
               ))}
+            </div>
+
+            {/* Live stat preview */}
+            <div className="mt-4 pt-4 border-t border-border/40">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">Preview</p>
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">{icon}</span>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-foreground">{name || "Your Habit"}</p>
+                  <StatBars weights={weights} />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -566,57 +613,37 @@ export function TrackerCreatePage() {
           </div>
         </div>
 
-        {/* Dimensions + habit cards */}
-        <div className="px-4 space-y-8">
-          {filteredDimensions.map(({ dim, habits }) => {
-            const meta = DIMENSION_META[dim]
-            return (
-              <section key={dim}>
-                {/* Dimension header */}
-                <div className="mb-3">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-xl">{meta.icon}</span>
-                    <h2 className={`text-base font-bold ${meta.color}`}>{meta.label}</h2>
-                  </div>
-                  <p className="text-xs text-muted-foreground pl-8">{meta.description}</p>
-                </div>
+        {/* Habit cards grid -- sorted by total impact */}
+        <div className="px-4">
+          <div className="grid grid-cols-2 gap-3">
+            {filteredHabits.map((habit) => (
+              <div
+                key={habit.name}
+                className="relative rounded-xl bg-white dark:bg-card border border-border/30 p-4 flex flex-col items-center text-center transition-all hover:shadow-md"
+              >
+                {/* Icon */}
+                <span className="text-3xl mb-1.5">{habit.icon}</span>
 
-                {/* 2-column card grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  {habits.map((habit) => (
-                    <div
-                      key={`${dim}-${habit.name}`}
-                      className={`relative rounded-xl bg-white dark:bg-card border border-border/30 border-l-[3px] ${meta.borderColor} p-4 flex flex-col items-center text-center transition-all hover:shadow-md`}
-                    >
-                      {/* Icon */}
-                      <span className="text-3xl mb-2">{habit.icon}</span>
+                {/* Name */}
+                <span className="text-sm font-bold text-foreground leading-tight">{habit.name}</span>
 
-                      {/* Name */}
-                      <span className="text-sm font-bold text-foreground leading-tight mb-2">{habit.name}</span>
+                {/* RPG stat bars */}
+                <StatBars weights={habit.weights} />
 
-                      {/* Dimension pill */}
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${meta.bgColor} ${meta.color} mb-3`}>
-                        <span className="text-xs">{meta.icon}</span>
-                        {meta.label}
-                      </span>
-
-                      {/* Add button */}
-                      <button
-                        onClick={() => prefillFromTemplate(habit)}
-                        className="flex h-8 w-8 items-center justify-center rounded-full bg-[#22C55E] text-white transition-all hover:bg-[#16A34A] hover:scale-110 active:scale-95"
-                        style={{ boxShadow: "0 0 8px rgba(34,197,94,0.25)" }}
-                      >
-                        <Plus className="h-4 w-4" strokeWidth={3} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )
-          })}
+                {/* Add button */}
+                <button
+                  onClick={() => prefillFromTemplate(habit)}
+                  className="mt-3 flex h-8 w-8 items-center justify-center rounded-full bg-[#22C55E] text-white transition-all hover:bg-[#16A34A] hover:scale-110 active:scale-95"
+                  style={{ boxShadow: "0 0 8px rgba(34,197,94,0.25)" }}
+                >
+                  <Plus className="h-4 w-4" strokeWidth={3} />
+                </button>
+              </div>
+            ))}
+          </div>
 
           {/* Empty search state */}
-          {filteredDimensions.length === 0 && (
+          {filteredHabits.length === 0 && (
             <div className="text-center py-12">
               <span className="text-4xl mb-3 block">{"\uD83D\uDD0D"}</span>
               <p className="text-sm font-semibold text-foreground">No habits found</p>
