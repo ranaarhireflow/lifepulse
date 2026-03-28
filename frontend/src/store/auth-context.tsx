@@ -11,6 +11,11 @@ import api from "@/services/api"
 const IS_DEV = !import.meta.env.VITE_FIREBASE_API_KEY ||
   (typeof window !== "undefined" && !window.location.hostname.includes("localhost") && !window.location.hostname.includes("lifepulse"))
 
+/** Check if running inside Capacitor native app */
+function isNativeApp(): boolean {
+  return !!(window as any).Capacitor?.isNativePlatform()
+}
+
 interface AppUser {
   id: string
   email: string
@@ -42,25 +47,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (IS_DEV) {
-      // Dev mode: auto-login, register with backend
       api
         .post("/auth/dev-login")
         .then((res) => setUser(res.data))
         .catch(() => setUser(DEV_USER))
         .finally(() => setLoading(false))
     } else {
-      // Firebase mode: dynamic import to avoid loading Firebase when not configured
+      // Firebase mode
       import("@/lib/firebase").then(({ auth }) => {
         import("firebase/auth").then(({ onAuthStateChanged }) => {
           onAuthStateChanged(auth, async (fbUser) => {
             if (fbUser) {
               try {
                 const token = await fbUser.getIdToken()
-                const res = await api.post("/auth/login", {
-                  id_token: token,
-                })
+                const res = await api.post("/auth/login", { id_token: token })
                 setUser(res.data)
-                // Auto-detect and sync timezone
                 const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
                 if (res.data.timezone !== tz) {
                   api.patch("/auth/me", { timezone: tz }).catch(() => {})
@@ -88,16 +89,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return
     }
-    const { auth, googleProvider } = await import("@/lib/firebase")
-    const { signInWithPopup } = await import("firebase/auth")
-    const result = await signInWithPopup(auth, googleProvider)
-    const token = await result.user.getIdToken()
-    const res = await api.post("/auth/login", { id_token: token })
-    setUser(res.data)
+
+    if (isNativeApp()) {
+      // NATIVE: Use Capacitor Firebase plugin for native Google Sign-In
+      // This shows the native Google account picker (bottom sheet)
+      // and returns the credential without leaving the app
+      const { FirebaseAuthentication } = await import("@capacitor-firebase/authentication")
+      const { GoogleAuthProvider, signInWithCredential } = await import("firebase/auth")
+      const { auth } = await import("@/lib/firebase")
+
+      const result = await FirebaseAuthentication.signInWithGoogle()
+      if (!result.credential?.idToken) throw new Error("No ID token from Google Sign-In")
+
+      // Use the native token to sign in to Firebase Web SDK
+      const credential = GoogleAuthProvider.credential(result.credential.idToken)
+      const userCredential = await signInWithCredential(auth, credential)
+      const token = await userCredential.user.getIdToken()
+
+      // Register with our backend
+      const res = await api.post("/auth/login", { id_token: token })
+      setUser(res.data)
+    } else {
+      // WEB: Use popup (works in browsers)
+      const { auth, googleProvider } = await import("@/lib/firebase")
+      const { signInWithPopup } = await import("firebase/auth")
+      const result = await signInWithPopup(auth, googleProvider)
+      const token = await result.user.getIdToken()
+      const res = await api.post("/auth/login", { id_token: token })
+      setUser(res.data)
+    }
   }
 
   const signOut = async () => {
     if (!IS_DEV) {
+      if (isNativeApp()) {
+        const { FirebaseAuthentication } = await import("@capacitor-firebase/authentication")
+        await FirebaseAuthentication.signOut()
+      }
       const { auth } = await import("@/lib/firebase")
       const { signOut: firebaseSignOut } = await import("firebase/auth")
       await firebaseSignOut(auth)
