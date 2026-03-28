@@ -43,10 +43,10 @@ export function RulerInput({ value, min, max, step, unit, onChange }: RulerInput
 
   const handleEnd = () => { isDragging.current = false }
 
-  // Touch events
-  const onTouchStart = (e: React.TouchEvent) => handleStart(e.touches[0].clientX)
-  const onTouchMove = (e: React.TouchEvent) => { e.preventDefault(); handleMove(e.touches[0].clientX) }
-  const onTouchEnd = () => handleEnd()
+  // Touch events — stopPropagation prevents card swipe from firing
+  const onTouchStart = (e: React.TouchEvent) => { e.stopPropagation(); handleStart(e.touches[0].clientX) }
+  const onTouchMove = (e: React.TouchEvent) => { e.stopPropagation(); e.preventDefault(); handleMove(e.touches[0].clientX) }
+  const onTouchEnd = (e: React.TouchEvent) => { e.stopPropagation(); handleEnd() }
 
   // Mouse events (for desktop)
   const onMouseDown = (e: React.MouseEvent) => handleStart(e.clientX)
