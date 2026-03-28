@@ -75,7 +75,13 @@ export function SettingsPage() {
               </div>
             </div>
             {notifStatus === "granted" ? (
-              <span className="text-[11px] font-bold text-primary">On</span>
+              <button onClick={async () => {
+                const { sendTestNotification } = await import("@/services/alarm-sync")
+                const ok = await sendTestNotification()
+                if (!ok) alert("Could not send test notification")
+              }} className="text-[11px] font-bold text-primary hover:underline">
+                Test ✓
+              </button>
             ) : notifStatus === "denied" ? (
               <span className="text-[11px] font-bold text-destructive">Blocked</span>
             ) : (
