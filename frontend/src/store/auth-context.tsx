@@ -51,7 +51,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       // Firebase mode: dynamic import to avoid loading Firebase when not configured
       import("@/lib/firebase").then(({ auth }) => {
-        import("firebase/auth").then(({ onAuthStateChanged }) => {
+        import("firebase/auth").then(async ({ onAuthStateChanged, getRedirectResult }) => {
+          // Handle redirect result (for Capacitor native sign-in)
+          try {
+            const redirectResult = await getRedirectResult(auth)
+            if (redirectResult) {
+              const token = await redirectResult.user.getIdToken()
+              const res = await api.post("/auth/login", { id_token: token })
+              setUser(res.data)
+              setLoading(false)
+              return
+            }
+          } catch { /* no redirect result */ }
+
           onAuthStateChanged(auth, async (fbUser) => {
             if (fbUser) {
               try {
@@ -89,11 +101,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return
     }
     const { auth, googleProvider } = await import("@/lib/firebase")
-    const { signInWithPopup } = await import("firebase/auth")
-    const result = await signInWithPopup(auth, googleProvider)
-    const token = await result.user.getIdToken()
-    const res = await api.post("/auth/login", { id_token: token })
-    setUser(res.data)
+
+    // Detect if running in Capacitor (native app) or browser
+    const isCapacitor = !!(window as any).Capacitor?.isNativePlatform()
+
+    if (isCapacitor) {
+      // Use redirect for native WebView (popup doesn't work)
+      const { signInWithRedirect, getRedirectResult } = await import("firebase/auth")
+
+      // Check if returning from redirect
+      try {
+        const result = await getRedirectResult(auth)
+        if (result) {
+          const token = await result.user.getIdToken()
+          const res = await api.post("/auth/login", { id_token: token })
+          setUser(res.data)
+          return
+        }
+      } catch { /* no redirect result */ }
+
+      // Start redirect
+      await signInWithRedirect(auth, googleProvider)
+    } else {
+      // Use popup for desktop browsers
+      const { signInWithPopup } = await import("firebase/auth")
+      const result = await signInWithPopup(auth, googleProvider)
+      const token = await result.user.getIdToken()
+      const res = await api.post("/auth/login", { id_token: token })
+      setUser(res.data)
+    }
   }
 
   const signOut = async () => {
