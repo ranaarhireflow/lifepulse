@@ -12,6 +12,7 @@ import {
   Pencil,
   Bell,
   BellOff,
+  ChevronLeft,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -125,13 +126,14 @@ export function TrackersPage() {
 
   return (
     <div className="space-y-5 px-5 pt-6 pb-6 max-w-md mx-auto">
-      <div className="flex items-center gap-3 mb-1">
+      <div className="flex items-center gap-2 mb-4">
+        <button onClick={() => navigate(-1)} className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-accent transition-colors">
+          <ChevronLeft className="h-5 w-5 text-muted-foreground" />
+        </button>
         <NavLink to="/"><PulseLogo size={28} /></NavLink>
-      </div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-[24px] font-extrabold tracking-tight">My Pulses</h1>
-          <p className="text-[12px] text-muted-foreground">
+        <div className="flex-1">
+          <h1 className="text-[20px] font-bold text-foreground">My Pulses</h1>
+          <p className="text-[11px] text-muted-foreground">
             {activeTrackers.length} active{archivedTrackers.length > 0 && ` · ${archivedTrackers.length} archived`}
           </p>
         </div>

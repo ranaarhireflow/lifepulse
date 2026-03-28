@@ -3,7 +3,7 @@ import { useAuth } from "@/store/auth-context"
 import { useTheme } from "@/hooks/useTheme"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Switch } from "@/components/ui/switch"
-import { NavLink } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
 import { PulseLogo } from "@/components/common/PulseLogo"
 import {
   LogOut, Bell, Trash2, Moon, Sun, ChevronRight,
@@ -14,7 +14,9 @@ import { BRAND } from "@/lib/brand"
 export function SettingsPage() {
   const { user, signOut } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const navigate = useNavigate()
   const [showDelete, setShowDelete] = useState(false)
+  const [showInstallInfo, setShowInstallInfo] = useState(false)
 
   const initials = user?.display_name
     ?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?"
@@ -52,15 +54,23 @@ export function SettingsPage() {
             </div>
             <Switch checked={theme === "dark"} onCheckedChange={toggleTheme} />
           </div>
-          <div className="flex items-center justify-between px-4 py-3.5">
-            <div className="flex items-center gap-3">
-              <Smartphone className="h-5 w-5 text-cyan-500" />
-              <div>
-                <span className="text-[14px] font-semibold text-foreground">Install App</span>
-                <p className="text-[11px] text-muted-foreground">Add to home screen for native feel</p>
+          <div>
+            <button onClick={() => setShowInstallInfo(!showInstallInfo)} className="w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-accent transition-colors">
+              <div className="flex items-center gap-3">
+                <Smartphone className="h-5 w-5 text-cyan-500" />
+                <div>
+                  <span className="text-[14px] font-semibold text-foreground">Install App</span>
+                  <p className="text-[11px] text-muted-foreground">Add to home screen for native feel</p>
+                </div>
               </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${showInstallInfo ? "rotate-90" : ""}`} />
+            </button>
+            {showInstallInfo && (
+              <div className="px-4 pb-3.5 space-y-1.5">
+                <p className="text-[12px] text-muted-foreground"><span className="font-bold text-foreground">iOS Safari:</span> Tap the Share button, then "Add to Home Screen"</p>
+                <p className="text-[12px] text-muted-foreground"><span className="font-bold text-foreground">Android Chrome:</span> Tap the menu (3 dots), then "Add to Home Screen"</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -69,13 +79,13 @@ export function SettingsPage() {
       <div>
         <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider px-1 mb-2">About</p>
         <div className="rounded-2xl bg-card border border-border overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3.5 border-b border-border">
+          <button onClick={() => navigate("/score")} className="w-full flex items-center justify-between px-4 py-3.5 border-b border-border text-left hover:bg-accent transition-colors">
             <div className="flex items-center gap-3">
               <HelpCircle className="h-5 w-5 text-muted-foreground" />
               <span className="text-[14px] font-semibold text-foreground">How Scoring Works</span>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
-          </div>
+          </button>
           <div className="flex items-center justify-between px-4 py-3.5">
             <div className="flex items-center gap-3">
               <Shield className="h-5 w-5 text-muted-foreground" />

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react"
-import { Loader2, Bell, BellOff, Plus, Settings } from "lucide-react"
+import { Loader2, Bell, BellOff, Plus, Settings, ChevronLeft } from "lucide-react"
 import { motion } from "framer-motion"
 import { useNavigate, NavLink } from "react-router-dom"
 import { fetchTrackers, type Tracker, type TrackerAlert } from "@/services/trackers"
@@ -89,7 +89,10 @@ export function AlarmsPage() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="flex items-center gap-3 mb-1">
+          <div className="flex items-center gap-2 mb-1">
+            <button onClick={() => navigate(-1)} className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-accent transition-colors">
+              <ChevronLeft className="h-5 w-5 text-muted-foreground" />
+            </button>
             <NavLink to="/"><PulseLogo size={28} /></NavLink>
             <h1 className="text-[28px] font-extrabold tracking-tight text-foreground">Alarms</h1>
           </div>
