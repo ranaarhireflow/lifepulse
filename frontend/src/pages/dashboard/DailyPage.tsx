@@ -23,6 +23,8 @@ const SCENES: Record<string, { bg: string; sub: string }> = {
 }
 const DEF = { bg: "radial-gradient(ellipse at 50% 50%, #22c55e, #16a34a, #15803d)", sub: "Track it. Master it." }
 
+const DAILY_CACHE_KEY = "lifepulse_daily_cache"
+
 export function DailyPage() {
   const navigate = useNavigate()
   const [data, setData] = useState<DailyTrackerEntry[]>([])
@@ -33,10 +35,25 @@ export function DailyPage() {
   const [showConfirmAnim, setShowConfirmAnim] = useState<string | null>(null)
   const dateStr = format(selectedDate, "yyyy-MM-dd")
 
+  // Load from cache on mount for instant display
+  useEffect(() => {
+    try {
+      const cached = JSON.parse(localStorage.getItem(DAILY_CACHE_KEY) || "{}")
+      if (cached.date === dateStr && cached.entries?.length) {
+        setData(cached.entries)
+        setLoading(false)
+      }
+    } catch {}
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Fetch entries whenever the selected date changes
   const load = useCallback(async () => {
     setLoading(true)
-    try { setData(await fetchDailyEntries(dateStr)) } catch { setData([]) } finally { setLoading(false) }
+    try {
+      const entries = await fetchDailyEntries(dateStr)
+      setData(entries)
+      try { localStorage.setItem(DAILY_CACHE_KEY, JSON.stringify({ date: dateStr, entries })) } catch {}
+    } catch { setData([]) } finally { setLoading(false) }
   }, [dateStr])
   useEffect(() => { load(); setCurrentIndex(0); setConfirmedCards(new Set()) }, [load])
 
@@ -86,9 +103,23 @@ export function DailyPage() {
     else if (info.offset.x > 80) goPrev()
   }
 
-  if (loading) return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+  if (loading && data.length === 0) return (
+    <div className="h-full flex flex-col overflow-hidden relative w-full">
+      {/* Show top bar + date dial immediately */}
+      <div className="flex items-center justify-between px-4 pt-4 pb-2 shrink-0">
+        <div className="flex items-center gap-2">
+          <PulseLogo size={28} />
+          <span className="text-[17px] font-black tracking-tight text-foreground">LifePulse</span>
+        </div>
+      </div>
+      <DateDial selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+      <div className="flex-1 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    </div>
+  )
 
-  if (total === 0) return (
+  if (total === 0 && !loading) return (
     <div className="flex flex-col items-center justify-center h-full px-6 text-center">
       <Sparkles className="h-16 w-16 text-primary mb-6" />
       <h1 className="text-[32px] font-extrabold mb-3">Begin Your Journey</h1>
@@ -166,13 +197,13 @@ export function DailyPage() {
 
           {/* Front card — draggable with swipe gestures */}
           <div className="relative w-full px-5 z-10">
-            <AnimatePresence mode="wait">
+            <AnimatePresence initial={false}>
               <motion.div
                 key={currentIndex}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, x: -200, rotate: -5 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.15}

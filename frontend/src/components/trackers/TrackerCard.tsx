@@ -87,10 +87,6 @@ export function TrackerCard({ data, onUpdate }: TrackerCardProps) {
           style={{ background: scene.bg }}
         />
 
-        {/* Noise texture overlay for depth */}
-        <div className="absolute inset-0 opacity-20" style={{
-          backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E\")"
-        }} />
 
         {/* Bottom gradient overlay for text readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -99,10 +95,10 @@ export function TrackerCard({ data, onUpdate }: TrackerCardProps) {
         <div className="relative h-full flex flex-col justify-between p-5">
           {/* Top row */}
           <div className="flex items-start justify-between">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-md text-[26px] shadow-lg">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 text-[26px] shadow-lg">
               {tracker.icon || "📊"}
             </div>
-            <div className="flex items-center gap-1.5 rounded-full bg-black/30 backdrop-blur-md px-3 py-1">
+            <div className="flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1">
               <Flame className="h-3.5 w-3.5 text-amber-400" />
               <span className="text-[13px] font-bold text-amber-400">3 days</span>
             </div>

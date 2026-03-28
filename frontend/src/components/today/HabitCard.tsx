@@ -75,37 +75,35 @@ export function HabitCard({
       className="h-full rounded-[28px] overflow-hidden relative"
       style={{ background: scene.bg }}
     >
-      {/* Noise texture */}
-      <div className="absolute inset-0 opacity-15" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E\")" }} />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
 
       {/* Confirmed overlay animation */}
       <AnimatePresence>
         {showConfirmAnim && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.5 }}
-            transition={{ duration: 0.5 }}
-            className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="absolute inset-0 z-30 flex items-center justify-center bg-black/50"
           >
             <div className="flex flex-col items-center gap-3">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.1 }}
+                transition={{ duration: 0.2 }}
                 className="h-20 w-20 rounded-full bg-primary flex items-center justify-center"
                 style={{ boxShadow: "0 0 60px rgba(34,197,94,0.6)" }}
               >
                 <Check className="h-10 w-10 text-white" strokeWidth={3} />
               </motion.div>
               <motion.span
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.15, delay: 0.1 }}
                 className="text-[22px] font-extrabold text-white"
               >
-                Done ✓
+                Done
               </motion.span>
             </div>
           </motion.div>
@@ -117,13 +115,13 @@ export function HabitCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {tracker.times_per_day > 1 && (
-              <div className="flex items-center gap-1 rounded-full bg-black/30 backdrop-blur px-2.5 py-1.5">
+              <div className="flex items-center gap-1 rounded-full bg-black/40 px-2.5 py-1.5">
                 <span className="text-[12px] font-bold text-sky-400">{tracker.times_per_day}x daily</span>
               </div>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={onNavigateEdit} className="flex h-8 w-8 items-center justify-center rounded-full bg-black/30 backdrop-blur text-white/50 hover:text-white transition-colors">
+            <button onClick={onNavigateEdit} className="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white/50 hover:text-white transition-colors">
               <Settings2 className="h-3.5 w-3.5" />
             </button>
           </div>

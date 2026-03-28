@@ -40,4 +40,18 @@ api.interceptors.request.use(async (config) => {
   return config
 })
 
+// Retry once on 401 — handles race where Firebase token isn't ready yet after login
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401 && !error.config._retried) {
+      error.config._retried = true
+      // Wait for auth to settle
+      await new Promise(r => setTimeout(r, 1000))
+      return api(error.config)
+    }
+    return Promise.reject(error)
+  }
+)
+
 export default api

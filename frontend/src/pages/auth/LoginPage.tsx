@@ -123,7 +123,7 @@ export function LoginPage() {
           </div>
 
           {/* Login card */}
-          <div className="rounded-2xl border border-border bg-card backdrop-blur-sm p-8">
+          <div className="rounded-2xl border border-border bg-card p-8">
             <h2 className="text-xl font-bold text-center text-white mb-1">Welcome</h2>
             <p className="text-sm text-muted-foreground text-center mb-8">
               Sign in to start tracking your life

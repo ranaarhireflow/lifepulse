@@ -96,7 +96,7 @@ export function SuggestedHabitRow({
                 <h3 className="text-[20px] font-black text-white tracking-wide leading-tight">
                   {habit.name}
                 </h3>
-                <div className="flex items-center gap-1 bg-black/30 backdrop-blur-sm rounded-full px-2.5 py-1 shrink-0">
+                <div className="flex items-center gap-1 bg-black/30  rounded-full px-2.5 py-1 shrink-0">
                   <span className="text-[11px] font-bold text-[#22C55E]">{habit.fit}%</span>
                   <span className="text-[10px] text-white/50">fit</span>
                 </div>
@@ -107,7 +107,7 @@ export function SuggestedHabitRow({
                 {habit.boosts.map(boost => (
                   <div
                     key={boost.stat}
-                    className="flex items-center gap-1.5 bg-black/25 backdrop-blur-sm rounded-lg px-2.5 py-1.5"
+                    className="flex items-center gap-1.5 bg-black/25  rounded-lg px-2.5 py-1.5"
                   >
                     <ChevronUp className="h-3 w-3" style={{ color: boost.color }} />
                     <span className="text-[11px] font-bold text-white">
@@ -119,7 +119,7 @@ export function SuggestedHabitRow({
               </div>
 
               {/* Scientific study */}
-              <div className="bg-black/20 backdrop-blur-sm rounded-lg p-3 mb-3">
+              <div className="bg-black/20  rounded-lg p-3 mb-3">
                 <p className="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1">
                   Scientific Study
                 </p>
@@ -132,7 +132,7 @@ export function SuggestedHabitRow({
               <div className="flex gap-2">
                 <button
                   onClick={(e) => { e.stopPropagation(); onDismiss() }}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-black/30 backdrop-blur-sm py-2.5 text-[13px] font-bold text-white/70 hover:bg-black/40 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-black/30  py-2.5 text-[13px] font-bold text-white/70 hover:bg-black/40 transition-colors"
                 >
                   <X className="h-4 w-4" />
                   Decline

@@ -28,6 +28,9 @@ const STATS = [
 ]
 
 
+const SCORE_CACHE_KEY = "lifepulse_score_cache"
+const SCORE_CACHE_TTL = 30_000 // 30 seconds
+
 export function MonkScorePage() {
   const [score, setScore] = useState<MonkScore | null>(null)
   const [loading, setLoading] = useState(true)
@@ -43,16 +46,30 @@ export function MonkScorePage() {
   }
 
   useEffect(() => {
-    fetchTrackers().then(setTrackers).catch(() => {})
+    // Use cached trackers if fresh
+    try {
+      const cached = JSON.parse(localStorage.getItem(SCORE_CACHE_KEY) || "{}")
+      if (cached.ts && Date.now() - cached.ts < SCORE_CACHE_TTL) {
+        if (cached.trackers) setTrackers(cached.trackers)
+        if (cached.score) { setScore(cached.score); setLoading(false); return }
+      }
+    } catch {}
+    fetchTrackers().then(t => { setTrackers(t); try { const c = JSON.parse(localStorage.getItem(SCORE_CACHE_KEY) || "{}"); localStorage.setItem(SCORE_CACHE_KEY, JSON.stringify({ ...c, trackers: t, ts: Date.now() })) } catch {} }).catch(() => {})
   }, [])
 
   useEffect(() => {
+    // Skip fetch if we loaded from cache
+    if (score) return
+
     const fallback: MonkScore = {
       level: 1, xp_total: 0, xp_to_next: 125, overall: 0,
       wisdom: 0, strength: 0, focus: 0, discipline: 0, confidence: 0,
     }
     api.get<MonkScore>("/gamification/score", { timeout: 5000 })
-      .then((res) => setScore(res.data))
+      .then((res) => {
+        setScore(res.data)
+        try { const c = JSON.parse(localStorage.getItem(SCORE_CACHE_KEY) || "{}"); localStorage.setItem(SCORE_CACHE_KEY, JSON.stringify({ ...c, score: res.data, ts: Date.now() })) } catch {}
+      })
       .catch(() => setScore(fallback))
       .finally(() => setLoading(false))
     // Safety timeout so we never hang on a slow API
@@ -61,7 +78,7 @@ export function MonkScorePage() {
       setScore(prev => prev || fallback)
     }, 3000)
     return () => clearTimeout(timer)
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="h-7 w-7 animate-spin text-[#22C55E]" /></div>
   if (!score) return <div className="text-center py-20 text-muted-foreground">Could not load your rating</div>
