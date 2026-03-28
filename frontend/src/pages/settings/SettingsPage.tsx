@@ -9,6 +9,7 @@ import {
   Palette, Shield, Smartphone, HelpCircle, Sparkles,
 } from "lucide-react"
 import { BRAND } from "@/lib/brand"
+import { requestNotificationPermission, sendLocalNotification } from "@/services/notifications"
 
 export function SettingsPage() {
   const { user, signOut } = useAuth()
@@ -16,6 +17,16 @@ export function SettingsPage() {
   const navigate = useNavigate()
   const [showDelete, setShowDelete] = useState(false)
   const [showInstallInfo, setShowInstallInfo] = useState(false)
+  const [notifStatus, setNotifStatus] = useState(
+    typeof Notification !== "undefined" ? Notification.permission : "default"
+  )
+  const enableNotifs = async () => {
+    const granted = await requestNotificationPermission()
+    setNotifStatus(granted ? "granted" : "denied")
+    if (granted) {
+      sendLocalNotification("LifePulse", "Notifications enabled! You'll get reminders for your habits.")
+    }
+  }
 
   const initials = user?.display_name
     ?.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase() || "?"
@@ -51,6 +62,26 @@ export function SettingsPage() {
               <span className="text-[14px] font-semibold text-foreground">Dark Mode</span>
             </div>
             <Switch checked={theme === "dark"} onCheckedChange={toggleTheme} />
+          </div>
+          <div className="flex items-center justify-between px-4 py-3.5 border-b border-border">
+            <div className="flex items-center gap-3">
+              <Bell className="h-5 w-5 text-primary" />
+              <div>
+                <span className="text-[14px] font-semibold text-foreground">Notifications</span>
+                <p className="text-[11px] text-muted-foreground">
+                  {notifStatus === "granted" ? "Enabled" : notifStatus === "denied" ? "Blocked" : "Not enabled"}
+                </p>
+              </div>
+            </div>
+            {notifStatus === "granted" ? (
+              <span className="text-[11px] font-bold text-primary">On</span>
+            ) : notifStatus === "denied" ? (
+              <span className="text-[11px] font-bold text-destructive">Blocked</span>
+            ) : (
+              <button onClick={enableNotifs} className="text-[11px] font-bold text-primary hover:underline">
+                Enable
+              </button>
+            )}
           </div>
           <div>
             <button onClick={() => setShowInstallInfo(!showInstallInfo)} className="w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-accent transition-colors">

@@ -1,95 +1,46 @@
-const CACHE_NAME = "mytracker-v1";
-const STATIC_ASSETS = ["/", "/manifest.json"];
+// Service Worker for LifePulse
+const CACHE_NAME = 'lifepulse-v1';
 
-// Install: cache static assets
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
-  );
-  self.skipWaiting();
+// Push notification handler
+self.addEventListener('push', (event) => {
+  const data = event.data ? event.data.json() : {};
+  const title = data.title || 'LifePulse';
+  const options = {
+    body: data.body || 'Time to check in!',
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-72.png',
+    vibrate: [200, 100, 200],
+    tag: data.tag || 'lifepulse-reminder',
+    data: { url: data.url || '/' },
+    actions: [
+      { action: 'log', title: '\u2713 Log Now' },
+      { action: 'snooze', title: '\u23F0 Later' },
+    ],
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// Activate: clean old caches
-self.addEventListener("activate", (event) => {
+// Notification click handler
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || '/';
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
-      )
-    )
-  );
-  self.clients.claim();
-});
-
-// Fetch: network-first for API, cache-first for assets
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Skip non-GET requests
-  if (request.method !== "GET") return;
-
-  // API calls: network only
-  if (url.pathname.startsWith("/api")) return;
-
-  // Assets: network-first with cache fallback
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-        return response;
-      })
-      .catch(() => caches.match(request))
-  );
-});
-
-// Push notifications
-self.addEventListener("push", (event) => {
-  let data = { title: "LifePulse", body: "Time to log your tracker!" };
-
-  try {
-    data = event.data.json();
-  } catch {
-    data.body = event.data?.text() || data.body;
-  }
-
-  event.waitUntil(
-    self.registration.showNotification(data.title || "myTracker", {
-      body: data.body,
-      icon: "/icons/icon-192.png",
-      badge: "/icons/icon-72.png",
-      vibrate: [200, 100, 200],
-      tag: data.tag || "tracker-reminder",
-      data: { url: data.url || "/" },
-      actions: [
-        { action: "open", title: "Open App" },
-        { action: "dismiss", title: "Dismiss" },
-      ],
+    clients.matchAll({ type: 'window' }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      return clients.openWindow(url);
     })
   );
 });
 
-// Notification click: open app
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
+// Basic cache strategy
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+});
 
-  if (event.action === "dismiss") return;
-
-  const url = event.notification.data?.url || "/";
-  event.waitUntil(
-    self.clients
-      .matchAll({ type: "window", includeUncontrolled: true })
-      .then((clients) => {
-        const existingClient = clients.find(
-          (c) => c.url.includes(self.location.origin) && "focus" in c
-        );
-        if (existingClient) {
-          return existingClient.focus();
-        }
-        return self.clients.openWindow(url);
-      })
-  );
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim());
 });

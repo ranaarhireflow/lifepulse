@@ -111,6 +111,41 @@ cd backend && python seed.py
 cd backend && python seed_dummy.py
 ```
 
+## Native Builds (iOS + Android)
+
+### Prerequisites
+- Xcode 15+ (iOS)
+- Android Studio (Android)
+- Node 20+
+
+### Build & Run
+```bash
+cd frontend
+
+# Build web assets
+npm run build
+
+# Sync to native projects
+npx cap sync
+
+# Open in Xcode (iOS)
+npx cap open ios
+
+# Open in Android Studio
+npx cap open android
+```
+
+### Push Notifications
+- Web: Service Worker (sw.js) handles push events
+- iOS: APNs via @capacitor/push-notifications
+- Android: FCM via @capacitor/push-notifications
+- Local notifications: @capacitor/local-notifications
+
+### Widgets (planned)
+- iOS: WidgetKit extension (requires native Swift code)
+- Android: App Widget (requires native Kotlin code)
+- Both need native project setup beyond Capacitor
+
 ## v4.1.0 — Life Reset Redesign
 
 Major UI overhaul inspired by Life Reset app + Tinder swipe UX + RPG gamification.
