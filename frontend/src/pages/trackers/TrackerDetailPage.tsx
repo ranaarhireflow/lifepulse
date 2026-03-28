@@ -121,7 +121,7 @@ export function TrackerDetailPage() {
   const [editTrackingDays, setEditTrackingDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 7])
   const [editTimesPerDay, setEditTimesPerDay] = useState(1)
   const [editDifficulty, setEditDifficulty] = useState(1)
-  const [editDimension, setEditDimension] = useState<string>("discipline")
+  const [editWeights, setEditWeights] = useState<Record<string, number>>({ wisdom: 0, strength: 0, focus: 0, discipline: 50, confidence: 0 })
   const [deleting, setDeleting] = useState(false)
 
   const EDIT_DIMENSIONS = [
@@ -140,7 +140,24 @@ export function TrackerDetailPage() {
     setEditTrackingDays(tracker.tracking_days || [1, 2, 3, 4, 5, 6, 7])
     setEditTimesPerDay(tracker.times_per_day || 1)
     setEditDifficulty(tracker.difficulty || 1)
-    setEditDimension(tracker.dimension || "discipline")
+    // Load dimension weights — try known habits, fall back to primary dimension
+    const knownWeights: Record<string, Record<string, number>> = {
+      "🧘": { wisdom: 60, strength: 0, focus: 90, discipline: 70, confidence: 40 },
+      "📖": { wisdom: 95, strength: 0, focus: 60, discipline: 40, confidence: 30 },
+      "💪": { wisdom: 0, strength: 95, focus: 30, discipline: 70, confidence: 60 },
+      "🏃": { wisdom: 10, strength: 80, focus: 40, discipline: 70, confidence: 50 },
+      "💧": { wisdom: 0, strength: 20, focus: 10, discipline: 80, confidence: 10 },
+      "🧠": { wisdom: 90, strength: 0, focus: 100, discipline: 80, confidence: 30 },
+      "🌙": { wisdom: 20, strength: 30, focus: 60, discipline: 80, confidence: 20 },
+      "🌅": { wisdom: 30, strength: 10, focus: 50, discipline: 90, confidence: 40 },
+      "🪥": { wisdom: 5, strength: 0, focus: 10, discipline: 70, confidence: 50 },
+      "❤️": { wisdom: 20, strength: 10, focus: 10, discipline: 60, confidence: 40 },
+      "⚖️": { wisdom: 10, strength: 30, focus: 20, discipline: 60, confidence: 50 },
+      "🏋️": { wisdom: 0, strength: 95, focus: 30, discipline: 70, confidence: 60 },
+    }
+    const dim = tracker.dimension || "discipline"
+    const w = knownWeights[tracker.icon || ""] || { wisdom: 0, strength: 0, focus: 0, discipline: 0, confidence: 0, [dim]: 80 }
+    setEditWeights({ wisdom: w.wisdom || 0, strength: w.strength || 0, focus: w.focus || 0, discipline: w.discipline || 0, confidence: w.confidence || 0 })
     setConfigOpen(true)
   }
 
@@ -153,7 +170,7 @@ export function TrackerDetailPage() {
       tracking_days: editTrackingDays,
       times_per_day: editTimesPerDay,
       difficulty: editDifficulty,
-      dimension: editDimension,
+      dimension: Object.entries(editWeights).sort(([,a], [,b]) => b - a)[0][0],
     })
     const t = await fetchTracker(tracker.id)
     setTracker(t)
@@ -351,21 +368,35 @@ export function TrackerDetailPage() {
               </div>
             </div>
 
-            {/* Primary Dimension */}
+            {/* Dimension Weights — RPG style sliders */}
             <div>
-              <label className="text-[13px] font-bold text-foreground">Primary Dimension</label>
-              <p className="text-[11px] text-muted-foreground mb-2">Which personality stat does this habit mainly boost?</p>
-              <div className="flex flex-wrap gap-2">
+              <label className="text-[13px] font-bold text-foreground">Dimension Weights</label>
+              <p className="text-[11px] text-muted-foreground mb-3">How does this habit affect your personality stats?</p>
+              <div className="space-y-3">
                 {EDIT_DIMENSIONS.map((dim) => (
-                  <button key={dim.key} type="button" onClick={() => setEditDimension(dim.key)}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold transition-all ${
-                      editDimension === dim.key
-                        ? "text-white shadow-md"
-                        : "bg-card border border-border text-muted-foreground"
-                    }`}
-                    style={editDimension === dim.key ? { backgroundColor: dim.color } : undefined}>
-                    <span>{dim.emoji}</span> {dim.label}
-                  </button>
+                  <div key={dim.key} className="space-y-1">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[12px]">{dim.emoji}</span>
+                        <span className="text-[11px] font-bold text-foreground">{dim.label}</span>
+                      </div>
+                      <span className="text-[11px] font-black tabular-nums" style={{ color: dim.color }}>
+                        {editWeights[dim.key]}
+                      </span>
+                    </div>
+                    <input
+                      type="range" min={0} max={100} value={editWeights[dim.key]}
+                      onChange={(e) => setEditWeights(prev => ({ ...prev, [dim.key]: parseInt(e.target.value) }))}
+                      className="w-full h-2 rounded-full appearance-none bg-border cursor-pointer
+                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4
+                        [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-grab"
+                      style={{
+                        // @ts-expect-error custom property for slider thumb
+                        '--tw-slider-color': dim.color,
+                        accentColor: dim.color,
+                      }}
+                    />
+                  </div>
                 ))}
               </div>
             </div>
