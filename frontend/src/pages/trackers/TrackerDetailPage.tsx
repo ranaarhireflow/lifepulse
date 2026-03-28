@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react"
-import { useParams, useNavigate, NavLink } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { format, subDays, startOfYear, subYears } from "date-fns"
 import {
   ChevronLeft,
@@ -26,7 +26,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts"
-import { PulseLogo } from "@/components/common/PulseLogo"
 import {
   fetchTracker,
   fetchAnalytics,
@@ -288,12 +287,11 @@ export function TrackerDetailPage() {
 
   return (
     <div className="space-y-5 pb-6 px-5 pt-4 max-w-md mx-auto">
-      {/* Back + Logo */}
+      {/* Back */}
       <div className="flex items-center gap-2">
-        <button onClick={() => navigate(-1)} className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-accent transition-colors">
+        <button onClick={() => navigate(-1)} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-accent transition-colors">
           <ChevronLeft className="h-5 w-5 text-muted-foreground" />
         </button>
-        <NavLink to="/"><PulseLogo size={28} /></NavLink>
       </div>
 
       {/* Pokemon Card — Hero Section */}

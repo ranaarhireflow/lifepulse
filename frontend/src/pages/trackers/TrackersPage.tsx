@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
-import { PulseLogo } from "@/components/common/PulseLogo"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   LayoutGrid,
@@ -127,10 +126,9 @@ export function TrackersPage() {
   return (
     <div className="space-y-5 px-5 pt-6 pb-6 max-w-md mx-auto">
       <div className="flex items-center gap-2 mb-4">
-        <button onClick={() => navigate(-1)} className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-accent transition-colors">
+        <button onClick={() => navigate(-1)} className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-accent transition-colors">
           <ChevronLeft className="h-5 w-5 text-muted-foreground" />
         </button>
-        <NavLink to="/"><PulseLogo size={28} /></NavLink>
         <div className="flex-1">
           <h1 className="text-[20px] font-bold text-foreground">My Pulses</h1>
           <p className="text-[11px] text-muted-foreground">

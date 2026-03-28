@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react"
-import { NavLink } from "react-router-dom"
 import { Loader2, Zap } from "lucide-react"
-import { PulseLogo } from "@/components/common/PulseLogo"
 import { motion } from "framer-motion"
 import api from "@/services/api"
 
@@ -43,10 +41,7 @@ export function AchievementsPage() {
   return (
     <div className="px-5 pt-6 pb-6 space-y-5">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <NavLink to="/"><PulseLogo size={28} /></NavLink>
-        <h1 className="text-[24px] font-black tracking-tight text-foreground">Awards</h1>
-      </div>
+      <h1 className="text-[24px] font-black tracking-tight text-foreground">Awards</h1>
 
       {/* Summary card — shows how achievements affect rating */}
       <div className="rounded-2xl border border-border bg-card p-4">

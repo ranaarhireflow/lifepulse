@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
 import { NavLink } from "react-router-dom"
-import { PulseLogo } from "@/components/common/PulseLogo"
 import { Loader2, Flame, ChevronRight } from "lucide-react"
 import { motion } from "framer-motion"
 import { fetchTrackers, type Tracker } from "@/services/trackers"
@@ -37,10 +36,7 @@ export function ProgressPage() {
     <div className="min-h-screen pb-6 max-w-md mx-auto">
       {/* Header */}
       <div className="px-6 pt-8 pb-4">
-        <div className="flex items-center gap-3 mb-1">
-          <NavLink to="/"><PulseLogo size={28} /></NavLink>
-          <h1 className="text-[28px] font-black tracking-tight">Progress</h1>
-        </div>
+        <h1 className="text-[24px] font-black tracking-tight text-foreground">Progress</h1>
         <p className="text-[14px] text-muted-foreground mt-1">
           {trackers.length} pulse{trackers.length !== 1 ? "s" : ""} tracked
         </p>

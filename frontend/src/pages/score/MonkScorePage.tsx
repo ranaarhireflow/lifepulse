@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react"
-import { NavLink } from "react-router-dom"
 import { Loader2, Info } from "lucide-react"
 import { motion } from "framer-motion"
 import api from "@/services/api"
-import { PulseLogo } from "@/components/common/PulseLogo"
 import { fetchTrackers, type Tracker } from "@/services/trackers"
 import { LevelCard } from "@/components/score/LevelCard"
 import { StatRow } from "@/components/score/StatRow"
@@ -88,10 +86,7 @@ export function MonkScorePage() {
       <div className="relative z-10 space-y-6">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="flex items-center gap-3 mb-1">
-            <NavLink to="/"><PulseLogo size={28} /></NavLink>
-            <p className="text-[11px] font-extrabold uppercase tracking-[3px] text-[#22C55E]">Monk Score</p>
-          </div>
+          <p className="text-[11px] font-extrabold uppercase tracking-[3px] text-[#22C55E]">Monk Score</p>
           <h1 className="text-[32px] font-black tracking-tight text-foreground leading-tight">
             Your Current Rating
           </h1>

@@ -4,7 +4,6 @@ import { useTheme } from "@/hooks/useTheme"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Switch } from "@/components/ui/switch"
 import { NavLink, useNavigate } from "react-router-dom"
-import { PulseLogo } from "@/components/common/PulseLogo"
 import {
   LogOut, Bell, Trash2, Moon, Sun, ChevronRight,
   Palette, Shield, Smartphone, HelpCircle,
@@ -33,7 +32,6 @@ export function SettingsPage() {
           <p className="text-[16px] font-bold text-foreground truncate">{user?.display_name || "User"}</p>
           <p className="text-[12px] text-muted-foreground truncate">{user?.email}</p>
         </div>
-        <NavLink to="/"><PulseLogo size={28} /></NavLink>
       </div>
 
       {/* Quick links */}
