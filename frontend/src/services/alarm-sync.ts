@@ -6,13 +6,12 @@ function isNative(): boolean {
 }
 
 /**
- * Send a test notification immediately — use to verify notifications work.
+ * Send a test notification in 3 seconds to verify notifications work.
  */
 export async function sendTestNotification(): Promise<boolean> {
   if (!isNative()) {
-    // Web fallback
     if ("Notification" in window && Notification.permission === "granted") {
-      new Notification("LifePulse 🧘", { body: "Notifications are working! 🎉", icon: "/icons/icon-192.png" })
+      new Notification("LifePulse 🧘", { body: "Notifications are working! 🎉" })
       return true
     }
     return false
@@ -20,26 +19,42 @@ export async function sendTestNotification(): Promise<boolean> {
 
   try {
     const { LocalNotifications } = await import("@capacitor/local-notifications")
+
     const perm = await LocalNotifications.requestPermissions()
     if (perm.display !== "granted") return false
+
+    // Create channel first
+    try {
+      await LocalNotifications.createChannel({
+        id: "lifepulse-test",
+        name: "Test",
+        importance: 4,
+        vibration: true,
+      })
+    } catch {}
+
+    // Schedule 3 seconds from now
+    const fireAt = new Date(Date.now() + 3000)
 
     await LocalNotifications.schedule({
       notifications: [{
         id: 9999,
         title: "LifePulse 🧘",
-        body: "Notifications are working! You'll get habit reminders at your scheduled times 🎉",
-        schedule: { at: new Date(Date.now() + 2000) }, // 2 seconds from now
-        sound: "default",
+        body: "Notifications are working! You'll get habit reminders 🎉",
+        schedule: { at: fireAt, allowWhileIdle: true },
+        channelId: "lifepulse-test",
       }],
     })
     return true
-  } catch {
+  } catch (e) {
+    console.error("Test notification failed:", e)
     return false
   }
 }
 
 /**
  * Sync tracker alerts to device local notifications.
+ * Uses `schedule.on` for cron-like daily recurring.
  */
 export async function syncAlarmsToDevice(trackers: Tracker[]) {
   if (!isNative()) return
@@ -50,27 +65,26 @@ export async function syncAlarmsToDevice(trackers: Tracker[]) {
     const perm = await LocalNotifications.requestPermissions()
     if (perm.display !== "granted") return
 
-    // Create notification channel first (Android 8+)
+    // Create notification channel (Android 8+)
     try {
       await LocalNotifications.createChannel({
         id: "lifepulse-reminders",
         name: "Habit Reminders",
-        description: "Reminders to log your daily habits",
+        description: "Daily reminders to log your habits",
         importance: 4,
         visibility: 1,
         vibration: true,
-        sound: "default",
       })
-    } catch { /* already exists */ }
+    } catch {}
 
-    // Cancel all existing scheduled notifications (IDs 1000+)
+    // Cancel existing scheduled reminders (IDs 1000-1999)
     const pending = await LocalNotifications.getPending()
-    const toCancel = pending.notifications.filter(n => n.id >= 1000)
+    const toCancel = pending.notifications.filter(n => n.id >= 1000 && n.id < 2000)
     if (toCancel.length > 0) {
       await LocalNotifications.cancel({ notifications: toCancel })
     }
 
-    // Schedule notifications for each tracker alert
+    // Schedule from tracker alerts
     const notifications: any[] = []
     let id = 1000
 
@@ -83,25 +97,16 @@ export async function syncAlarmsToDevice(trackers: Tracker[]) {
         const [hour, minute] = alert.alert_time.split(":").map(Number)
         const message = getNotificationMessage(tracker.icon)
 
-        // Schedule for the next occurrence of this time
-        const now = new Date()
-        const scheduledTime = new Date()
-        scheduledTime.setHours(hour, minute, 0, 0)
-        if (scheduledTime <= now) {
-          scheduledTime.setDate(scheduledTime.getDate() + 1) // Tomorrow
-        }
-
+        // Use `on` for cron-like recurring (fires every day at this time)
         notifications.push({
           id: id++,
           title: `${tracker.icon || "📊"} ${tracker.name}`,
           body: alert.label || message,
           schedule: {
-            at: scheduledTime,
-            repeats: true,
-            every: "day" as const,
+            on: { hour, minute },
+            allowWhileIdle: true,
           },
           channelId: "lifepulse-reminders",
-          sound: "default",
         })
       }
     }
@@ -110,7 +115,7 @@ export async function syncAlarmsToDevice(trackers: Tracker[]) {
       await LocalNotifications.schedule({ notifications })
     }
   } catch (err) {
-    console.error("Failed to sync alarms:", err)
+    console.error("Alarm sync failed:", err)
   }
 }
 
