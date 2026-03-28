@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { NavLink, useNavigate } from "react-router-dom"
 import { PulseLogo } from "@/components/common/PulseLogo"
 import { fetchDailyEntries, fetchTrackers, upsertEntry, type DailyTrackerEntry, type Entry } from "@/services/trackers"
-import { syncWidgetData } from "@/services/widget-sync"
+import { syncWidgetData, syncTrackerList } from "@/services/widget-sync"
 import { syncAlarms } from "@/services/alarm-sync"
 import { DateDial } from "@/components/today/DateDial"
 import { HabitCard } from "@/components/today/HabitCard"
@@ -55,8 +55,8 @@ export function DailyPage() {
       try { localStorage.setItem(DAILY_CACHE_KEY, JSON.stringify({ date: dateStr, entries })) } catch {}
       // Sync to native widget + alarms
       syncWidgetData(entries).catch(() => {})
-      fetchTrackers().then(t => syncAlarms(t)).catch(() => {})
-    } catch { setData([]) } finally { setLoading(false) }
+      fetchTrackers().then(t => { syncAlarms(t); syncTrackerList(t) }).catch(() => {})
+    } catch { /* Keep existing data on error — don't reset to empty */ } finally { setLoading(false) }
   }, [dateStr])
   useEffect(() => { load(); setCurrentIndex(0); setConfirmedCards(new Set()) }, [load])
 

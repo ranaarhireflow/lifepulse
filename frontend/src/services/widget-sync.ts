@@ -1,8 +1,7 @@
-import type { DailyTrackerEntry } from "@/services/trackers"
+import type { DailyTrackerEntry, Tracker } from "@/services/trackers"
 
 /**
  * Sync today's habit data to the native widget via Capacitor Preferences.
- * The Android widget reads from SharedPreferences to display habit status.
  */
 export async function syncWidgetData(entries: DailyTrackerEntry[], streak?: number, level?: number) {
   if (!(window as any).Capacitor?.isNativePlatform()) return
@@ -20,17 +19,29 @@ export async function syncWidgetData(entries: DailyTrackerEntry[], streak?: numb
 
     await Preferences.set({
       key: "widget_habits",
-      value: JSON.stringify({
-        total,
-        done,
-        streak: streak || 0,
-        level: level || 1,
-        habits,
-      }),
+      value: JSON.stringify({ total, done, streak: streak || 0, level: level || 1, habits }),
     })
+  } catch {}
+}
 
-    // Widget updates on its own schedule (every 30 min via updatePeriodMillis)
-  } catch {
-    // Capacitor not available
-  }
+/**
+ * Sync full tracker list so the widget config picker can show all habits.
+ */
+export async function syncTrackerList(trackers: Tracker[]) {
+  if (!(window as any).Capacitor?.isNativePlatform()) return
+
+  try {
+    const { Preferences } = await import("@capacitor/preferences")
+
+    const list = trackers.map(t => ({
+      id: t.id,
+      icon: t.icon || "📊",
+      name: t.name,
+    }))
+
+    await Preferences.set({
+      key: "widget_trackers",
+      value: JSON.stringify(list),
+    })
+  } catch {}
 }
