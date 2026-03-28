@@ -9,7 +9,7 @@ import {
   Palette, Shield, Smartphone, HelpCircle, Sparkles,
 } from "lucide-react"
 import { BRAND } from "@/lib/brand"
-import { requestNotificationPermission, sendLocalNotification } from "@/services/notifications"
+import { sendLocalNotification } from "@/services/notifications"
 
 export function SettingsPage() {
   const { user, signOut } = useAuth()
@@ -21,7 +21,8 @@ export function SettingsPage() {
     typeof Notification !== "undefined" ? Notification.permission : "default"
   )
   const enableNotifs = async () => {
-    const granted = await requestNotificationPermission()
+    const { requestNotifPermission } = await import("@/services/alarm-sync")
+    const granted = await requestNotifPermission()
     setNotifStatus(granted ? "granted" : "denied")
     if (granted) {
       sendLocalNotification("LifePulse", "Notifications enabled! You'll get reminders for your habits.")
