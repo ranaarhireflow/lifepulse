@@ -5,9 +5,8 @@ const config: CapacitorConfig = {
   appName: "LifePulse",
   webDir: "dist",
   server: {
-    // For development: uncomment and set your local IP
-    // url: "http://192.168.1.9:5173",
-    // cleartext: true,
+    // Use https scheme so Firebase Auth works in WebView
+    androidScheme: "https",
   },
   plugins: {
     PushNotifications: {
