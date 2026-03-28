@@ -1,6 +1,7 @@
 import { Check, ArrowRight, Settings2 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import type { DailyTrackerEntry, Entry } from "@/services/trackers"
+import { RulerInput } from "./RulerInput"
 
 const DIMENSION_EMOJI: Record<string, string> = {
   wisdom: "🧠", strength: "💪", focus: "🎯", discipline: "📚", confidence: "👤"
@@ -150,43 +151,18 @@ export function HabitCard({
 
         {/* Bottom — input control + confirm button */}
         <div className="space-y-4">
-          {/* Slider for NUMERIC — with smart range + tick marks */}
+          {/* Ruler input for NUMERIC */}
           {tracker.type === "NUMERIC" && (() => {
             const range = getSmartRange(tracker)
-            const val = entry?.value_numeric ?? 0
-            // Generate ~5 tick labels
-            const ticks = Array.from({ length: 6 }, (_, i) => {
-              const v = range.min + (range.max - range.min) * (i / 5)
-              return range.step < 1 ? Math.round(v * 10) / 10 : Math.round(v)
-            })
             return (
-            <div className="space-y-2">
-              <div className="text-center text-[36px] font-extrabold text-white" style={{ textShadow: "0 0 20px rgba(255,255,255,0.2)" }}>
-                {range.step < 1 ? val.toFixed(1) : val}
-                <span className="text-[16px] text-white/40 ml-1">{tracker.unit}</span>
-              </div>
-              {/* Slider */}
-              <input type="range" min={range.min} max={range.max} step={range.step}
-                value={val}
-                onChange={(e) => onUpdate(tracker.id, { value_numeric: parseFloat(e.target.value) })}
-                className="w-full h-2 rounded-full appearance-none bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-[0_0_12px_rgba(34,197,94,0.5)] [&::-webkit-slider-thumb]:cursor-grab"
+              <RulerInput
+                value={entry?.value_numeric ?? 0}
+                min={range.min}
+                max={range.max}
+                step={range.step}
+                unit={tracker.unit || undefined}
+                onChange={(v) => onUpdate(tracker.id, { value_numeric: v })}
               />
-              {/* Tick marks */}
-              <div className="flex justify-between px-1">
-                {ticks.map((t, i) => (
-                  <span key={i} className="text-[9px] text-white/25 font-bold">{t}</span>
-                ))}
-              </div>
-              {/* Target indicator */}
-              {tracker.target_value && (
-                <div className="relative h-0">
-                  <div className="absolute text-[9px] text-primary font-bold -top-1"
-                    style={{ left: `${((tracker.target_value - range.min) / (range.max - range.min)) * 100}%`, transform: "translateX(-50%)" }}>
-                    ▲ {tracker.target_value}
-                  </div>
-                </div>
-              )}
-            </div>
             )
           })()}
 
@@ -200,18 +176,16 @@ export function HabitCard({
             </button>
           )}
 
-          {/* Duration */}
+          {/* Duration — ruler in minutes */}
           {tracker.type === "DURATION" && (
-            <div className="space-y-2">
-              <div className="text-center text-[36px] font-extrabold text-white">
-                {Math.floor((entry?.value_duration || 0) / 60)}h {(entry?.value_duration || 0) % 60}m
-              </div>
-              <input type="range" min={0} max={480} step={15}
-                value={entry?.value_duration ?? 0}
-                onChange={(e) => onUpdate(tracker.id, { value_duration: parseInt(e.target.value) })}
-                className="w-full h-2 rounded-full appearance-none bg-white/10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow-[0_0_12px_rgba(34,197,94,0.5)] [&::-webkit-slider-thumb]:cursor-grab"
-              />
-            </div>
+            <RulerInput
+              value={entry?.value_duration ?? 0}
+              min={0}
+              max={tracker.max_value || 480}
+              step={15}
+              unit="min"
+              onChange={(v) => onUpdate(tracker.id, { value_duration: v })}
+            />
           )}
 
           {/* Time */}
