@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { format } from "date-fns"
 import { Loader2, Sparkles, Plus, Flame, Zap } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-type PanInfo = { offset: { x: number; y: number }; velocity: { x: number; y: number } }
 import { Button } from "@/components/ui/button"
 import { NavLink, useNavigate } from "react-router-dom"
 import { PulseLogo } from "@/components/common/PulseLogo"
@@ -102,10 +100,13 @@ export function DailyPage() {
   const goNext = () => setCurrentIndex(i => Math.min(i + 1, total - 1))
   const goPrev = () => setCurrentIndex(i => Math.max(i - 1, 0))
 
-  // Swipe left/right to navigate cards
-  const handleDragEnd = (_: any, info: PanInfo) => {
-    if (info.offset.x < -80) goNext()
-    else if (info.offset.x > 80) goPrev()
+  // Touch swipe handler — lighter than Framer Motion drag
+  const touchStart = { current: 0 }
+  const handleTouchStart = (e: React.TouchEvent) => { touchStart.current = e.touches[0].clientX }
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const diff = e.changedTouches[0].clientX - touchStart.current
+    if (diff < -60) goNext()
+    else if (diff > 60) goPrev()
   }
 
   if (loading && data.length === 0) return (
@@ -200,22 +201,12 @@ export function DailyPage() {
             )
           })()}
 
-          {/* Front card — draggable with swipe gestures */}
-          <div className="relative w-full px-5 z-10">
-            <AnimatePresence initial={false}>
-              <motion.div
-                key={currentIndex}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                drag="x"
-                dragConstraints={{ left: 0, right: 0 }}
-                dragElastic={0.15}
-                onDragEnd={handleDragEnd}
-                className="h-full cursor-grab active:cursor-grabbing"
-                style={{ touchAction: "pan-y" }}
-              >
+          {/* Front card — touch swipe */}
+          <div className="relative w-full px-5 z-10"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div key={currentIndex} className="h-full transition-opacity duration-150">
                 {item && (
                   <HabitCard
                     data={item}
@@ -227,8 +218,7 @@ export function DailyPage() {
                     showConfirmAnim={showConfirmAnim === item.tracker.id}
                   />
                 )}
-              </motion.div>
-            </AnimatePresence>
+              </div>
           </div>
         </div>
       </div>
