@@ -6,7 +6,7 @@ const TABS = [
   { to: "/progress", icon: TrendingUp, label: "Progress" },
   { to: "/score", icon: Zap, label: "Score" },
   { to: "/", icon: LayoutGrid, label: "Today", center: true },
-  { to: "/achievements", icon: Trophy, label: "Trophies" },
+  { to: "/achievements", icon: Trophy, label: "Awards" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ]
 

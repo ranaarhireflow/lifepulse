@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate, NavLink } from "react-router-dom"
-import { Loader2, Trophy, Compass, Info } from "lucide-react"
+import { Loader2, Compass, Info } from "lucide-react"
 import { motion } from "framer-motion"
 import api from "@/services/api"
 import { PulseLogo } from "@/components/common/PulseLogo"
@@ -134,18 +134,11 @@ export function MonkScorePage() {
           className="space-y-3"
         >
           <button
-            onClick={() => navigate("/achievements")}
+            onClick={() => navigate("/trackers/new")}
             className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#22C55E] py-4 text-[15px] font-extrabold text-black shadow-[0_0_30px_rgba(34,197,94,0.3)] hover:shadow-[0_0_40px_rgba(34,197,94,0.45)] transition-shadow"
           >
-            <Trophy className="h-5 w-5" />
-            Achievements
-          </button>
-          <button
-            onClick={() => navigate("/trackers/new")}
-            className="w-full flex items-center justify-center gap-2 rounded-2xl border border-border bg-card py-3.5 text-[14px] font-bold text-foreground hover:bg-accent transition-colors"
-          >
-            <Compass className="h-4 w-4 text-primary" />
-            Discover New Habits
+            <Compass className="h-5 w-5" />
+            Add New Habits
           </button>
         </motion.div>
 

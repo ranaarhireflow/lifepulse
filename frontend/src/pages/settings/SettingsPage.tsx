@@ -7,7 +7,7 @@ import { NavLink, useNavigate } from "react-router-dom"
 import { PulseLogo } from "@/components/common/PulseLogo"
 import {
   LogOut, Bell, Trash2, Moon, Sun, ChevronRight,
-  Trophy, Palette, Shield, Smartphone, HelpCircle,
+  Palette, Shield, Smartphone, HelpCircle,
 } from "lucide-react"
 import { BRAND } from "@/lib/brand"
 
@@ -39,7 +39,6 @@ export function SettingsPage() {
       {/* Quick links */}
       <div className="rounded-2xl bg-card border border-border overflow-hidden">
         <SettingsRow icon={<Bell className="h-5 w-5 text-primary" />} label="Alarms & Reminders" to="/alarms" />
-        <SettingsRow icon={<Trophy className="h-5 w-5 text-amber-500" />} label="Achievements" to="/achievements" />
         <SettingsRow icon={<Palette className="h-5 w-5 text-purple-500" />} label="My Pulses" to="/trackers" last />
       </div>
 
