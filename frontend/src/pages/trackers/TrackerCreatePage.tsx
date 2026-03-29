@@ -32,6 +32,7 @@ interface HabitTemplate {
   icon: string
   type: HabitType
   unit?: string
+  unit_secondary?: string
   target_value?: number
   min_value?: number
   max_value?: number
@@ -74,7 +75,7 @@ const HABITS: HabitTemplate[] = [
   { name: "Budget", icon: "\uD83D\uDCB0", type: "BOOLEAN", weights: { wisdom: 50, strength: 0, focus: 30, discipline: 80, confidence: 40 }, categories: ["life"] },
   { name: "Call a Friend", icon: "\uD83D\uDCDE", type: "BOOLEAN", weights: { wisdom: 20, strength: 0, focus: 10, discipline: 30, confidence: 90 }, categories: ["life"] },
   { name: "Clean Space", icon: "\uD83E\uDDF9", type: "BOOLEAN", weights: { wisdom: 10, strength: 10, focus: 40, discipline: 70, confidence: 50 }, categories: ["life"] },
-  { name: "Blood Pressure", icon: "\u2764\uFE0F", type: "DUAL_NUMERIC", unit: "systolic", weights: { wisdom: 20, strength: 10, focus: 10, discipline: 60, confidence: 40 }, categories: ["body"] },
+  { name: "Blood Pressure", icon: "\u2764\uFE0F", type: "DUAL_NUMERIC", unit: "systolic", unit_secondary: "diastolic", min_value: 60, max_value: 250, weights: { wisdom: 20, strength: 10, focus: 10, discipline: 60, confidence: 40 }, categories: ["body"] },
   { name: "Weight", icon: "\u2696\uFE0F", type: "NUMERIC", unit: "kg", target_value: 72, min_value: 30, max_value: 200, weights: { wisdom: 10, strength: 30, focus: 20, discipline: 60, confidence: 50 }, categories: ["body"] },
   { name: "Limit Screen", icon: "\uD83D\uDCF1", type: "NUMERIC", unit: "hrs", target_value: 2, min_value: 0, max_value: 12, weights: { wisdom: 20, strength: 0, focus: 80, discipline: 70, confidence: 30 }, categories: ["focus", "quit"] },
   { name: "Eat Vegetables", icon: "\uD83E\uDD57", type: "BOOLEAN", weights: { wisdom: 10, strength: 30, focus: 10, discipline: 60, confidence: 40 }, categories: ["life"] },
@@ -173,14 +174,15 @@ export function TrackerCreatePage() {
   const [icon, setIcon] = useState("\uD83C\uDFAF")
   const [color, setColor] = useState("#22C55E")
   const [habitMode, setHabitMode] = useState<"build" | "quit">("build")
-  const [type, setType] = useState<"BOOLEAN" | "NUMERIC" | "DURATION" | "TIME">("BOOLEAN")
+  const [type, setType] = useState<HabitType>("BOOLEAN")
+  const [unitSecondary, setUnitSecondary] = useState("")
   const [unit, setUnit] = useState("")
   const [targetValue, setTargetValue] = useState("")
   const [trackingDays, setTrackingDays] = useState([1, 2, 3, 4, 5, 6, 7])
   const [timesPerDay, setTimesPerDay] = useState(1)
   const [timeRange, setTimeRange] = useState<TimeRange>("anytime")
   const [reminderEnabled, setReminderEnabled] = useState(false)
-  const [reminderTime, setReminderTime] = useState("08:00")
+  const [reminderTimes, setReminderTimes] = useState<string[]>(["08:00"])
   const [weights, setWeights] = useState<DimensionWeights>({
     wisdom: 50, strength: 50, focus: 50, discipline: 50, confidence: 50,
   })
@@ -197,21 +199,22 @@ export function TrackerCreatePage() {
     setHabitMode("build")
     setType("BOOLEAN")
     setUnit("")
+    setUnitSecondary("")
     setTargetValue("")
     setTrackingDays([1, 2, 3, 4, 5, 6, 7])
     setTimesPerDay(1)
     setTimeRange("anytime")
     setReminderEnabled(false)
-    setReminderTime("08:00")
+    setReminderTimes(["08:00"])
     setWeights({ wisdom: 50, strength: 50, focus: 50, discipline: 50, confidence: 50 })
   }
 
   const prefillFromTemplate = (h: HabitTemplate) => {
     setName(h.name)
     setIcon(h.icon)
-    const formType = h.type === "DUAL_NUMERIC" ? "NUMERIC" : h.type
-    setType(formType as "BOOLEAN" | "NUMERIC" | "DURATION" | "TIME")
+    setType(h.type)
     setUnit(h.unit || "")
+    setUnitSecondary(h.unit_secondary || "")
     setTargetValue(h.target_value != null ? String(h.target_value) : "")
     setWeights({ ...h.weights })
     setHabitMode("build")
@@ -223,19 +226,23 @@ export function TrackerCreatePage() {
     setCreating(true)
     try {
       const dimension = getPrimaryDimension(weights)
+      const alerts = reminderEnabled
+        ? reminderTimes.map((t) => ({ alert_time: t, alert_days: trackingDays })) as any
+        : undefined
       await createTracker({
         name: name.trim(),
         icon,
         color,
-        type: type as "NUMERIC" | "BOOLEAN" | "DURATION" | "TIME",
+        type: type as "NUMERIC" | "DUAL_NUMERIC" | "BOOLEAN" | "DURATION" | "TIME",
         unit: unit || null,
-        unit_secondary: null,
+        unit_secondary: type === "DUAL_NUMERIC" ? (unitSecondary || null) : null,
         default_behavior: "NULL",
         target_value: targetValue ? parseFloat(targetValue) : null,
         reminder_enabled: reminderEnabled,
         tracking_days: trackingDays,
         times_per_day: timesPerDay,
         dimension,
+        alerts,
       })
       navigate("/")
     } catch {
@@ -373,12 +380,13 @@ export function TrackerCreatePage() {
             {/* Tracking Type */}
             <div>
               <Label className="text-sm font-semibold text-foreground mb-2 block">Tracking Type</Label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-5 gap-1.5">
                 {([
                   { value: "BOOLEAN" as const, label: "Yes/No", icon: "\u2713" },
                   { value: "NUMERIC" as const, label: "Number", icon: "#" },
                   { value: "DURATION" as const, label: "Duration", icon: "\u23F1" },
                   { value: "TIME" as const, label: "Time", icon: "\uD83D\uDD50" },
+                  { value: "DUAL_NUMERIC" as const, label: "Dual No.", icon: "\u2194\uFE0F" },
                 ]).map((t) => (
                   <button
                     key={t.value}
@@ -390,7 +398,7 @@ export function TrackerCreatePage() {
                     }`}
                   >
                     <span className="block text-lg">{t.icon}</span>
-                    <span className="text-[11px] font-bold">{t.label}</span>
+                    <span className="text-[10px] font-bold">{t.label}</span>
                   </button>
                 ))}
               </div>
@@ -411,11 +419,22 @@ export function TrackerCreatePage() {
                   <Input
                     value={unit}
                     onChange={(e) => setUnit(e.target.value)}
-                    placeholder="unit (glasses, km...)"
+                    placeholder={type === "DUAL_NUMERIC" ? "primary unit" : "unit (glasses, km...)"}
                     className="h-12 flex-1 rounded-xl bg-gray-50 dark:bg-secondary border-border/50 text-foreground focus-visible:ring-[#22C55E] focus-visible:ring-2"
                   />
                   <span className="text-sm font-semibold text-muted-foreground whitespace-nowrap">/ Day</span>
                 </div>
+                {type === "DUAL_NUMERIC" && (
+                  <div className="mt-2">
+                    <Label className="text-sm font-semibold text-foreground mb-1.5 block">Secondary Unit</Label>
+                    <Input
+                      value={unitSecondary}
+                      onChange={(e) => setUnitSecondary(e.target.value)}
+                      placeholder="secondary unit (e.g., diastolic)"
+                      className="h-12 rounded-xl bg-gray-50 dark:bg-secondary border-border/50 text-foreground focus-visible:ring-[#22C55E] focus-visible:ring-2"
+                    />
+                  </div>
+                )}
               </div>
             )}
 
@@ -508,12 +527,39 @@ export function TrackerCreatePage() {
             </div>
 
             {reminderEnabled && (
-              <Input
-                type="time"
-                value={reminderTime}
-                onChange={(e) => setReminderTime(e.target.value)}
-                className="w-40 h-11 rounded-xl bg-gray-50 dark:bg-secondary border-border/50 text-foreground focus-visible:ring-[#22C55E] focus-visible:ring-2"
-              />
+              <div className="space-y-2">
+                {reminderTimes.map((rt, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Input
+                      type="time"
+                      value={rt}
+                      onChange={(e) => {
+                        const updated = [...reminderTimes]
+                        updated[idx] = e.target.value
+                        setReminderTimes(updated)
+                      }}
+                      className="w-40 h-11 rounded-xl bg-gray-50 dark:bg-secondary border-border/50 text-foreground focus-visible:ring-[#22C55E] focus-visible:ring-2"
+                    />
+                    {reminderTimes.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => setReminderTimes((prev) => prev.filter((_, i) => i !== idx))}
+                        className="h-9 w-9 rounded-lg bg-red-500/10 text-red-500 text-sm font-bold flex items-center justify-center hover:bg-red-500/20 transition-colors"
+                      >
+                        &times;
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setReminderTimes((prev) => [...prev, "08:00"])}
+                  className="flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary/80 transition-colors"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add time
+                </button>
+              </div>
             )}
           </div>
 

@@ -35,7 +35,7 @@ export function DailyPage() {
   const [showConfirmAnim, setShowConfirmAnim] = useState<string | null>(null)
   const dateStr = format(selectedDate, "yyyy-MM-dd")
 
-  // Load from cache on mount for instant display
+  // Load from cache for instant display, but ALWAYS fetch fresh data after
   useEffect(() => {
     try {
       const cached = JSON.parse(localStorage.getItem(DAILY_CACHE_KEY) || "{}")
@@ -44,11 +44,12 @@ export function DailyPage() {
         setLoading(false)
       }
     } catch {}
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dateStr])
 
-  // Fetch entries whenever the selected date changes
+  // Fetch fresh entries (runs on mount AND when date changes)
   const load = useCallback(async () => {
-    setLoading(true)
+    // Don't show loading spinner if we have cached data
+    if (data.length === 0) setLoading(true)
     try {
       const entries = await fetchDailyEntries(dateStr)
       setData(entries)
