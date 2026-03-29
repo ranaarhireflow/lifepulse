@@ -151,18 +151,27 @@ export function HabitCard({
 
         {/* Bottom — input control + confirm button */}
         <div className="space-y-4">
-          {/* Ruler input for NUMERIC */}
+          {/* Ruler input for NUMERIC — starts at last value, target, or default */}
           {tracker.type === "NUMERIC" && (() => {
             const range = getSmartRange(tracker)
+            const startValue = entry?.value_numeric ?? data.default_value ?? tracker.target_value ?? 0
             return (
-              <RulerInput
-                value={entry?.value_numeric ?? 0}
-                min={range.min}
-                max={range.max}
-                step={range.step}
-                unit={tracker.unit || undefined}
-                onChange={(v) => onUpdate(tracker.id, { value_numeric: v })}
-              />
+              <div>
+                <RulerInput
+                  value={startValue}
+                  min={range.min}
+                  max={range.max}
+                  step={range.step}
+                  unit={tracker.unit || undefined}
+                  onChange={(v) => onUpdate(tracker.id, { value_numeric: v })}
+                />
+                {/* Ideal range hint */}
+                {tracker.target_value && (
+                  <p className="text-center text-[10px] text-white/30 mt-1">
+                    Target: {tracker.target_value} {tracker.unit}
+                  </p>
+                )}
+              </div>
             )
           })()}
 
@@ -178,14 +187,21 @@ export function HabitCard({
 
           {/* Duration — ruler in minutes */}
           {tracker.type === "DURATION" && (
-            <RulerInput
-              value={entry?.value_duration ?? 0}
-              min={0}
-              max={tracker.max_value || 480}
-              step={15}
-              unit="min"
-              onChange={(v) => onUpdate(tracker.id, { value_duration: v })}
-            />
+            <div>
+              <RulerInput
+                value={entry?.value_duration ?? data.default_value ?? 0}
+                min={0}
+                max={tracker.max_value || 480}
+                step={15}
+                unit="min"
+                onChange={(v) => onUpdate(tracker.id, { value_duration: v })}
+              />
+              {tracker.target_value && (
+                <p className="text-center text-[10px] text-white/30 mt-1">
+                  Target: {Math.floor(tracker.target_value / 60)}h {tracker.target_value % 60}m
+                </p>
+              )}
+            </div>
           )}
 
           {/* Time */}

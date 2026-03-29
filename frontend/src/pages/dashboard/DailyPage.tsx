@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { format } from "date-fns"
 import { Loader2, Sparkles, Plus, Flame, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -60,10 +60,16 @@ export function DailyPage() {
   }, [dateStr])
   useEffect(() => { load(); setCurrentIndex(0); setConfirmedCards(new Set()) }, [load])
 
-  // Optimistic update: patch local state then persist to server
-  const update = async (tid: string, u: Partial<Entry>) => {
+  // Optimistic update with debounced save
+  const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+  const update = (tid: string, u: Partial<Entry>) => {
+    // Update UI immediately
     setData((p) => p.map((i) => i.tracker.id !== tid ? i : { ...i, entry: i.entry ? { ...i.entry, ...u } : ({ id: "t", tracker_id: tid, date: dateStr, value_numeric: null, value_numeric2: null, value_boolean: null, value_duration: null, value_time: null, value_text: null, note: null, ...u } as Entry) }))
-    try { await upsertEntry(tid, dateStr, u) } catch { load() }
+    // Debounce API save (500ms) so rapid ruler changes don't spam
+    if (saveTimers.current[tid]) clearTimeout(saveTimers.current[tid])
+    saveTimers.current[tid] = setTimeout(async () => {
+      try { await upsertEntry(tid, dateStr, u) } catch { /* keep local data */ }
+    }, 500)
   }
 
   const confirmCard = async () => {

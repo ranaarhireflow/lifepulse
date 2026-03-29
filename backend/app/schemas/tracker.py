@@ -24,7 +24,7 @@ class TrackerAlertResponse(BaseModel):
 class TrackerCreate(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     icon: str | None = None
-    color: str | None = Field(None, pattern=r"^#[0-9a-fA-F]{6}$")
+    color: str | None = None
     type: TrackerType
     unit: str | None = None
     unit_secondary: str | None = None
@@ -33,13 +33,18 @@ class TrackerCreate(BaseModel):
     max_value: float | None = None
     streak_goal: int | None = None
     target_value: float | None = None
+    tracking_days: list[int] | None = None
+    times_per_day: int = 1
+    dimension: str | None = None
+    difficulty: int = 1
+    reminder_enabled: bool = False
     alerts: list[TrackerAlertCreate] = []
 
 
 class TrackerUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=255)
     icon: str | None = None
-    color: str | None = Field(None, pattern=r"^#[0-9a-fA-F]{6}$")
+    color: str | None = None
     unit: str | None = None
     unit_secondary: str | None = None
     default_behavior: DefaultBehavior | None = None
@@ -48,6 +53,10 @@ class TrackerUpdate(BaseModel):
     max_value: float | None = None
     streak_goal: int | None = None
     target_value: float | None = None
+    tracking_days: list[int] | None = None
+    times_per_day: int | None = None
+    dimension: str | None = None
+    difficulty: int | None = None
     archived: bool | None = None
 
 
@@ -67,7 +76,10 @@ class TrackerResponse(BaseModel):
     max_value: float | None
     streak_goal: int | None
     target_value: float | None
+    tracking_days: list[int] | None = None
+    times_per_day: int = 1
     dimension: str | None = None
+    difficulty: int = 1
     alerts: list[TrackerAlertResponse] = []
 
     model_config = {"from_attributes": True}
