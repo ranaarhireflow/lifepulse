@@ -78,8 +78,12 @@ def bulk_daily(
                 .order_by(Entry.date.desc())
                 .first()
             )
-            if prev and prev.value_numeric is not None:
-                default_value = prev.value_numeric
+            if prev:
+                # Carry forward the appropriate value based on tracker type
+                if prev.value_numeric is not None:
+                    default_value = prev.value_numeric
+                elif prev.value_duration is not None:
+                    default_value = prev.value_duration
 
         result.append(DailyTrackerEntry(
             tracker=TrackerBrief(
@@ -92,7 +96,11 @@ def bulk_daily(
                 unit_secondary=tracker.unit_secondary,
                 default_behavior=tracker.default_behavior.value,
                 target_value=tracker.target_value,
+                min_value=tracker.min_value,
+                max_value=tracker.max_value,
                 reminder_enabled=tracker.reminder_enabled or (len(tracker.alerts) > 0 if tracker.alerts else False),
+                tracking_days=tracker.tracking_days,
+                times_per_day=tracker.times_per_day or 1,
                 dimension=tracker.dimension,
             ),
             entry=entry,

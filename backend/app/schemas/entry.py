@@ -45,7 +45,11 @@ class TrackerBrief(BaseModel):
     unit_secondary: str | None
     default_behavior: str
     target_value: float | None
+    min_value: float | None = None
+    max_value: float | None = None
     reminder_enabled: bool = False
+    tracking_days: list[int] | None = None
+    times_per_day: int = 1
     dimension: str | None = None
 
     model_config = {"from_attributes": True}

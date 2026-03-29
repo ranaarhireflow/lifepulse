@@ -112,20 +112,30 @@ export function HabitCard({
       </AnimatePresence>
 
       <div className="relative h-full flex flex-col justify-between p-6 z-10">
-        {/* Top — streak + edit + status */}
+        {/* Top — logged status + times + edit */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
+            {/* Show logged value if entry exists */}
+            {logged && (
+              <div className="flex items-center gap-1.5 rounded-full bg-primary/20 border border-primary/30 px-2.5 py-1">
+                <Check className="h-3 w-3 text-primary" />
+                <span className="text-[11px] font-bold text-primary">
+                  {entry?.value_numeric != null ? `${entry.value_numeric}${tracker.unit ? ' ' + tracker.unit : ''}`
+                    : entry?.value_boolean ? "Done"
+                    : entry?.value_duration != null ? `${Math.floor(entry.value_duration/60)}h ${entry.value_duration%60}m`
+                    : entry?.value_time || "Logged"}
+                </span>
+              </div>
+            )}
             {tracker.times_per_day > 1 && (
               <div className="flex items-center gap-1 rounded-full bg-black/40 px-2.5 py-1.5">
-                <span className="text-[12px] font-bold text-sky-400">{tracker.times_per_day}x daily</span>
+                <span className="text-[12px] font-bold text-sky-400">{tracker.times_per_day}x</span>
               </div>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <button onClick={onNavigateEdit} className="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white/50 hover:text-white transition-colors">
-              <Settings2 className="h-3.5 w-3.5" />
-            </button>
-          </div>
+          <button onClick={onNavigateEdit} className="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white/50 hover:text-white transition-colors">
+            <Settings2 className="h-3.5 w-3.5" />
+          </button>
         </div>
 
         {/* Center — emoji + name + narrative */}
@@ -247,7 +257,7 @@ export function HabitCard({
             style={(logged || isConfirmed) ? undefined : { boxShadow: "0 0 30px rgba(34,197,94,0.5), 0 4px 20px rgba(34,197,94,0.3)" }}
           >
             {(logged || isConfirmed) ? (
-              <><Check className="h-5 w-5" /> Confirmed</>
+              <><Check className="h-5 w-5" /> Update</>
             ) : (
               <><ArrowRight className="h-5 w-5" /> Confirm</>
             )}
