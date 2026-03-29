@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,7 +11,7 @@ import {
   Sparkles,
   ChevronRight,
 } from "lucide-react"
-import { createTracker } from "@/services/trackers"
+import { createTracker, fetchTrackers } from "@/services/trackers"
 
 /* ──────────────────── TYPES ──────────────────── */
 
@@ -162,6 +162,14 @@ export function TrackerCreatePage() {
   // Mode
   const [showCustomForm, setShowCustomForm] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [existingNames, setExistingNames] = useState<Set<string>>(new Set())
+
+  // Load existing tracker names to mark already-added habits
+  useEffect(() => {
+    fetchTrackers().then(trackers => {
+      setExistingNames(new Set(trackers.map(t => t.name.toLowerCase())))
+    }).catch(() => {})
+  }, [])
 
   // Search & category
   const [searchQuery, setSearchQuery] = useState("")
@@ -752,13 +760,19 @@ export function TrackerCreatePage() {
                   </span>
                 )}
 
-                {/* Add button */}
-                <button
-                  onClick={() => prefillFromTemplate(habit)}
-                  className="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition-all hover:bg-primary/20 hover:scale-110 active:scale-95"
-                >
-                  <Plus className="h-4 w-4" strokeWidth={3} />
-                </button>
+                {/* Add button or checkmark if already added */}
+                {existingNames.has(habit.name.toLowerCase()) ? (
+                  <span className="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-primary">
+                    ✓
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => prefillFromTemplate(habit)}
+                    className="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary transition-all hover:bg-primary/20 hover:scale-110 active:scale-95"
+                  >
+                    <Plus className="h-4 w-4" strokeWidth={3} />
+                  </button>
+                )}
               </div>
             )
           })}
